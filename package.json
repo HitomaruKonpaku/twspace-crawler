@@ -1,5 +1,5 @@
 {
-  "name": "ytc-crawler",
+  "name": "twspace-crawler",
   "version": "1.0.0",
   "scripts": {
     "start": "node dist/main",
