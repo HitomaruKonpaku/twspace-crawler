@@ -1,0 +1,29 @@
+name: Deploy backend
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger rebuild
+        uses: appleboy/ssh-action@master
+        env:
+          PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
+        with:
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USERNAME }}
+          key: ${{ secrets.BACKEND_KEY }}
+          envs: PROJECT_PATH
+          script: |
+            #!/bin/bash
+            set -ex
+            cd $PROJECT_PATH || { echo "No directory found"; exit 1; }
+            git pull
+            npm i
+            npm run build
+            pm2 reload twspace-crawler
