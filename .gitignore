@@ -1,6 +1,7 @@
-node_modules
-dist
-.vscode
-.tmp
-.logs
-.media
+node_modules/
+dist/
+.vscode/
+.tmp/
+.logs/
+.media/
+.idea/
