@@ -30,7 +30,7 @@ class Main {
     config.app.userRefreshInterval = interval
 
     const users = (args.user || '').split(',')
-      .concat(Object.keys(extConfig.users || {}))
+      .concat((extConfig.users || []).map((v) => v.screenName))
       .filter((v) => v)
     if (users.length) {
       logger.info({ args: { users } })
