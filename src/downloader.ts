@@ -51,7 +51,7 @@ export class Downloader {
     return result
   }
 
-  public static runFfmpeg(playlistPath: string, mediaPath: string): void {
+  private static runFfmpeg(playlistPath: string, mediaPath: string): void {
     const cmd = 'ffmpeg'
     const args = [
       '-protocol_whitelist',
