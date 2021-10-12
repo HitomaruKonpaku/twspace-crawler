@@ -1,6 +1,5 @@
 import axios from 'axios'
 import moment from 'moment'
-import { config } from './config'
 
 export class Util {
   public static getTimeString(format = 'YYMMDDHHmmSS'): string {
@@ -9,7 +8,7 @@ export class Util {
   }
 
   public static async getTwitterGuestToken(): Promise<string> {
-    const { data } = await axios.get<string>(config.twitter.baseUrl)
+    const { data } = await axios.get<string>('https://twitter.com/')
     const token = /(?<=gt=)\d{19}/.exec(data)[0]
     return token
   }
@@ -18,22 +17,23 @@ export class Util {
     spaceId: string,
     headers?: Record<string, string>,
   ): Promise<Record<string, any>> {
-    const url = new URL(config.twitter.api.AudioSpaceById, config.twitter.baseApiUrl)
-    const vars = {
-      id: spaceId,
-      isMetatagsQuery: false,
-      withSuperFollowsUserFields: false,
-      withUserResults: false,
-      withBirdwatchPivots: false,
-      withReactionsMetadata: false,
-      withReactionsPerspective: false,
-      withSuperFollowsTweetFields: false,
-      withReplays: false,
-      withScheduledSpaces: false,
-    }
-    url.searchParams.append('variables', JSON.stringify(vars))
-    const { href } = url
-    const res = await axios.get<any>(href, { headers })
+    const res = await axios.get<any>('https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById', {
+      headers,
+      params: {
+        variables: {
+          id: spaceId,
+          isMetatagsQuery: false,
+          withSuperFollowsUserFields: false,
+          withUserResults: false,
+          withBirdwatchPivots: false,
+          withReactionsMetadata: false,
+          withReactionsPerspective: false,
+          withSuperFollowsTweetFields: false,
+          withReplays: false,
+          withScheduledSpaces: false,
+        },
+      },
+    })
     const { metadata } = res.data.data.audioSpace
     return metadata
   }

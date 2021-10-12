@@ -9,11 +9,8 @@ export class SpaceWatcher extends EventEmitter {
   public spaceId: string
 
   private guestToken: string
-
   private metadata: Record<string, any>
-
   private mediaKey: string
-
   private streamDynamicUrl: string
 
   constructor(spaceId: string) {

@@ -17,20 +17,20 @@ class Main {
     logger.info('[MAIN] Starting...')
     logger.info(args)
 
-    let extConfig: Record<string, any> = {}
+    let externalConfig: Record<string, any> = {}
     if (args.config) {
       try {
-        extConfig = JSON.parse(fs.readFileSync(args.config, 'utf-8'))
+        externalConfig = JSON.parse(fs.readFileSync(args.config, 'utf-8'))
       } catch (error) {
         logger.error(`Failed to read config: ${error.message}`)
       }
     }
 
-    const interval = Number(args.interval || extConfig.interval) || config.app.userRefreshInterval
+    const interval = Number(args.interval) || config.app.userRefreshInterval
     config.app.userRefreshInterval = interval
 
     const users = (args.user || '').split(',')
-      .concat((extConfig.users || []).map((v) => v.screenName))
+      .concat((externalConfig.users || []).map((v) => v.screenName))
       .filter((v) => v)
     if (users.length) {
       logger.info({ args: { users } })

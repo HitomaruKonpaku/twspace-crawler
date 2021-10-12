@@ -38,20 +38,17 @@ export class Downloader {
   }
 
   public static async getMediaPlaylist(url: string): Promise<string> {
-    let res = await axios.get<string>(url)
-    let { data } = res
-    const playlistOrigin = new URL(url).origin
-    const playlistSuffix = data.split('\n')[3]
-    const playlistUrl = playlistOrigin + playlistSuffix
-    logger.info(`Playlist url: ${playlistUrl}`)
-    res = await axios.get<string>(playlistUrl)
-    data = res.data
+    const { data: noneTranscodePlaylistData } = await axios.get<string>(url)
+    const transcodePlaylistUrl = new URL(url).origin + noneTranscodePlaylistData.split('\n')[3]
+    logger.info(`Playlist url: ${transcodePlaylistUrl}`)
+    const transcodePlaylistRes = await axios.get<string>(transcodePlaylistUrl)
+    const { data: transcodePlaylistData } = transcodePlaylistRes
     const chunkRegex = /^chunk/gm
-    logger.info(`Playlis content length: ${Number(res.headers['content-length'])}`)
-    logger.info(`Playlis chunk count: ${data.match(chunkRegex).length}`)
+    logger.info(`Playlis content length: ${Number(transcodePlaylistRes.headers['content-length'])}`)
+    logger.info(`Playlis chunk count: ${transcodePlaylistData.match(chunkRegex).length}`)
     const masterUrlWithoutExt = url.replace('master_playlist.m3u8', '')
-    const playlistFormatData = data.replace(chunkRegex, `${masterUrlWithoutExt}chunk`)
-    return playlistFormatData
+    const result = transcodePlaylistData.replace(chunkRegex, `${masterUrlWithoutExt}chunk`)
+    return result
   }
 
   public static runFfmpeg(playlistPath: string, mediaPath: string): void {

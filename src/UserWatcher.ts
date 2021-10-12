@@ -17,7 +17,7 @@ export class UserWatcher extends EventEmitter {
   }
 
   private async checkUser(): Promise<void> {
-    const url = config.tweespaces.api.SpaceByUser
+    const url = 'https://tweespaces-serverless-function.vercel.app/api/space-by-user'
     const body = { username: this.username }
     try {
       const res = await axios.post<any>(url, body)
