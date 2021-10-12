@@ -1,9 +1,16 @@
 import axios from 'axios'
-import moment from 'moment'
 
 export class Util {
-  public static getTimeString(format = 'YYMMDDHHmmSS'): string {
-    const s = moment().format(format)
+  public static getTimeString(): string {
+    const date = new Date()
+    const s = [
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
+    ].map((v) => String(v).padStart(2, '0').slice(-2)).join('')
     return s
   }
 
