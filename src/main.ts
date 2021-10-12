@@ -1,70 +1,81 @@
 import * as dotenv from 'dotenv'
+import fs from 'fs'
 import { args } from './args'
+import { config } from './config'
+import { Downloader } from './downloader'
 import logger from './logger'
-import util from './util'
-import { Watcher } from './watcher'
+import { SpaceWatcher } from './space-watcher'
+import { UserWatcher } from './user-watcher'
+import { Util } from './util'
 
-async function bootstrap() {
-  dotenv.config()
-  logger.info({ args })
+class Main {
+  private userWatchers: Record<string, UserWatcher> = {}
 
-  const watchers: Watcher[] = []
-  util.makeMediaDir()
+  private spaceWatchers: Record<string, SpaceWatcher> = {}
 
-  const url = args.url
-  if (url) {
-    try {
-      const fileName = Date.now()
-      await util.downloadPlaylist(url, String(fileName))
+  constructor() {
+    dotenv.config()
+  }
+
+  public async start() {
+    logger.info('[MAIN] Starting...')
+    logger.info(args)
+
+    let extConfig: Record<string, any> = {}
+    if (args.config) {
+      try {
+        extConfig = JSON.parse(fs.readFileSync(args.config, 'utf-8'))
+      } catch (error) {
+        logger.error(`Failed to read config: ${error.message}`)
+      }
+    }
+
+    const interval = Number(args.interval || extConfig.interval) || config.app.userRefreshInterval
+    config.app.userRefreshInterval = interval
+
+    const users = (args.user || '').split(',')
+      .concat(Object.keys(extConfig.users || {}))
+      .filter((v) => v)
+    if (users.length) {
+      logger.info({ args: { users } })
+      users.forEach((user) => this.addUserWatcher(user))
+    }
+
+    const { id } = args
+    if (id) {
+      logger.info({ args: { id } })
+      this.addSpaceWatcher(id)
+    }
+
+    const { url } = args
+    if (url) {
+      logger.info({ args: { url } })
+      await Downloader.downloadMedia(url, Util.getTimeString())
+    }
+  }
+
+  private addUserWatcher(username: string) {
+    const watchers = this.userWatchers
+    if (watchers[username]) {
       return
-    } catch (error) {
-      logger.error({ msg: error.message })
-      debugger
     }
+    const watcher = new UserWatcher(username)
+    watchers[username] = watcher
+    watcher.watch()
+    watcher.on('data', (id) => {
+      this.addSpaceWatcher(id)
+    })
   }
 
-  const getTweetSpace = async () => {
-    try {
-      const user: string = args.user
-      let id: string = args.id
-      if (!id && !user) {
-        logger.error('require user or id arg')
-        return
-      }
-
-      const interval = Number(args.interval)
-      if (!id && user) {
-        id = await util.getTweetSpaceIdByTweetSpaces(user)
-      }
-      if (!id) {
-        if (isNaN(interval)) {
-          logger.error(`spaceId not found: ${id || user}`)
-          return
-        }
-        logger.silly(`spaceId not found: ${id || user}, retry in ${interval}ms`)
-        if (user && !isNaN(interval)) {
-          setTimeout(() => getTweetSpace(), interval)
-        }
-        return
-      }
-
-      if (user && !isNaN(interval)) {
-        setTimeout(() => getTweetSpace(), interval)
-      }
-      if (watchers.find(v => v.spaceId === id)) {
-        return
-      }
-
-      const watcher = new Watcher(id)
-      watchers.push(watcher)
-      watcher.start()
-    } catch (error) {
-      logger.error({ msg: error.message })
-      debugger
+  private addSpaceWatcher(spaceId: string) {
+    const watchers = this.spaceWatchers
+    if (watchers[spaceId]) {
+      return
     }
+    const watcher = new SpaceWatcher(spaceId)
+    watchers[spaceId] = watcher
+    watcher.watch()
   }
-
-  getTweetSpace()
 }
 
-bootstrap()
+new Main().start()

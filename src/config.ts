@@ -1,13 +1,23 @@
 export const config = {
   app: {
-    logDir: '../.logs',
     mediaDir: '../.media',
-    dynamicPlaylistCheckInterval: 5000,
+    userRefreshInterval: 10000,
+    dynamicPlaylistRefreshInterval: 5000,
+  },
+  logger: {
+    dir: './logs',
+    datePattern: 'YYMMDD',
   },
   twitter: {
+    baseUrl: 'https://twitter.com/',
     baseApiUrl: 'https://twitter.com/i/api/graphql/',
-    apiPath: {
-      'AudioSpaceById': 'jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById',
+    api: {
+      AudioSpaceById: 'jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById',
+    },
+  },
+  tweespaces: {
+    api: {
+      SpaceByUser: 'https://tweespaces-serverless-function.vercel.app/api/space-by-user',
     },
   },
 }
