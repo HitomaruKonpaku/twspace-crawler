@@ -9,8 +9,7 @@ export class Util {
   }
 
   public static async getTwitterGuestToken(): Promise<string> {
-    const res = await axios.get<string>(config.twitter.baseUrl)
-    const { data } = res
+    const { data } = await axios.get<string>(config.twitter.baseUrl)
     const token = /(?<=gt=)\d{19}/.exec(data)[0]
     return token
   }
@@ -39,14 +38,14 @@ export class Util {
     return metadata
   }
 
-  public static getStreamMasterUrlFromDynamicUrl(dynamicUrl: string): string {
+  public static getMasterUrlFromDynamicUrl(dynamicUrl: string): string {
     const masterUrl = dynamicUrl
       .replace('?type=live', '')
       .replace('dynamic', 'master')
     return masterUrl
   }
 
-  public static async getStreamDynamicUrl(
+  public static async getDynamicUrl(
     mediaKey: string,
     headers?: Record<string, string>,
   ): Promise<string> {
@@ -57,12 +56,12 @@ export class Util {
     return dynamicUrl
   }
 
-  public static async getStreamMasterUrl(
+  public static async getMasterUrl(
     mediaKey: string,
     headers?: Record<string, string>,
   ): Promise<string> {
-    const dynamicUrl = await this.getStreamDynamicUrl(mediaKey, headers)
-    const masterUrl = this.getStreamMasterUrlFromDynamicUrl(dynamicUrl)
+    const dynamicUrl = await this.getDynamicUrl(mediaKey, headers)
+    const masterUrl = this.getMasterUrlFromDynamicUrl(dynamicUrl)
     return masterUrl
   }
 }

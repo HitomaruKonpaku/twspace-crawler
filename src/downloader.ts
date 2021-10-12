@@ -18,7 +18,7 @@ export class Downloader {
   }
 
   public static async downloadMedia(url: string, fileName: string): Promise<void> {
-    const masterUrl = Util.getStreamMasterUrlFromDynamicUrl(url)
+    const masterUrl = Util.getMasterUrlFromDynamicUrl(url)
     const playlistFileName = `${fileName}.m3u8`
     const mediaFileName = `${fileName}.aac`
     logger.info(`StreamMasterUrl: ${masterUrl}`)
@@ -34,7 +34,7 @@ export class Downloader {
     const filePath = path.join(this.getMediaDir(), fileName)
     this.createMediaDir()
     fs.writeFileSync(filePath, data)
-    logger.info(`[Playlist] Saved to: ${filePath}`)
+    logger.verbose(`[Playlist] Saved to: ${filePath}`)
   }
 
   public static async getMediaPlaylist(url: string): Promise<string> {
@@ -43,12 +43,12 @@ export class Downloader {
     const playlistOrigin = new URL(url).origin
     const playlistSuffix = data.split('\n')[3]
     const playlistUrl = playlistOrigin + playlistSuffix
-    logger.info(`StreamPlaylisUrl: ${playlistUrl}`)
+    logger.info(`Playlist url: ${playlistUrl}`)
     res = await axios.get<string>(playlistUrl)
     data = res.data
     const chunkRegex = /^chunk/gm
-    logger.info(`StreamPlaylisContentLength: ${Number(res.headers['content-length'])}`)
-    logger.info(`StreamPlaylisChunkCount: ${data.match(chunkRegex).length}`)
+    logger.info(`Playlis content length: ${Number(res.headers['content-length'])}`)
+    logger.info(`Playlis chunk count: ${data.match(chunkRegex).length}`)
     const masterUrlWithoutExt = url.replace('master_playlist.m3u8', '')
     const playlistFormatData = data.replace(chunkRegex, `${masterUrlWithoutExt}chunk`)
     return playlistFormatData
@@ -65,12 +65,13 @@ export class Downloader {
       'copy',
       mediaPath,
     ]
-    logger.info(`[Audio] Saving to: ${mediaPath}`)
-    logger.info(`${cmd} ${args.join(' ')}`)
+    logger.verbose(`[Audio] Saving to: ${mediaPath}`)
+    logger.verbose(`${cmd} ${args.join(' ')}`)
     this.createMediaDir()
-    const cp = process.platform === 'win32'
-      ? child_process.spawn('cmd', ['/c', [cmd, ...args].join(' ')], { detached: true, stdio: 'ignore' })
-      : child_process.spawn(cmd, args, { stdio: 'ignore' })
-    cp.unref()
+    if (process.platform === 'win32') {
+      child_process.spawn('cmd', ['/c', [cmd, ...args].join(' ')], { detached: true, stdio: 'ignore' })
+    } else {
+      child_process.spawn(cmd, args, { detached: true, stdio: 'ignore' })
+    }
   }
 }

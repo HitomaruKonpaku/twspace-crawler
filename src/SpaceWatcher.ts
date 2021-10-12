@@ -37,7 +37,7 @@ export class SpaceWatcher extends EventEmitter {
       this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, this.headers)
       logger.debug({ spaceId: this.spaceId, metadata: this.metadata })
       this.mediaKey = this.metadata.media_key
-      this.streamDynamicUrl = await Util.getStreamDynamicUrl(this.mediaKey, this.headers)
+      this.streamDynamicUrl = await Util.getDynamicUrl(this.mediaKey, this.headers)
       logger.info({ spaceId: this.spaceId, streamUrl: this.streamDynamicUrl })
       this.checkPlaylist()
     } catch (error) {
