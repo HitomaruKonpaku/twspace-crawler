@@ -6,13 +6,11 @@ import logger from './logger'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
-  public spaceId: string
-
   private metadata: Record<string, any>
   private mediaKey: string
   private streamDynamicUrl: string
 
-  constructor(spaceId: string) {
+  constructor(public spaceId: string) {
     super()
     this.spaceId = spaceId
   }
@@ -34,7 +32,6 @@ export class SpaceWatcher extends EventEmitter {
       this.checkPlaylist()
     } catch (error) {
       logger.error({ spaceId: this.spaceId, error: { msg: error.message, stack: error.stack } })
-      debugger
     }
   }
 
@@ -57,7 +54,6 @@ export class SpaceWatcher extends EventEmitter {
         status,
         error: { msg: error.message, stack: error.stack },
       })
-      debugger
       setTimeout(() => this.checkPlaylist(), config.app.dynamicPlaylistRefreshInterval)
     }
   }

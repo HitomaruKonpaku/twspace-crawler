@@ -4,9 +4,7 @@ import { config } from './config'
 import logger from './logger'
 
 export class UserWatcher extends EventEmitter {
-  public username: string
-
-  constructor(username: string) {
+  constructor(public username: string) {
     super()
     this.username = username
   }
@@ -32,7 +30,6 @@ export class UserWatcher extends EventEmitter {
       }
     } catch (error) {
       logger.error({ username: this.username, error: { msg: error.message, stack: error.stack } })
-      debugger
     }
     setTimeout(() => this.checkUser(), config.app.userRefreshInterval)
   }
