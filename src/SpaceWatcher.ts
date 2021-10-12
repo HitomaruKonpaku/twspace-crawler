@@ -1,9 +1,9 @@
 import axios from 'axios'
 import EventEmitter from 'events'
 import { config } from './config'
-import { Downloader } from './downloader'
+import { Downloader } from './Downloader'
 import logger from './logger'
-import { Util } from './util'
+import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
   public spaceId: string

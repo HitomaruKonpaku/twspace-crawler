@@ -1,21 +1,17 @@
-import * as dotenv from 'dotenv'
+import 'dotenv/config'
 import fs from 'fs'
 import { args } from './args'
 import { config } from './config'
-import { Downloader } from './downloader'
+import { Downloader } from './Downloader'
 import logger from './logger'
-import { SpaceWatcher } from './space-watcher'
-import { UserWatcher } from './user-watcher'
-import { Util } from './util'
+import { SpaceWatcher } from './SpaceWatcher'
+import { UserWatcher } from './UserWatcher'
+import { Util } from './Util'
 
 class Main {
   private userWatchers: Record<string, UserWatcher> = {}
 
   private spaceWatchers: Record<string, SpaceWatcher> = {}
-
-  constructor() {
-    dotenv.config()
-  }
 
   public async start() {
     logger.info('[MAIN] Starting...')

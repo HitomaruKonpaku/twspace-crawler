@@ -20,11 +20,7 @@ function getFileFormat() {
 
 const logger = winston.createLogger({
   format: format.combine(
-    format((info) => {
-      const level = info.level.toUpperCase()
-      Object.assign(info, { level })
-      return info
-    })(),
+    format((info) => Object.assign(info, { level: info.level.toUpperCase() }))(),
   ),
   transports: [
     new winston.transports.Console({
