@@ -4,7 +4,7 @@ import child_process from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import { config } from './config'
-import logger from './logger'
+import { logger } from './logger'
 import { Util } from './Util'
 
 export class Downloader {
@@ -21,7 +21,7 @@ export class Downloader {
     const masterUrl = Util.getMasterUrlFromDynamicUrl(url)
     const playlistFileName = `${fileName}.m3u8`
     const mediaFileName = `${fileName}.aac`
-    logger.info(`StreamMasterUrl: ${masterUrl}`)
+    logger.info(`Playlist master url: ${masterUrl}`)
     await this.downloadMediaPlaylist(masterUrl, playlistFileName)
     this.runFfmpeg(
       path.join(this.getMediaDir(), playlistFileName),
@@ -34,13 +34,13 @@ export class Downloader {
     const filePath = path.join(this.getMediaDir(), fileName)
     this.createMediaDir()
     fs.writeFileSync(filePath, data)
-    logger.verbose(`[Playlist] Saved to: ${filePath}`)
+    logger.verbose(`Playlist saved to: ${filePath}`)
   }
 
   public static async getMediaPlaylist(url: string): Promise<string> {
     const { data: noneTranscodePlaylistData } = await axios.get<string>(url)
     const transcodePlaylistUrl = new URL(url).origin + noneTranscodePlaylistData.split('\n')[3]
-    logger.info(`Playlist url: ${transcodePlaylistUrl}`)
+    logger.info(`TranscodePlaylist url: ${transcodePlaylistUrl}`)
     const transcodePlaylistRes = await axios.get<string>(transcodePlaylistUrl)
     const { data: transcodePlaylistData } = transcodePlaylistRes
     const chunkRegex = /^chunk/gm
@@ -62,7 +62,7 @@ export class Downloader {
       'copy',
       mediaPath,
     ]
-    logger.verbose(`[Audio] Saving to: ${mediaPath}`)
+    logger.verbose(`Audio saving to: ${mediaPath}`)
     logger.verbose(`${cmd} ${args.join(' ')}`)
     this.createMediaDir()
     if (process.platform === 'win32') {

@@ -1,17 +1,21 @@
 import axios from 'axios'
 import EventEmitter from 'events'
+import winston from 'winston'
 import { config } from './config'
-import logger from './logger'
+import { logger as baseLogger } from './logger'
 import { Util } from './Util'
 
 export class UserWatcher extends EventEmitter {
+  private logger: winston.Logger
+
   constructor(public username: string) {
     super()
+    this.logger = baseLogger.child({ label: `[UserWatcher@${username}]` })
     this.username = username
   }
 
   public async watch(): Promise<void> {
-    logger.info({ username: this.username, msg: 'Watching user...' })
+    this.logger.info('Watching...')
     this.checkUser()
   }
 
@@ -22,15 +26,15 @@ export class UserWatcher extends EventEmitter {
       const res = await axios.post<any>(url, body)
       const spaces: any[] = (res.data.spaces.data || [])
         .filter((v) => v.state === 'live')
-      logger.debug({ username: this.username, spaceCount: spaces.length })
+      this.logger.debug(`Space count: ${spaces.length}`)
       if (spaces.length) {
-        logger.debug({ username: this.username, spaceIds: spaces.map((v) => v.id) })
+        this.logger.debug(`Space ids: ${spaces.map((v) => v.id).join(', ')}`)
         spaces.forEach((space) => {
           this.emit('data', space.id)
         })
       }
     } catch (error) {
-      logger.error({ username: this.username, error: { msg: error.message, stack: error.stack } })
+      this.logger.error(error.message, { stack: error.stack })
     }
 
     setTimeout(

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import fs from 'fs'
 import { args } from './args'
-import logger from './logger'
+import { logger } from './logger'
 
 export class Util {
   public static getTimeString(): string {
