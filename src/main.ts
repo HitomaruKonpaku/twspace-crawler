@@ -1,7 +1,5 @@
 import 'dotenv/config'
-import fs from 'fs'
 import { args } from './args'
-import { config } from './config'
 import { Downloader } from './Downloader'
 import logger from './logger'
 import { SpaceWatcher } from './SpaceWatcher'
@@ -16,18 +14,7 @@ class Main {
     logger.info('[MAIN] Starting...')
     logger.info(args)
 
-    let externalConfig: Record<string, any> = {}
-    if (args.config) {
-      try {
-        externalConfig = JSON.parse(fs.readFileSync(args.config, 'utf-8'))
-      } catch (error) {
-        logger.error(`Failed to read config: ${error.message}`)
-      }
-    }
-
-    const interval = Number(args.interval) || config.app.userRefreshInterval
-    config.app.userRefreshInterval = interval
-
+    const externalConfig = Util.getExternalConfig()
     const users = (args.user || '').split(',')
       .concat((externalConfig.users || []).map((v) => v.screenName))
       .filter((v) => v)

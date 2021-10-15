@@ -2,6 +2,7 @@ import axios from 'axios'
 import EventEmitter from 'events'
 import { config } from './config'
 import logger from './logger'
+import { Util } from './Util'
 
 export class UserWatcher extends EventEmitter {
   constructor(public username: string) {
@@ -31,6 +32,10 @@ export class UserWatcher extends EventEmitter {
     } catch (error) {
       logger.error({ username: this.username, error: { msg: error.message, stack: error.stack } })
     }
-    setTimeout(() => this.checkUser(), config.app.userRefreshInterval)
+
+    setTimeout(
+      () => this.checkUser(),
+      Number(Util.getExternalConfig().interval) || config.app.userRefreshInterval,
+    )
   }
 }

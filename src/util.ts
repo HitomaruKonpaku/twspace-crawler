@@ -1,4 +1,7 @@
 import axios from 'axios'
+import fs from 'fs'
+import { args } from './args'
+import logger from './logger'
 
 export class Util {
   public static getTimeString(): string {
@@ -12,6 +15,18 @@ export class Util {
       date.getSeconds(),
     ].map((v) => String(v).padStart(2, '0').slice(-2)).join('')
     return s
+  }
+
+  public static getExternalConfig(): Record<string, any> {
+    const config = {}
+    if (args.config) {
+      try {
+        Object.assign(config, JSON.parse(fs.readFileSync(args.config, 'utf-8')))
+      } catch (error) {
+        logger.error(`Failed to read config: ${error.message}`)
+      }
+    }
+    return config
   }
 
   public static async getTwitterGuestToken(): Promise<string> {
