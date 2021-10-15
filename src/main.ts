@@ -10,7 +10,6 @@ import { Util } from './Util'
 
 class Main {
   private userWatchers: Record<string, UserWatcher> = {}
-
   private spaceWatchers: Record<string, SpaceWatcher> = {}
 
   public async start() {

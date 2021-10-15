@@ -21,7 +21,7 @@ export class SpaceWatcher extends EventEmitter {
       const guestToken = await Util.getTwitterGuestToken()
       logger.debug({ spaceId: this.spaceId, guestToken })
       const headers = {
-        authorization: process.env.AUTHORIZATION,
+        authorization: config.twitter.authorization,
         'x-guest-token': guestToken,
       }
       this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, headers)
