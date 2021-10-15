@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { config } from './config'
 import { logger } from './logger'
-import { Util } from './Util'
+import { Util } from './ZUtil'
 
 export class Downloader {
   public static getMediaDir(subDir = ''): string {
