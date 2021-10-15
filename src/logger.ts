@@ -3,19 +3,15 @@ import DailyRotateFile from 'winston-daily-rotate-file'
 import { config } from './config'
 
 function getPrintFormat() {
-  return format.printf((info) => [
-    info.timestamp,
-    info.level,
-    info.label,
-    typeof info.message === 'string' ? info.message : JSON.stringify(info.message),
-    Object.keys(info.metadata).length ? JSON.stringify(info.metadata) : '',
-  ].filter((v) => v).join(' '))
+  return format.printf((info) => (Object.keys(info.metadata).length
+    ? `${info.timestamp} | [${info.level}] ${[info.label, info.message].filter((v) => v).join(' ')} | ${JSON.stringify(info.metadata)}`
+    : `${info.timestamp} | [${info.level}] ${[info.label, info.message].filter((v) => v).join(' ')}`))
 }
 
 const logger = winston.createLogger({
   format: format.combine(
-    format.metadata(),
     format.timestamp(),
+    format.metadata({ fillExcept: ['timestamp', 'level', 'message'] }),
     format((info) => Object.assign(info, { level: info.level.toUpperCase() }))(),
     format((info) => {
       const { metadata } = info
