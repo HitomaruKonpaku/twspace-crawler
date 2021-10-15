@@ -28,7 +28,7 @@ export class SpaceWatcher extends EventEmitter {
         'x-guest-token': guestToken,
       }
       this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, headers)
-      this.logger.debug(`Metadata: ${this.metadata}`)
+      this.logger.debug(`Metadata: ${JSON.stringify(this.metadata)}`)
       this.mediaKey = this.metadata.media_key
       this.dynamicPlaylistUrl = await Util.getDynamicUrl(this.mediaKey, headers)
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
