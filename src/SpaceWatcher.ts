@@ -12,10 +12,14 @@ export class SpaceWatcher extends EventEmitter {
   private mediaKey: string
   private dynamicPlaylistUrl: string
 
-  constructor(public spaceId: string) {
+  constructor(
+    public spaceId: string,
+    public username = null,
+  ) {
     super()
     this.logger = baseLogger.child({ label: `[SpaceWatcher@${spaceId}]` })
     this.spaceId = spaceId
+    this.username = username
   }
 
   public async watch(): Promise<void> {
@@ -49,7 +53,7 @@ export class SpaceWatcher extends EventEmitter {
       status = error.response.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
-        Downloader.downloadMedia(this.dynamicPlaylistUrl, `${Util.getTimeString()}_${this.spaceId}`)
+        Downloader.downloadMedia(this.dynamicPlaylistUrl, `${Util.getTimeString()}_${this.spaceId}`, this.username)
         return
       }
       this.logger.error(error.message, { status, stack: error.stack })

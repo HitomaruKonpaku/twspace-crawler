@@ -8,31 +8,27 @@ import { logger } from './logger'
 import { Util } from './Util'
 
 export class Downloader {
-  public static getMediaDir(): string {
-    const dir = path.join(__dirname, config.app.mediaDir)
+  public static getMediaDir(subDir = ''): string {
+    const dir = path.join(__dirname, config.app.mediaDir, subDir)
     return dir
   }
 
-  public static createMediaDir(): string {
-    return fs.mkdirSync(this.getMediaDir(), { recursive: true })
+  public static createMediaDir(subDir = ''): string {
+    return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
   }
 
-  public static async downloadMedia(url: string, fileName: string): Promise<void> {
+  public static async downloadMedia(url: string, fileName: string, subDir = ''): Promise<void> {
     const masterUrl = Util.getMasterUrlFromDynamicUrl(url)
-    const playlistFileName = `${fileName}.m3u8`
-    const mediaFileName = `${fileName}.aac`
     logger.info(`Playlist master url: ${masterUrl}`)
-    await this.downloadMediaPlaylist(masterUrl, playlistFileName)
-    this.runFfmpeg(
-      path.join(this.getMediaDir(), playlistFileName),
-      path.join(this.getMediaDir(), mediaFileName),
-    )
+    const playlistPath = path.join(this.getMediaDir(subDir), `${fileName}.m3u8`)
+    const mediaPath = path.join(this.getMediaDir(subDir), `${fileName}.aac`)
+    this.createMediaDir(subDir)
+    await this.downloadMediaPlaylist(masterUrl, playlistPath)
+    this.runFfmpeg(playlistPath, mediaPath)
   }
 
-  public static async downloadMediaPlaylist(url: string, fileName: string): Promise<void> {
+  public static async downloadMediaPlaylist(url: string, filePath: string): Promise<void> {
     const data = await this.getMediaPlaylist(url)
-    const filePath = path.join(this.getMediaDir(), fileName)
-    this.createMediaDir()
     fs.writeFileSync(filePath, data)
     logger.verbose(`Playlist saved to: ${filePath}`)
   }
