@@ -61,10 +61,10 @@ export class Downloader {
     logger.verbose(`Audio saving to: ${mediaPath}`)
     logger.verbose(`${cmd} ${args.join(' ')}`)
     this.createMediaDir()
-    if (process.platform === 'win32') {
-      child_process.spawn('cmd', ['/c', [cmd, ...args].join(' ')], { detached: true, stdio: 'ignore' })
-    } else {
-      child_process.spawn(cmd, args, { detached: true, stdio: 'ignore' })
-    }
+
+    const cp = process.platform === 'win32'
+      ? child_process.spawn('cmd', ['/c', [cmd, ...args].join(' ')], { detached: true, stdio: 'ignore' })
+      : child_process.spawn(cmd, args, { detached: true, stdio: 'ignore' })
+    cp.unref()
   }
 }
