@@ -2,7 +2,7 @@
   "name": "twspace-crawler",
   "version": "1.0.0",
   "scripts": {
-    "start": "node dist/main",
+    "start": "node dist/index",
     "build": "tsc",
     "lint": "eslint src --ext .ts",
     "lint-fix": "eslint src --ext .ts --fix"
