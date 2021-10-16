@@ -1,6 +1,7 @@
 import axios from 'axios'
 import EventEmitter from 'events'
 import winston from 'winston'
+import { args } from './args'
 import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
@@ -49,6 +50,10 @@ export class SpaceWatcher extends EventEmitter {
     try {
       status = (await axios.head(this.dynamicPlaylistUrl)).status
       this.logger.debug(`Status: ${status}`)
+      if (args.force) {
+        this.downloadMedia()
+        return
+      }
       setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     } catch (error) {
       status = error.response.status
