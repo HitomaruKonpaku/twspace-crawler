@@ -15,35 +15,26 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/eslint-recommended"
+    "plugin:@typescript-eslint/eslint-recommended",
+    "airbnb-base"
   ],
   "rules": {
-    "indent": [
+    "semi": [
       "error",
-      2,
-      {
-        "SwitchCase": 1
-      }
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
+      "never"
     ],
     "quotes": [
       "error",
       "single"
     ],
-    "semi": [
-      "error",
-      "never"
-    ],
     "comma-dangle": [
       "error",
       "always-multiline"
     ],
-    "no-debugger": "off",
-    "no-empty-function": "warn",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off"
+    "lines-between-class-members": "off",
+    "no-debugger": "warn",
+    "import/extensions": "off",
+    "import/prefer-default-export": "off",
+    "import/no-unresolved": "off"
   }
 }

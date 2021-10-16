@@ -1,58 +1,50 @@
-import path from 'path'
 import winston, { format } from 'winston'
-import { config } from './config'
+import DailyRotateFile from 'winston-daily-rotate-file'
+import { LOGGER_DATE_PATTERN, LOGGER_DIR } from './constants/logger.constant'
 
-export default winston.createLogger({
+function getPrintFormat() {
+  return format.printf((info) => (Object.keys(info.metadata).length
+    ? `${info.timestamp} | [${info.level}] ${[info.label, info.message].filter((v) => v).join(' ')} | ${JSON.stringify(info.metadata)}`
+    : `${info.timestamp} | [${info.level}] ${[info.label, info.message].filter((v) => v).join(' ')}`))
+}
+
+const logger = winston.createLogger({
   format: format.combine(
-    format(info => {
-      info.level = info.level.toUpperCase()
+    format.timestamp(),
+    format.metadata({ fillExcept: ['timestamp', 'level', 'message'] }),
+    format((info) => Object.assign(info, { level: info.level.toUpperCase() }))(),
+    format((info) => {
+      const { metadata } = info
+      if (metadata.label) {
+        Object.assign(info, { label: metadata.label })
+        delete metadata.label
+      }
       return info
     })(),
   ),
   transports: [
     new winston.transports.Console({
-      level: 'info',
-      format: format.combine(format.colorize(), getConsoleFormat()),
+      level: 'verbose',
+      format: format.combine(
+        format.colorize(),
+        getPrintFormat(),
+      ),
     }),
-    new winston.transports.File({
-      level: 'debug',
-      filename: getFileName(),
-      format: format.combine(getFileFormat()),
+    new DailyRotateFile({
+      level: 'verbose',
+      format: format.combine(getPrintFormat()),
+      datePattern: LOGGER_DATE_PATTERN,
+      dirname: LOGGER_DIR,
+      filename: '%DATE%.log',
     }),
-    new winston.transports.File({
+    new DailyRotateFile({
       level: 'silly',
-      filename: getFileNameAll(),
-      format: format.combine(getFileFormat()),
+      format: format.combine(getPrintFormat()),
+      datePattern: LOGGER_DATE_PATTERN,
+      dirname: LOGGER_DIR,
+      filename: '%DATE%_all.log',
     }),
   ],
 })
 
-function getConsoleFormat() {
-  return format.printf((info) => {
-    const date = new Date().toISOString()
-    const msg = `${date} ${info.level} ${typeof info.message === 'string' ? info.message : JSON.stringify(info.message)}`
-    return msg
-  })
-}
-
-function getFileName(): string {
-  const date = new Date()
-  const fileName = [date.getFullYear(), date.getMonth() + 1, date.getDate()]
-    .map(v => String(v).padStart(2, '0'))
-    .join('') + '.log'
-  const filePath = path.join(__dirname, config.app.logDir, fileName)
-  return filePath
-}
-
-function getFileNameAll(): string {
-  const date = new Date()
-  const fileName = [date.getFullYear(), date.getMonth() + 1, date.getDate()]
-    .map(v => String(v).padStart(2, '0'))
-    .join('') + '_all' + '.log'
-  const filePath = path.join(__dirname, config.app.logDir, fileName)
-  return filePath
-}
-
-function getFileFormat() {
-  return getConsoleFormat()
-}
+export { logger }
