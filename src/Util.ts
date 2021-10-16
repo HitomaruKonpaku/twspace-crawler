@@ -82,8 +82,6 @@ export class Util {
     mediaKey: string,
     headers?: Record<string, string>,
   ): Promise<string> {
-    const dynamicUrl = await this.getDynamicUrl(mediaKey, headers)
-    const masterUrl = this.getMasterUrlFromDynamicUrl(dynamicUrl)
-    return masterUrl
+    return this.getMasterUrlFromDynamicUrl(await this.getDynamicUrl(mediaKey, headers))
   }
 }
