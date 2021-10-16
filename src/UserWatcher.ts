@@ -1,7 +1,6 @@
 import axios from 'axios'
 import EventEmitter from 'events'
 import winston from 'winston'
-import { APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { logger as baseLogger } from './logger'
 import { Util } from './Util'
 
@@ -37,9 +36,6 @@ export class UserWatcher extends EventEmitter {
       this.logger.error(error.message, { stack: error.stack })
     }
 
-    setTimeout(
-      () => this.checkUser(),
-      Number(Util.getExternalConfig().interval) || APP_USER_REFRESH_INTERVAL,
-    )
+    setTimeout(() => this.checkUser(), Util.getUserRefreshInterval())
   }
 }

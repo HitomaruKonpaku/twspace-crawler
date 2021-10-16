@@ -1,6 +1,7 @@
 import axios from 'axios'
 import fs from 'fs'
 import { args } from './args'
+import { APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { logger } from './logger'
 
 export class Util {
@@ -27,6 +28,10 @@ export class Util {
       }
     }
     return config
+  }
+
+  public static getUserRefreshInterval(): number {
+    return Number(Util.getExternalConfig().interval) || APP_USER_REFRESH_INTERVAL
   }
 
   public static async getTwitterGuestToken(): Promise<string> {
