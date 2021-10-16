@@ -3,13 +3,13 @@ import axios from 'axios'
 import child_process from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import { config } from './config'
+import { APP_MEDIA_DIR } from './constants/app.constant'
 import { logger } from './logger'
 import { Util } from './Util'
 
 export class Downloader {
   public static getMediaDir(subDir = ''): string {
-    const dir = path.join(__dirname, config.app.mediaDir, subDir)
+    const dir = path.join(__dirname, APP_MEDIA_DIR, subDir)
     return dir
   }
 

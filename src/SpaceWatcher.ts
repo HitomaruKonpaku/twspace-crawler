@@ -1,7 +1,8 @@
 import axios from 'axios'
 import EventEmitter from 'events'
 import winston from 'winston'
-import { config } from './config'
+import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
+import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
 import { logger as baseLogger } from './logger'
 import { Util } from './Util'
@@ -28,7 +29,7 @@ export class SpaceWatcher extends EventEmitter {
       const guestToken = await Util.getTwitterGuestToken()
       this.logger.debug(`Guest token: ${guestToken}`)
       const headers = {
-        authorization: config.twitter.authorization,
+        authorization: TWITTER_AUTHORIZATION,
         'x-guest-token': guestToken,
       }
       this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, headers)
@@ -48,7 +49,7 @@ export class SpaceWatcher extends EventEmitter {
     try {
       status = (await axios.head(this.dynamicPlaylistUrl)).status
       this.logger.debug(`Status: ${status}`)
-      setTimeout(() => this.checkPlaylist(), config.app.dynamicPlaylistRefreshInterval)
+      setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     } catch (error) {
       status = error.response.status
       if (status === 404) {
@@ -57,7 +58,7 @@ export class SpaceWatcher extends EventEmitter {
         return
       }
       this.logger.error(error.message, { status, stack: error.stack })
-      setTimeout(() => this.checkPlaylist(), config.app.dynamicPlaylistRefreshInterval)
+      setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     }
   }
 }

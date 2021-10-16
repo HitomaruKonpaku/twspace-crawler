@@ -1,6 +1,6 @@
 import winston, { format } from 'winston'
 import DailyRotateFile from 'winston-daily-rotate-file'
-import { config } from './config'
+import { LOGGER_DATE_PATTERN, LOGGER_DIR } from './constants/logger.constant'
 
 function getPrintFormat() {
   return format.printf((info) => (Object.keys(info.metadata).length
@@ -33,15 +33,15 @@ const logger = winston.createLogger({
     new DailyRotateFile({
       level: 'verbose',
       format: format.combine(getPrintFormat()),
-      datePattern: config.logger.datePattern,
-      dirname: config.logger.dir,
+      datePattern: LOGGER_DATE_PATTERN,
+      dirname: LOGGER_DIR,
       filename: '%DATE%.log',
     }),
     new DailyRotateFile({
       level: 'silly',
       format: format.combine(getPrintFormat()),
-      datePattern: config.logger.datePattern,
-      dirname: config.logger.dir,
+      datePattern: LOGGER_DATE_PATTERN,
+      dirname: LOGGER_DIR,
       filename: '%DATE%_all.log',
     }),
   ],
