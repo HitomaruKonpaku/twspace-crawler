@@ -9,8 +9,7 @@ import { Util } from './Util'
 
 export class Downloader {
   public static getMediaDir(subDir = ''): string {
-    const dir = path.join(__dirname, APP_MEDIA_DIR, subDir)
-    return dir
+    return path.join(__dirname, APP_MEDIA_DIR, subDir)
   }
 
   public static createMediaDir(subDir = ''): string {
