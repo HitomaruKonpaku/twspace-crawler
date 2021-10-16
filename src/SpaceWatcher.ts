@@ -54,11 +54,18 @@ export class SpaceWatcher extends EventEmitter {
       status = error.response.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
-        Downloader.downloadMedia(this.dynamicPlaylistUrl, `${Util.getTimeString()}_${this.spaceId}`, this.username)
+        this.downloadMedia()
         return
       }
       this.logger.error(error.message, { status, stack: error.stack })
       setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     }
+  }
+
+  private downloadMedia() {
+    const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
+    const fileName = `[${new Date(this.metadata.created_at).toISOString().slice(0, 10).replace(/-/g, '')}] ${username} (${this.spaceId})`
+    this.logger.info(`File name: ${fileName}`)
+    Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username)
   }
 }
