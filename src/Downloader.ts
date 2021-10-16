@@ -36,10 +36,12 @@ export class Downloader {
     const { data: noneTranscodePlaylistData } = await axios.get<string>(url)
     const transcodePlaylistUrl = new URL(url).origin + noneTranscodePlaylistData.split('\n')[3]
     logger.info(`TranscodePlaylist url: ${transcodePlaylistUrl}`)
-    const transcodePlaylistRes = await axios.get<string>(transcodePlaylistUrl)
-    const { data: transcodePlaylistData } = transcodePlaylistRes
+    const {
+      headers: transcodePlaylistHeaders,
+      data: transcodePlaylistData,
+    } = await axios.get<string>(transcodePlaylistUrl)
     const chunkRegex = /^chunk/gm
-    logger.info(`Playlis content length: ${Number(transcodePlaylistRes.headers['content-length'])}`)
+    logger.info(`Playlis content length: ${Number(transcodePlaylistHeaders['content-length'])}`)
     logger.info(`Playlis chunk count: ${transcodePlaylistData.match(chunkRegex).length}`)
     const masterUrlWithoutExt = url.replace('master_playlist.m3u8', '')
     const result = transcodePlaylistData.replace(chunkRegex, `${masterUrlWithoutExt}chunk`)
