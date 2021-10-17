@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'twspace-crawler',
       script: './dist/index.js',
-      args: '--user nakiriayame --interval 10000',
+      args: '--config ./config.json',
       env: {
         NODE_ENV: 'production',
       },
