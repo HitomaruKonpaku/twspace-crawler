@@ -1,6 +1,6 @@
 import axios from 'axios'
 // eslint-disable-next-line camelcase
-import child_process from 'child_process'
+import child_process, { SpawnOptions } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import { APP_MEDIA_DIR } from './constants/app.constant'
@@ -21,6 +21,8 @@ export class Downloader {
     logger.info(`Playlist master url: ${masterUrl}`)
     const playlistPath = path.join(this.getMediaDir(subDir), `${fileName}.m3u8`)
     const mediaPath = path.join(this.getMediaDir(subDir), `${fileName}.aac`)
+    logger.verbose(`Playlist path: ${playlistPath}`)
+    logger.verbose(`Media path: ${mediaPath}`)
     this.createMediaDir(subDir)
     await this.downloadMediaPlaylist(masterUrl, playlistPath)
     this.runFfmpeg(playlistPath, mediaPath)
@@ -63,9 +65,10 @@ export class Downloader {
     logger.verbose(`${cmd} ${args.join(' ')}`)
     this.createMediaDir()
 
+    const spawnOptions: SpawnOptions = { detached: true, stdio: 'ignore' }
     const cp = process.platform === 'win32'
-      ? child_process.spawn('cmd', ['/c', [cmd, ...args].join(' ')], { detached: true, stdio: 'ignore' })
-      : child_process.spawn(cmd, args, { detached: true, stdio: 'ignore' })
+      ? child_process.spawn(process.env.comspec, ['/c', cmd, ...args], spawnOptions)
+      : child_process.spawn(cmd, args, spawnOptions)
     cp.unref()
   }
 }

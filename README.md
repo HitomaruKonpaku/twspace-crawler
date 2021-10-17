@@ -11,8 +11,13 @@ node ./dist/index.js --user nakiriayame
 ## Arguments
 
 ```
-  --config  Path to config file (Check sample config.json)
-  --user    Watch & get space from users to download, separate by comma (,)
-  --id      Watch & wait for specific space id to complete & download
-  --url     Download space with playlist url
+  --config  CONFIG_PATH
+            Path to config file (Check sample config.json)
+  --user    USER
+            Watch & get space from users to download, separate by comma (,)
+  --id      SPACE_ID
+            Watch & wait for specific space id to complete & download
+  --force   Use combine with --id to force download instead of waiting
+  --url     PLAYLIST_URL
+            Download space with playlist url
 ```

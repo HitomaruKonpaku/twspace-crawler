@@ -3,4 +3,5 @@ export interface AppArgs {
   user?: string
   id?: string
   url?: string
+  force?: boolean
 }

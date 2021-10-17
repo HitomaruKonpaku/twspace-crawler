@@ -1,6 +1,7 @@
 import axios from 'axios'
 import EventEmitter from 'events'
 import winston from 'winston'
+import { args } from './args'
 import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
@@ -49,16 +50,27 @@ export class SpaceWatcher extends EventEmitter {
     try {
       status = (await axios.head(this.dynamicPlaylistUrl)).status
       this.logger.debug(`Status: ${status}`)
+      if (args.force) {
+        this.downloadMedia()
+        return
+      }
       setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     } catch (error) {
       status = error.response.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
-        Downloader.downloadMedia(this.dynamicPlaylistUrl, `${Util.getTimeString()}_${this.spaceId}`, this.username)
+        this.downloadMedia()
         return
       }
       this.logger.error(error.message, { status, stack: error.stack })
       setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     }
+  }
+
+  private downloadMedia() {
+    const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
+    const fileName = `[${new Date(this.metadata.created_at).toISOString().slice(0, 10).replace(/-/g, '')}] ${username} (${this.spaceId})`
+    this.logger.info(`File name: ${fileName}`)
+    Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username)
   }
 }
