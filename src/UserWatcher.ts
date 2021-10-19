@@ -15,27 +15,25 @@ export class UserWatcher extends EventEmitter {
 
   public async watch(): Promise<void> {
     this.logger.info('Watching...')
-    this.checkUser()
+    this.getSpaces()
   }
 
-  private async checkUser(): Promise<void> {
+  private async getSpaces(): Promise<void> {
     const url = 'https://tweespaces-serverless-function.vercel.app/api/space-by-user'
     const body = { username: this.username }
     try {
       const res = await axios.post<any>(url, body)
-      const spaces: any[] = (res.data.spaces.data || [])
+      const liveSpaces: any[] = (res.data.spaces.data || [])
         .filter((v) => v.state === 'live')
-      this.logger.debug(`Space count: ${spaces.length}`)
-      if (spaces.length) {
-        this.logger.debug(`Space ids: ${spaces.map((v) => v.id).join(', ')}`)
-        spaces.forEach((space) => {
-          this.emit('data', space.id)
-        })
+      this.logger.debug(`Space count: ${liveSpaces.length}`)
+      if (liveSpaces.length) {
+        this.logger.debug(`Space ids: ${liveSpaces.map((v) => v.id).join(', ')}`)
+        liveSpaces.forEach((space) => this.emit('data', space.id))
       }
     } catch (error) {
       this.logger.error(error.message, { stack: error.stack })
     }
 
-    setTimeout(() => this.checkUser(), Util.getUserRefreshInterval())
+    setTimeout(() => this.getSpaces(), Util.getUserRefreshInterval())
   }
 }
