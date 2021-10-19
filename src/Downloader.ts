@@ -20,18 +20,18 @@ export class Downloader {
     const masterUrl = Util.getMasterUrlFromDynamicUrl(url)
     logger.info(`Playlist master url: ${masterUrl}`)
     const playlistPath = path.join(this.getMediaDir(subDir), `${fileName}.m3u8`)
-    const mediaPath = path.join(this.getMediaDir(subDir), `${fileName}.aac`)
-    logger.verbose(`Playlist path: ${playlistPath}`)
-    logger.verbose(`Media path: ${mediaPath}`)
+    logger.verbose(`Playlist path: "${playlistPath}"`)
     this.createMediaDir(subDir)
     await this.downloadMediaPlaylist(masterUrl, playlistPath)
+    const mediaPath = path.join(this.getMediaDir(subDir), `${fileName}.aac`)
+    logger.verbose(`Media path: "${mediaPath}"`)
     this.runFfmpeg(playlistPath, mediaPath)
   }
 
   public static async downloadMediaPlaylist(url: string, filePath: string): Promise<void> {
     const data = await this.getMediaPlaylist(url)
     fs.writeFileSync(filePath, data)
-    logger.verbose(`Playlist saved to: ${filePath}`)
+    logger.verbose(`Playlist saved to: "${filePath}"`)
   }
 
   public static async getMediaPlaylist(url: string): Promise<string> {
@@ -42,6 +42,7 @@ export class Downloader {
       headers: transcodePlaylistHeaders,
       data: transcodePlaylistData,
     } = await axios.get<string>(transcodePlaylistUrl)
+    logger.debug('Headers', transcodePlaylistHeaders)
     const chunkRegex = /^chunk/gm
     logger.info(`Playlis content length: ${Number(transcodePlaylistHeaders['content-length'])}`)
     logger.info(`Playlis chunk count: ${transcodePlaylistData.match(chunkRegex).length}`)
@@ -61,7 +62,7 @@ export class Downloader {
       'copy',
       mediaPath,
     ]
-    logger.verbose(`Audio saving to: ${mediaPath}`)
+    logger.verbose(`Audio saving to: "${mediaPath}"`)
     logger.verbose(`${cmd} ${args.join(' ')}`)
     this.createMediaDir()
 

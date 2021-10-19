@@ -19,28 +19,28 @@ class Main {
   public async start() {
     try {
       this.logger.info('Starting...')
-      this.logger.info('Args:', args)
+      this.logger.info('Args', args)
 
       const externalConfig = Util.getExternalConfig()
       const users = (args.user || '').split(',')
         .concat((externalConfig.users || []).map((v) => v.screenName))
         .filter((v) => v)
       if (users.length) {
-        this.logger.info('Start with user mode', { users })
+        this.logger.info('Starting in user mode', { users })
         users.forEach((user) => this.addUserWatcher(user))
         return
       }
 
       const { id } = args
       if (id) {
-        this.logger.info('Start with space id mode', { id })
+        this.logger.info('Starting in space id mode', { id })
         this.addSpaceWatcher(id)
         return
       }
 
       const { url } = args
       if (url) {
-        this.logger.info('Start with url mode', { url })
+        this.logger.info('Starting in url mode', { url })
         await Downloader.downloadMedia(url, Util.getTimeString())
         return
       }
