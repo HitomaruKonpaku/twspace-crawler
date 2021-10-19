@@ -71,8 +71,15 @@ export class SpaceWatcher extends EventEmitter {
     try {
       const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
       const fileName = `[${new Date(this.metadata.created_at).toISOString().slice(0, 10).replace(/-/g, '')}] ${username} (${this.spaceId})`
+      const metadata = {
+        title: this.metadata.title,
+        author: this.metadata.creator_results?.result?.legacy?.name,
+        artist: this.metadata.creator_results?.result?.legacy?.name,
+        episode_id: this.spaceId,
+      }
       this.logger.info(`File name: ${fileName}`)
-      await Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username)
+      this.logger.info(`Metadata: ${JSON.stringify(metadata)}`)
+      await Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username, metadata)
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
       this.logger.error(error.message, error)

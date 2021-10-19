@@ -16,16 +16,16 @@ export class Downloader {
     return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
   }
 
-  public static async downloadMedia(url: string, fileName: string, subDir = ''): Promise<void> {
+  public static async downloadMedia(url: string, fileName: string, subDir = '', metadata?: Record<string, any>): Promise<void> {
     const masterUrl = Util.getMasterUrlFromDynamicUrl(url)
     logger.info(`Playlist master url: ${masterUrl}`)
     const playlistPath = path.join(this.getMediaDir(subDir), `${fileName}.m3u8`)
     logger.verbose(`Playlist path: "${playlistPath}"`)
     this.createMediaDir(subDir)
     await this.downloadMediaPlaylist(masterUrl, playlistPath)
-    const mediaPath = path.join(this.getMediaDir(subDir), `${fileName}.aac`)
+    const mediaPath = path.join(this.getMediaDir(subDir), `${fileName}.m4a`)
     logger.verbose(`Media path: "${mediaPath}"`)
-    this.runFfmpeg(playlistPath, mediaPath)
+    this.runFfmpeg(playlistPath, mediaPath, metadata)
   }
 
   public static async downloadMediaPlaylist(url: string, filePath: string): Promise<void> {
@@ -51,7 +51,11 @@ export class Downloader {
     return result
   }
 
-  private static runFfmpeg(playlistPath: string, mediaPath: string): void {
+  private static runFfmpeg(
+    playlistPath: string,
+    mediaPath: string,
+    metadata?: Record<string, any>,
+  ): void {
     const cmd = 'ffmpeg'
     const args = [
       '-protocol_whitelist',
@@ -60,8 +64,18 @@ export class Downloader {
       playlistPath,
       '-c',
       'copy',
-      mediaPath,
     ]
+    if (metadata) {
+      logger.debug('Metadata', metadata)
+      Object.keys(metadata).forEach((key) => {
+        const value = metadata[key]
+        if (!value) {
+          return
+        }
+        args.push('-metadata', `${key}=${value}`)
+      })
+    }
+    args.push(mediaPath)
     logger.verbose(`Audio saving to: "${mediaPath}"`)
     logger.verbose(`${cmd} ${args.join(' ')}`)
     this.createMediaDir()
