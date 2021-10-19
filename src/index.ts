@@ -23,7 +23,7 @@ class Main {
 
       const externalConfig = Util.getExternalConfig()
       const users = (args.user || '').split(',')
-        .concat((externalConfig.users || []).map((v) => v.screenName))
+        .concat((externalConfig.users || []).map((v) => v.username))
         .filter((v) => v)
       if (users.length) {
         this.logger.info('Starting in user mode', { users })
