@@ -67,10 +67,18 @@ export class SpaceWatcher extends EventEmitter {
     }
   }
 
-  private downloadMedia() {
-    const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
-    const fileName = `[${new Date(this.metadata.created_at).toISOString().slice(0, 10).replace(/-/g, '')}] ${username} (${this.spaceId})`
-    this.logger.info(`File name: ${fileName}`)
-    Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username)
+  private async downloadMedia() {
+    try {
+      const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
+      const fileName = `[${new Date(this.metadata.created_at).toISOString().slice(0, 10).replace(/-/g, '')}] ${username} (${this.spaceId})`
+      this.logger.info(`File name: ${fileName}`)
+      await Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username)
+    } catch (error) {
+      // Attemp to download transcode playlist right after space end could return 404
+      this.logger.error(error.message, error)
+      const timeoutMs = 10000
+      this.logger.info(`Retry download in ${timeoutMs}ms`)
+      setTimeout(() => this.downloadMedia(), timeoutMs)
+    }
   }
 }
