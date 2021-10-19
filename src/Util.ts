@@ -5,6 +5,10 @@ import { APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { logger } from './logger'
 
 export class Util {
+  public static getTwitterAuthorization(): string {
+    return process.env.TWITTER_AUTHORIZATION
+  }
+
   public static getTimeString(): string {
     const date = new Date()
     const s = [
@@ -32,6 +36,17 @@ export class Util {
 
   public static getUserRefreshInterval(): number {
     return Number(Util.getExternalConfig().interval) || APP_USER_REFRESH_INTERVAL
+  }
+
+  public static async getTwitterSpacesByCreatorIds(
+    ids: string[],
+    headers?: Record<string, any>,
+  ): Promise<any> {
+    const { data } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
+      headers,
+      params: { user_ids: ids.join(',') },
+    })
+    return data
   }
 
   public static async getTwitterGuestToken(): Promise<string> {

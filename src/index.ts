@@ -4,6 +4,7 @@ import { args } from './args'
 import { Downloader } from './Downloader'
 import { logger as baseLogger } from './logger'
 import { SpaceWatcher } from './SpaceWatcher'
+import { UserListWatcher } from './UserListWatcher'
 import { UserWatcher } from './UserWatcher'
 import { Util } from './Util'
 
@@ -27,7 +28,11 @@ class Main {
         .filter((v) => v)
       if (users.length) {
         this.logger.info('Starting in user mode', { users })
-        users.forEach((user) => this.addUserWatcher(user))
+        if (!Util.getTwitterAuthorization()) {
+          users.forEach((user) => this.addUserWatcher(user))
+        } else {
+          this.runUserListWatcher(users)
+        }
         return
       }
 
@@ -72,6 +77,14 @@ class Main {
     const watcher = new SpaceWatcher(spaceId, username)
     watchers[spaceId] = watcher
     watcher.watch()
+  }
+
+  private runUserListWatcher(usernames: string[]) {
+    const watcher = new UserListWatcher(usernames)
+    watcher.watch()
+    watcher.on('data', (id) => {
+      this.addSpaceWatcher(id)
+    })
   }
 }
 
