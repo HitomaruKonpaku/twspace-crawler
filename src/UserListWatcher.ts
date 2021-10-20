@@ -36,7 +36,9 @@ export class UserListWatcher extends EventEmitter {
     } catch (error) {
       this.logger.error('Failed to start watcher')
       this.logger.error(error.message, { stack: error.stack })
-      setTimeout(() => this.watch(), 5000)
+      const timeoutMs = 5000
+      this.logger.info(`Retry in ${timeoutMs}ms`)
+      setTimeout(() => this.watch(), timeoutMs)
     }
   }
 
@@ -45,6 +47,7 @@ export class UserListWatcher extends EventEmitter {
       headers: { authorization: TWITTER_AUTHORIZATION },
       params: { screen_name: v.join(',') },
     })))
+    this.users = []
     responses.forEach((res) => {
       res.data.forEach((user) => {
         this.users.push({
@@ -53,6 +56,7 @@ export class UserListWatcher extends EventEmitter {
         })
       })
     })
+    this.logger.debug(`User list: ${JSON.stringify(this.users)}`)
   }
 
   private async getSpaces(ids: string[]) {
