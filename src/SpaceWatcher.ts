@@ -34,7 +34,7 @@ export class SpaceWatcher extends EventEmitter {
         'x-guest-token': guestToken,
       }
       this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, headers)
-      this.logger.debug(`Metadata: ${JSON.stringify(this.metadata)}`)
+      this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
       this.mediaKey = this.metadata.media_key
       this.dynamicPlaylistUrl = await Util.getDynamicUrl(this.mediaKey, headers)
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
@@ -78,7 +78,7 @@ export class SpaceWatcher extends EventEmitter {
         episode_id: this.spaceId,
       }
       this.logger.info(`File name: ${fileName}`)
-      this.logger.info(`Metadata: ${JSON.stringify(metadata)}`)
+      this.logger.info(`File metadata: ${JSON.stringify(metadata)}`)
       await Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username, metadata)
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
