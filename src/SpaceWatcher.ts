@@ -56,7 +56,7 @@ export class SpaceWatcher extends EventEmitter {
       }
       setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     } catch (error) {
-      status = error.response.status
+      status = error.response?.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
         this.downloadMedia()
