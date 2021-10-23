@@ -6,3 +6,5 @@ logs/
 .cache/
 .media/
 .tmp/
+
+.env
