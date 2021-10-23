@@ -105,10 +105,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async showNotification() {
-    if (!args.notification) {
-      return
-    }
-    if (this.isNotificationNotified) {
+    if (!args.notification || this.isNotificationNotified) {
       return
     }
     try {
@@ -127,7 +124,7 @@ export class SpaceWatcher extends EventEmitter {
             // Since notifier can not use url, need to download it
             await Downloader.downloadImage(profileImgUrl, imgPath)
           }
-          Object.assign(notification, { icon: imgPath })
+          notification.icon = imgPath
         } catch (error) {
           this.logger.error(error.message, error)
         }
