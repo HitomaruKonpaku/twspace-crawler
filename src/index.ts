@@ -77,6 +77,14 @@ class Main {
     const watcher = new SpaceWatcher(spaceId, username)
     watchers[spaceId] = watcher
     watcher.watch()
+    watcher.once('complete', () => {
+      this.logger.debug(`SpaceWatcher@${spaceId} complete`)
+      if (!watchers[spaceId]) {
+        return
+      }
+      delete watchers[spaceId]
+      this.logger.debug(`SpaceWatcher@${spaceId} delete`)
+    })
   }
 
   private runUserListWatcher(usernames: string[]) {

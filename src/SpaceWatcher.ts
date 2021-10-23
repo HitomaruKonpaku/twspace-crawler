@@ -83,6 +83,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`File name: ${fileName}`)
       this.logger.info(`File metadata: ${JSON.stringify(metadata)}`)
       await Downloader.downloadMedia(this.dynamicPlaylistUrl, fileName, username, metadata)
+      this.emit('complete')
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
       this.logger.error(error.message, error)
