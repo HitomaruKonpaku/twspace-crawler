@@ -41,6 +41,9 @@ export class SpaceWatcher extends EventEmitter {
       this.checkPlaylist()
     } catch (error) {
       this.logger.error(error.message, { stack: error.stack })
+      const timeoutMs = 5000
+      this.logger.info(`Retry watch in ${timeoutMs}ms`)
+      setTimeout(() => this.watch(), timeoutMs)
     }
   }
 
