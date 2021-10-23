@@ -116,12 +116,12 @@ export class SpaceWatcher extends EventEmitter {
       }
       const profileImgUrl: string = user.legacy?.profile_image_url_https?.replace('_normal', '')
       if (profileImgUrl) {
+        // Since notifier can not use url, need to download it
         try {
-          const host = 'https://pbs.twimg.com/'
-          Downloader.createCacheDir(path.dirname(profileImgUrl).replace(host, ''))
-          const imgPath = path.join(Downloader.getCacheDir(), profileImgUrl.replace(host, ''))
+          const imgPathname = profileImgUrl.replace('https://pbs.twimg.com/', '')
+          Downloader.createCacheDir(path.dirname(imgPathname))
+          const imgPath = path.join(Downloader.getCacheDir(), imgPathname)
           if (!fs.existsSync(imgPath)) {
-            // Since notifier can not use url, need to download it
             await Downloader.downloadImage(profileImgUrl, imgPath)
           }
           notification.icon = imgPath
