@@ -22,3 +22,12 @@ node ./dist/index.js --user nakiriayame
                   Download space with playlist url
   --notification  Show native notification about live space using node-notifier
 ```
+
+## Advance Usage
+
+- To watch multiple users, it is better to use [Twitter API](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
+    1. Get `Bearer Token` ([Docs](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api))
+    2. Open `.env` & set `TWITTER_AUTHORIZATION` value to `Bearer Token`
+       ```
+       TWITTER_AUTHORIZATION = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs..."
+       ```
