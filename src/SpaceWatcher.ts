@@ -1,5 +1,9 @@
 import axios from 'axios'
 import EventEmitter from 'events'
+import fs from 'fs'
+import nodeNotifier from 'node-notifier'
+import open from 'open'
+import path from 'path'
 import winston from 'winston'
 import { args } from './args'
 import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
@@ -13,6 +17,7 @@ export class SpaceWatcher extends EventEmitter {
   private metadata: Record<string, any>
   private mediaKey: string
   private dynamicPlaylistUrl: string
+  private isNotificationNotified = false
 
   constructor(
     public spaceId: string,
@@ -24,8 +29,13 @@ export class SpaceWatcher extends EventEmitter {
     this.username = username
   }
 
+  public get spaceUrl(): string {
+    return `https://twitter.com/i/spaces/${this.spaceId}`
+  }
+
   public async watch(): Promise<void> {
     this.logger.info('Watching...')
+    this.logger.info(`Space url: ${this.spaceUrl}`)
     try {
       const guestToken = await Util.getTwitterGuestToken()
       this.logger.debug(`Guest token: ${guestToken}`)
@@ -35,6 +45,7 @@ export class SpaceWatcher extends EventEmitter {
       }
       this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, headers)
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
+      this.showNotification()
       this.mediaKey = this.metadata.media_key
       this.dynamicPlaylistUrl = await Util.getDynamicUrl(this.mediaKey, headers)
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
@@ -90,6 +101,43 @@ export class SpaceWatcher extends EventEmitter {
       const timeoutMs = 10000
       this.logger.info(`Retry download in ${timeoutMs}ms`)
       setTimeout(() => this.downloadMedia(), timeoutMs)
+    }
+  }
+
+  private async showNotification() {
+    if (!args.notification || this.isNotificationNotified) {
+      return
+    }
+    try {
+      const user = this.metadata.creator_results?.result
+      const notification: nodeNotifier.Notification = {
+        title: `${user.legacy?.name || ''} Space Live`.trim(),
+        message: `${this.metadata.title || ''}`,
+      }
+      const profileImgUrl: string = user.legacy?.profile_image_url_https?.replace('_normal', '')
+      if (profileImgUrl) {
+        // Since notifier can not use url, need to download it
+        try {
+          const imgPathname = profileImgUrl.replace('https://pbs.twimg.com/', '')
+          Downloader.createCacheDir(path.dirname(imgPathname))
+          const imgPath = path.join(Downloader.getCacheDir(), imgPathname)
+          if (!fs.existsSync(imgPath)) {
+            await Downloader.downloadImage(profileImgUrl, imgPath)
+          }
+          notification.icon = imgPath
+        } catch (error) {
+          this.logger.error(error.message, error)
+        }
+      }
+      this.logger.debug('Notification:', notification)
+      nodeNotifier.notify(notification, (error, response) => {
+        if (!error && !response) {
+          open(this.spaceUrl)
+        }
+      })
+      this.isNotificationNotified = true
+    } catch (error) {
+      this.logger.error(error.message, error)
     }
   }
 }
