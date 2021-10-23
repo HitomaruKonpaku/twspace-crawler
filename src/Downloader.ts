@@ -3,17 +3,45 @@ import axios from 'axios'
 import child_process, { SpawnOptions } from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import { APP_MEDIA_DIR } from './constants/app.constant'
+import { APP_CACHE_DIR, APP_MEDIA_DIR } from './constants/app.constant'
 import { logger } from './logger'
 import { Util } from './Util'
 
 export class Downloader {
+  public static getCacheDir(subDir = ''): string {
+    return path.join(__dirname, APP_CACHE_DIR, subDir)
+  }
+
+  public static createCacheDir(subDir = ''): string {
+    return fs.mkdirSync(this.getCacheDir(subDir), { recursive: true })
+  }
+
   public static getMediaDir(subDir = ''): string {
     return path.join(__dirname, APP_MEDIA_DIR, subDir)
   }
 
   public static createMediaDir(subDir = ''): string {
     return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
+  }
+
+  public static async downloadImage(url: string, filePath: string): Promise<void> {
+    const response = await axios.get<any>(url, { responseType: 'stream' })
+    return new Promise((resolve, reject) => {
+      const writer = fs.createWriteStream(filePath)
+      response.data.pipe(writer)
+      let error = null
+      writer.on('error', (err) => {
+        error = err
+        writer.close()
+        reject(err)
+      })
+      writer.on('close', () => {
+        if (error) {
+          return
+        }
+        resolve()
+      })
+    })
   }
 
   public static async downloadMedia(url: string, fileName: string, subDir = '', metadata?: Record<string, any>): Promise<void> {

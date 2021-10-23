@@ -3,5 +3,6 @@ dist/
 logs/
 .vscode/
 .idea/
-.tmp/
+.cache/
 .media/
+.tmp/

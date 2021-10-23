@@ -2,6 +2,7 @@ export interface AppArgs {
   config?: string
   user?: string
   id?: string
-  url?: string
   force?: boolean
+  url?: string
+  notification?: boolean
 }
