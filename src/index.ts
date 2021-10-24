@@ -52,7 +52,7 @@ class Main {
 
       this.logger.warn('No args found!')
     } catch (error) {
-      this.logger.error(error.message, { stack: error.stack })
+      this.logger.error(error)
     }
   }
 

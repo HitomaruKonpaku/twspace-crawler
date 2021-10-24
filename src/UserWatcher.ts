@@ -31,7 +31,7 @@ export class UserWatcher extends EventEmitter {
         liveSpaces.forEach((space) => this.emit('data', space.id))
       }
     } catch (error) {
-      this.logger.error(error.message, { stack: error.stack })
+      this.logger.error(error)
     }
 
     setTimeout(() => this.getSpaces(), Util.getUserRefreshInterval())
