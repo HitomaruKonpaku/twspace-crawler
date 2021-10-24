@@ -11,24 +11,24 @@
   "author": "HitomaruKonpaku",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.22.0",
+    "axios": "^0.23.0",
     "dotenv": "^10.0.0",
     "minimist": "^1.2.5",
     "moment": "^2.29.1",
     "node-notifier": "^10.0.0",
-    "open": "^8.3.0",
+    "open": "^8.4.0",
     "tslib": "^2.3.1",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5"
   },
   "devDependencies": {
     "@types/minimist": "^1.2.2",
-    "@types/node": "^16.10.3",
+    "@types/node": "^16.11.4",
     "@types/node-notifier": "^8.0.1",
-    "@typescript-eslint/eslint-plugin": "^4.32.0",
-    "@typescript-eslint/parser": "^4.32.0",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.4"
   }
 }
