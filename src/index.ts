@@ -96,4 +96,5 @@ class Main {
   }
 }
 
+baseLogger.info(`ENV: ${process.env.NODE_ENV}`)
 new Main().start()
