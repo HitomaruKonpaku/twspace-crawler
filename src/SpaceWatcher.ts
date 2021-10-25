@@ -51,7 +51,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
       this.checkPlaylist()
     } catch (error) {
-      this.logger.error(error)
+      this.logger.error(error.message)
       const timeoutMs = 5000
       this.logger.info(`Retry watch in ${timeoutMs}ms`)
       setTimeout(() => this.watch(), timeoutMs)
@@ -76,7 +76,7 @@ export class SpaceWatcher extends EventEmitter {
         this.downloadMedia()
         return
       }
-      this.logger.error(error)
+      this.logger.error(error.message)
       setTimeout(() => this.checkPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
     }
   }
@@ -97,7 +97,7 @@ export class SpaceWatcher extends EventEmitter {
       this.emit('complete')
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
-      this.logger.error(error)
+      this.logger.error(error.message)
       const timeoutMs = 10000
       this.logger.info(`Retry download in ${timeoutMs}ms`)
       setTimeout(() => this.downloadMedia(), timeoutMs)
@@ -126,7 +126,7 @@ export class SpaceWatcher extends EventEmitter {
           }
           notification.icon = imgPath
         } catch (error) {
-          this.logger.error(error)
+          this.logger.error(error.message)
         }
       }
       this.logger.debug('Notification:', notification)
@@ -137,7 +137,7 @@ export class SpaceWatcher extends EventEmitter {
       })
       this.isNotificationNotified = true
     } catch (error) {
-      this.logger.error(error)
+      this.logger.error(error.message)
     }
   }
 }

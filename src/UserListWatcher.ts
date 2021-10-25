@@ -35,7 +35,7 @@ export class UserListWatcher extends EventEmitter {
       idChunks.forEach((idChunk) => this.getSpaces(idChunk))
     } catch (error) {
       this.logger.error('Failed to start watcher')
-      this.logger.error(error)
+      this.logger.error(error.message)
       const timeoutMs = 5000
       this.logger.info(`Retry in ${timeoutMs}ms`)
       setTimeout(() => this.watch(), timeoutMs)
@@ -74,7 +74,7 @@ export class UserListWatcher extends EventEmitter {
         liveSpaces.forEach((space) => this.emit('data', space.id))
       }
     } catch (error) {
-      this.logger.error(error)
+      this.logger.error(error.message)
     }
 
     setTimeout(() => this.getSpaces(ids), Util.getUserRefreshInterval())
