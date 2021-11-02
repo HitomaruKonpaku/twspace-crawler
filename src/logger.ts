@@ -24,7 +24,7 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console({
-      level: 'verbose',
+      level: process.env.NODE_ENV === 'production' ? 'verbose' : 'silly',
       format: format.combine(
         format.colorize(),
         getPrintFormat(),
