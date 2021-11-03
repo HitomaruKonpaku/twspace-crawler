@@ -2,7 +2,9 @@ import axios from 'axios'
 import fs from 'fs'
 import { args } from './args'
 import { APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
-import { logger } from './logger'
+import { logger as baseLogger } from './logger'
+
+const logger = baseLogger.child({ label: '[Util]' })
 
 export class Util {
   public static getTwitterAuthorization(): string {

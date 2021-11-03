@@ -6,8 +6,10 @@ import path from 'path'
 import stream from 'stream'
 import { promisify } from 'util'
 import { APP_CACHE_DIR, APP_MEDIA_DIR } from './constants/app.constant'
-import { logger } from './logger'
+import { logger as baseLogger } from './logger'
 import { Util } from './Util'
+
+const logger = baseLogger.child({ label: '[Downloader]' })
 
 export class Downloader {
   public static getCacheDir(subDir = ''): string {
