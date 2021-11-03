@@ -28,53 +28,63 @@ export class Downloader {
     return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
   }
 
-  public static async downloadImage(url: string, filePath: string): Promise<void> {
+  public static async downloadImage(url: string, filePath: string) {
+    logger.debug('Download image', { url, filePath })
     const response = await axios.get<any>(url, { responseType: 'stream' })
     const writer = fs.createWriteStream(filePath)
     response.data.pipe(writer)
     await promisify(stream.finished)(writer)
   }
 
-  public static async downloadMedia(url: string, fileName: string, subDir = '', metadata?: Record<string, any>): Promise<void> {
-    const masterUrl = Util.getMasterUrlFromDynamicUrl(url)
-    logger.info(`Playlist master url: ${masterUrl}`)
+  public static async downloadSpace(nonTranscodePlaylistUrl: string, fileName: string, subDir = '', metadata?: Record<string, any>) {
     const playlistPath = path.join(this.getMediaDir(subDir), `${fileName}.m3u8`)
     logger.verbose(`Playlist path: "${playlistPath}"`)
     this.createMediaDir(subDir)
-    await this.downloadMediaPlaylist(masterUrl, playlistPath)
-    const mediaPath = path.join(this.getMediaDir(subDir), `${fileName}.m4a`)
-    logger.verbose(`Media path: "${mediaPath}"`)
-    this.runFfmpeg(playlistPath, mediaPath, metadata)
+    await this.downloadSpacePlaylist(nonTranscodePlaylistUrl, playlistPath)
+    const audioPath = path.join(this.getMediaDir(subDir), `${fileName}.m4a`)
+    logger.verbose(`Audio path: "${audioPath}"`)
+    this.runFfmpeg(playlistPath, audioPath, metadata)
   }
 
-  public static async downloadMediaPlaylist(url: string, filePath: string): Promise<void> {
-    const data = await this.getMediaPlaylist(url)
+  public static async downloadSpacePlaylist(nonTranscodePlaylistUrl: string, filePath: string) {
+    const data = await this.getAbsoluteTranscodePlaylist(nonTranscodePlaylistUrl)
     fs.writeFileSync(filePath, data)
     logger.verbose(`Playlist saved to: "${filePath}"`)
   }
 
-  public static async getMediaPlaylist(url: string): Promise<string> {
-    const { data: noneTranscodePlaylistData } = await axios.get<string>(url)
-    const transcodePlaylistUrl = new URL(url).origin + noneTranscodePlaylistData.split('\n')[3]
-    logger.info(`TranscodePlaylist url: ${transcodePlaylistUrl}`)
-    const {
-      headers: transcodePlaylistHeaders,
-      data: transcodePlaylistData,
-    } = await axios.get<string>(transcodePlaylistUrl)
-    logger.debug('Headers', transcodePlaylistHeaders)
-    const chunkRegex = /^chunk/gm
-    logger.info(`Playlis content length: ${Number(transcodePlaylistHeaders['content-length'])}`)
-    logger.info(`Playlis chunk count: ${transcodePlaylistData.match(chunkRegex).length}`)
-    const masterUrlWithoutExt = url.replace('master_playlist.m3u8', '')
-    const result = transcodePlaylistData.replace(chunkRegex, `${masterUrlWithoutExt}chunk`)
-    return result
+  public static async getAbsoluteTranscodePlaylist(nonTranscodePlaylistUrl: string) {
+    const nonTranscodeMasterPlaylistUrl = Util.getMasterUrlFromDynamicUrl(nonTranscodePlaylistUrl)
+    logger.debug('getAbsoluteTranscodePlaylist', { nonTranscodePlaylistUrl, nonTranscodeMasterPlaylistUrl })
+    const baseAudioUrl = nonTranscodeMasterPlaylistUrl.replace('master_playlist.m3u8', '')
+    const chunkPattern = /^chunk/gm
+    const rawData = await this.getRawTranscodePlaylist(nonTranscodePlaylistUrl)
+    const data = rawData.replace(chunkPattern, `${baseAudioUrl}chunk`)
+    return data
+  }
+
+  public static async getRawTranscodePlaylist(nonTranscodePlaylistUrl: string) {
+    // eslint-disable-next-line max-len
+    const nonTranscodePlaylistData = await Downloader.getNonTranscodeMasterPlaylist(nonTranscodePlaylistUrl)
+    const transcodePlaylistUrl = new URL(nonTranscodePlaylistUrl).origin + nonTranscodePlaylistData.split('\n')[3]
+    logger.debug('getRawTranscodePlaylist', { nonTranscodePlaylistUrl, transcodePlaylistUrl })
+    const { data, headers } = await axios.get<string>(transcodePlaylistUrl)
+    logger.debug('getRawTranscodePlaylist', { headers })
+    return data
+  }
+
+  public static async getNonTranscodeMasterPlaylist(nonTranscodePlaylistUrl: string) {
+    const nonTranscodeMasterPlaylistUrl = Util.getMasterUrlFromDynamicUrl(nonTranscodePlaylistUrl)
+    logger.debug('getNonTranscodeMasterPlaylist', { nonTranscodePlaylistUrl, nonTranscodeMasterPlaylistUrl })
+    const { data, headers } = await axios.get<string>(nonTranscodeMasterPlaylistUrl)
+    logger.debug('getNonTranscodeMasterPlaylist', { headers })
+    return data
   }
 
   private static runFfmpeg(
     playlistPath: string,
     mediaPath: string,
     metadata?: Record<string, any>,
-  ): void {
+  ) {
     const cmd = 'ffmpeg'
     const args = [
       '-protocol_whitelist',

@@ -46,7 +46,7 @@ class Main {
       const { url } = args
       if (url) {
         this.logger.info('Starting in url mode', { url })
-        await Downloader.downloadMedia(url, Util.getTimeString())
+        await Downloader.downloadSpace(url, Util.getTimeString())
         return
       }
 

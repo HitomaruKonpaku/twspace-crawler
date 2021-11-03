@@ -106,4 +106,9 @@ export class Util {
   ): Promise<string> {
     return this.getMasterUrlFromDynamicUrl(await this.getDynamicUrl(mediaKey, headers))
   }
+
+  public static getChunks(data: string): number[] {
+    const chunkIndexPattern = /(?<=chunk_\d+_)\d+(?=_a\.)/gm
+    return data.match(chunkIndexPattern)?.map((v) => Number(v)) || []
+  }
 }
