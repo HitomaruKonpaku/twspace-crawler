@@ -155,7 +155,9 @@ export class SpaceWatcher extends EventEmitter {
       }
       this.logger.debug('Notification:', notification)
       nodeNotifier.notify(notification, (error, response) => {
-        if (!error && !response) {
+        this.logger.debug('Notification callback', { response, error })
+        // Tested on win32, response can be undefined, activate, timeout
+        if (!error && (!response || response === 'activate')) {
           open(this.spaceUrl)
         }
       })
