@@ -82,7 +82,9 @@ export class SpaceWatcher extends EventEmitter {
       }
       this.logger.error(error.message)
     }
-    setTimeout(() => this.checkDynamicPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
+    const ms = APP_PLAYLIST_REFRESH_INTERVAL
+    this.logger.debug(`Recheck dynamic playlist in ${ms}ms`)
+    setTimeout(() => this.checkDynamicPlaylist(), ms)
   }
 
   private async checkMasterPlaylist(): Promise<void> {
@@ -99,7 +101,9 @@ export class SpaceWatcher extends EventEmitter {
     } catch (error) {
       this.logger.error(error.message)
     }
-    setTimeout(() => this.checkMasterPlaylist(), APP_PLAYLIST_REFRESH_INTERVAL)
+    const ms = APP_PLAYLIST_REFRESH_INTERVAL
+    this.logger.info(`Recheck master playlist in ${ms}ms`)
+    setTimeout(() => this.checkMasterPlaylist(), ms)
   }
 
   private async downloadMedia() {
