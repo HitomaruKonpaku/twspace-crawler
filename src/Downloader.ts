@@ -36,12 +36,12 @@ export class Downloader {
     await promisify(stream.finished)(writer)
   }
 
-  public static async downloadSpace(nonTranscodePlaylistUrl: string, fileName: string, subDir = '', metadata?: Record<string, any>) {
-    const playlistPath = path.join(this.getMediaDir(subDir), `${fileName}.m3u8`)
+  public static async downloadSpace(nonTranscodePlaylistUrl: string, filename: string, subDir = '', metadata?: Record<string, any>) {
+    const playlistPath = path.join(this.getMediaDir(subDir), `${filename}.m3u8`)
     logger.verbose(`Playlist path: "${playlistPath}"`)
     this.createMediaDir(subDir)
     await this.downloadSpacePlaylist(nonTranscodePlaylistUrl, playlistPath)
-    const audioPath = path.join(this.getMediaDir(subDir), `${fileName}.m4a`)
+    const audioPath = path.join(this.getMediaDir(subDir), `${filename}.m4a`)
     logger.verbose(`Audio path: "${audioPath}"`)
     this.runFfmpeg(playlistPath, audioPath, metadata)
   }

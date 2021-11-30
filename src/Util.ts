@@ -82,6 +82,16 @@ export class Util {
     return metadata
   }
 
+  public static async getLiveStreamStatus(
+    mediaKey: string,
+    headers?: Record<string, string>,
+  ): Promise<Record<string, any>> {
+    const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
+    const res = await axios.get<any>(url, { headers })
+    const { data } = res
+    return data
+  }
+
   public static getMasterUrlFromDynamicUrl(dynamicUrl: string): string {
     const masterUrl = dynamicUrl
       .replace('?type=live', '')
@@ -93,9 +103,7 @@ export class Util {
     mediaKey: string,
     headers?: Record<string, string>,
   ): Promise<string> {
-    const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
-    const res = await axios.get<any>(url, { headers })
-    const { data } = res
+    const data = await this.getLiveStreamStatus(mediaKey, headers)
     const dynamicUrl: string = data.source.location
     return dynamicUrl
   }

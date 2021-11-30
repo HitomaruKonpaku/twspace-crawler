@@ -10,14 +10,18 @@ import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
 import { logger as baseLogger } from './logger'
+import { SpaceChat } from './SpaceChat'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
   private metadata: Record<string, any>
+  private liveStreamStatus: Record<string, any>
   private mediaKey: string
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
+
+  private spaceChat: SpaceChat
   private isNotificationNotified = false
 
   constructor(
@@ -48,12 +52,14 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
       this.showNotification()
       this.mediaKey = this.metadata.media_key
-      this.dynamicPlaylistUrl = await Util.getDynamicUrl(this.mediaKey, headers)
+      this.liveStreamStatus = await Util.getLiveStreamStatus(this.mediaKey, headers)
+      this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
       if (args.force) {
         this.downloadMedia()
         return
       }
+      this.watchSpaceChat()
       this.checkDynamicPlaylist()
     } catch (error) {
       this.logger.error(error.message)
@@ -61,6 +67,20 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Retry watch in ${timeoutMs}ms`)
       setTimeout(() => this.watch(), timeoutMs)
     }
+  }
+
+  private getUsername(): string {
+    const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
+    return username
+  }
+
+  private getFilename(): string {
+    const date = new Date(this.metadata.started_at || this.metadata.created_at)
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, '')
+    const filename = `[${date}] ${this.getUsername()} (${this.spaceId})`
+    return filename
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
@@ -77,6 +97,7 @@ export class SpaceWatcher extends EventEmitter {
       const status = error.response?.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
+        this.unwatchSpaceChat()
         this.checkMasterPlaylist()
         return
       }
@@ -108,17 +129,17 @@ export class SpaceWatcher extends EventEmitter {
 
   private async downloadMedia() {
     try {
-      const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
-      const fileName = `[${new Date(this.metadata.created_at).toISOString().slice(0, 10).replace(/-/g, '')}] ${username} (${this.spaceId})`
+      const username = this.getUsername()
+      const filename = this.getFilename()
       const metadata = {
         title: this.metadata.title,
         author: this.metadata.creator_results?.result?.legacy?.name,
         artist: this.metadata.creator_results?.result?.legacy?.name,
         episode_id: this.spaceId,
       }
-      this.logger.info(`File name: ${fileName}`)
+      this.logger.info(`File name: ${filename}`)
       this.logger.info(`File metadata: ${JSON.stringify(metadata)}`)
-      await Downloader.downloadSpace(this.dynamicPlaylistUrl, fileName, username, metadata)
+      await Downloader.downloadSpace(this.dynamicPlaylistUrl, filename, username, metadata)
       this.emit('complete')
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
@@ -130,6 +151,21 @@ export class SpaceWatcher extends EventEmitter {
   private retryDownload(timeoutMs: number) {
     this.logger.info(`Retry download in ${timeoutMs}ms`)
     setTimeout(() => this.downloadMedia(), timeoutMs)
+  }
+
+  private watchSpaceChat() {
+    this.spaceChat = new SpaceChat(this.spaceId, this.liveStreamStatus, {
+      username: this.getUsername(),
+      filename: this.getFilename(),
+    })
+    this.spaceChat.watch()
+  }
+
+  private unwatchSpaceChat() {
+    if (!this.spaceChat) {
+      return
+    }
+    this.spaceChat.unwatch()
   }
 
   private async showNotification() {
