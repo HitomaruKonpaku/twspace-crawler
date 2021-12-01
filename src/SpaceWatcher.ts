@@ -30,8 +30,6 @@ export class SpaceWatcher extends EventEmitter {
   ) {
     super()
     this.logger = baseLogger.child({ label: `[SpaceWatcher@${spaceId}]` })
-    this.spaceId = spaceId
-    this.username = username
   }
 
   public get spaceUrl(): string {

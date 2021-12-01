@@ -25,9 +25,6 @@ export class SpaceChat {
     private options: Record<string, any>,
   ) {
     this.logger = baseLogger.child({ label: `[SpaceChat@${spaceId}]` })
-    this.spaceId = spaceId
-    this.liveStreamStatus = liveStreamStatus
-    this.options = options
 
     this.tmpChatFile = path.join(Downloader.getMediaDir(this.username), `${this.filename} Chat.jsonl`)
     this.outChatFile = path.join(Downloader.getMediaDir(this.username), `${this.filename} Chat.txt`)

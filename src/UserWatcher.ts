@@ -10,7 +10,6 @@ export class UserWatcher extends EventEmitter {
   constructor(public username: string) {
     super()
     this.logger = baseLogger.child({ label: `[UserWatcher@${username}]` })
-    this.username = username
   }
 
   public async watch(): Promise<void> {
