@@ -13,9 +13,11 @@ export class SpaceCaptionsExtractor {
     this.logger = baseLogger.child({ label: '[SpaceCaptionsExtractor]' })
   }
 
-  public extract(inpPath: string, outPath?: string) {
-    this.inpFile = inpPath
-    this.outFile = outPath || `${inpPath}.txt`
+  public extract(inpFile: string, outFile?: string) {
+    this.inpFile = inpFile
+    this.outFile = outFile === inpFile
+      ? `${outFile}.txt`
+      : (outFile || `${inpFile}.txt`)
     this.processFile()
   }
 

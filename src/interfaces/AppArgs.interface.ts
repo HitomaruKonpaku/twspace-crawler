@@ -6,4 +6,5 @@ export interface AppArgs {
   url?: string
   force?: boolean
   notification?: boolean
+  'extract-cc'?: string
 }

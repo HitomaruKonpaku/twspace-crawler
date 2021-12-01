@@ -3,6 +3,7 @@ import winston from 'winston'
 import { args } from './args'
 import { Downloader } from './Downloader'
 import { logger as baseLogger } from './logger'
+import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
 import { SpaceWatcher } from './SpaceWatcher'
 import { UserListWatcher } from './UserListWatcher'
 import { UserWatcher } from './UserWatcher'
@@ -21,6 +22,15 @@ class Main {
     try {
       this.logger.info('Starting...')
       this.logger.info('Args', args)
+
+      if (typeof args['extract-cc'] === 'string') {
+        const file = args['extract-cc']
+        new SpaceCaptionsExtractor().extract(
+          file,
+          file.replace('.jsonl', '.txt'),
+        )
+        return
+      }
 
       const externalConfig = Util.getExternalConfig()
       const users = (args.user || '').split(',')
