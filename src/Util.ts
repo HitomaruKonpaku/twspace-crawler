@@ -1,7 +1,8 @@
 import axios from 'axios'
 import fs from 'fs'
+import path from 'path'
 import { args } from './args'
-import { APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
+import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { logger as baseLogger } from './logger'
 import { Twitter } from './namespaces/Twitter'
 
@@ -39,6 +40,22 @@ export class Util {
 
   public static getUserRefreshInterval(): number {
     return Number(Util.getExternalConfig().interval) || APP_USER_REFRESH_INTERVAL
+  }
+
+  public static getCacheDir(subDir = ''): string {
+    return path.join(__dirname, APP_CACHE_DIR, subDir)
+  }
+
+  public static createCacheDir(subDir = ''): string {
+    return fs.mkdirSync(this.getCacheDir(subDir), { recursive: true })
+  }
+
+  public static getMediaDir(subDir = ''): string {
+    return path.join(__dirname, APP_MEDIA_DIR, subDir)
+  }
+
+  public static createMediaDir(subDir = ''): string {
+    return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
   }
 
   public static async getTwitterSpacesByCreatorIds(

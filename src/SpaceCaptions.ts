@@ -4,11 +4,11 @@ import path from 'path'
 import readline from 'readline'
 import winston from 'winston'
 import { WebSocket } from 'ws'
-import { Downloader } from './Downloader'
 import { SpaceCaptionsOptions } from './interfaces/SpaceCaptionsOptions.interface'
 import { logger as baseLogger } from './logger'
 import { Periscope } from './namespaces/Periscope'
 import { Twitter } from './namespaces/Twitter'
+import { Util } from './Util'
 
 export class SpaceCaptions {
   private readonly WS_URL = 'wss://prod-chatman-ancillary-ap-northeast-1.pscp.tv/chatapi/v1/chatnow'
@@ -28,10 +28,10 @@ export class SpaceCaptions {
   ) {
     this.logger = baseLogger.child({ label: `[SpaceCaptions@${spaceId}]` })
 
-    this.tmpChatFile = path.join(Downloader.getMediaDir(this.username), `${this.filename} Chat.jsonl`)
-    this.outChatFile = path.join(Downloader.getMediaDir(this.username), `${this.filename} Chat.txt`)
+    this.tmpChatFile = path.join(Util.getMediaDir(this.username), `${this.filename} Chat.jsonl`)
+    this.outChatFile = path.join(Util.getMediaDir(this.username), `${this.filename} Chat.txt`)
 
-    Downloader.createMediaDir(this.username)
+    Util.createMediaDir(this.username)
     this.logger.info(`Tmp chat file ${this.tmpChatFile}`)
     this.logger.info(`Out chat file ${this.outChatFile}`)
   }

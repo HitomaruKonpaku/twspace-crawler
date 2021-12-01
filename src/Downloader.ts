@@ -5,29 +5,12 @@ import fs from 'fs'
 import path from 'path'
 import stream from 'stream'
 import { promisify } from 'util'
-import { APP_CACHE_DIR, APP_MEDIA_DIR } from './constants/app.constant'
 import { logger as baseLogger } from './logger'
 import { Util } from './Util'
 
 const logger = baseLogger.child({ label: '[Downloader]' })
 
 export class Downloader {
-  public static getCacheDir(subDir = ''): string {
-    return path.join(__dirname, APP_CACHE_DIR, subDir)
-  }
-
-  public static createCacheDir(subDir = ''): string {
-    return fs.mkdirSync(this.getCacheDir(subDir), { recursive: true })
-  }
-
-  public static getMediaDir(subDir = ''): string {
-    return path.join(__dirname, APP_MEDIA_DIR, subDir)
-  }
-
-  public static createMediaDir(subDir = ''): string {
-    return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
-  }
-
   public static async downloadImage(url: string, filePath: string) {
     logger.debug('Download image', { url, filePath })
     const response = await axios.get(url, { responseType: 'stream' })
@@ -37,11 +20,11 @@ export class Downloader {
   }
 
   public static async downloadSpace(nonTranscodePlaylistUrl: string, filename: string, subDir = '', metadata?: Record<string, any>) {
-    const playlistPath = path.join(this.getMediaDir(subDir), `${filename}.m3u8`)
+    const playlistPath = path.join(Util.getMediaDir(subDir), `${filename}.m3u8`)
     logger.verbose(`Playlist path: "${playlistPath}"`)
-    this.createMediaDir(subDir)
+    Util.createMediaDir(subDir)
     await this.downloadSpacePlaylist(nonTranscodePlaylistUrl, playlistPath)
-    const audioPath = path.join(this.getMediaDir(subDir), `${filename}.m4a`)
+    const audioPath = path.join(Util.getMediaDir(subDir), `${filename}.m4a`)
     logger.verbose(`Audio path: "${audioPath}"`)
     this.runFfmpeg(playlistPath, audioPath, metadata)
   }
@@ -107,7 +90,7 @@ export class Downloader {
     args.push(mediaPath)
     logger.verbose(`Audio saving to: "${mediaPath}"`)
     logger.verbose(`${cmd} ${args.join(' ')}`)
-    this.createMediaDir()
+    Util.createMediaDir()
 
     const spawnOptions: SpawnOptions = { detached: true, stdio: 'ignore' }
     const cp = process.platform === 'win32'
