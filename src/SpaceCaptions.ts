@@ -1,13 +1,13 @@
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path'
-import readline from 'readline'
 import winston from 'winston'
 import { WebSocket } from 'ws'
 import { SpaceCaptionsOptions } from './interfaces/SpaceCaptionsOptions.interface'
 import { logger as baseLogger } from './logger'
 import { Periscope } from './namespaces/Periscope'
 import { Twitter } from './namespaces/Twitter'
+import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
 import { Util } from './Util'
 
 export class SpaceCaptions {
@@ -85,7 +85,7 @@ export class SpaceCaptions {
     })
     ws.on('close', (code, reason) => {
       this.logger.info(`[WS] Close with code: ${code}, reason: ${reason.toString('utf-8') || 'not found'}`)
-      this.writeOutChatFile()
+      new SpaceCaptionsExtractor().extract(this.tmpChatFile, this.outChatFile)
     })
     ws.on('open', () => {
       this.logger.info('[WS] Open')
@@ -109,62 +109,5 @@ export class SpaceCaptions {
       const payload = `${data.toString('utf-8')}\n`
       fs.appendFileSync(this.tmpChatFile, payload)
     })
-  }
-
-  private async writeOutChatFile() {
-    this.logger.silly('writeOutChatFile')
-    try {
-      if (!fs.existsSync(this.tmpChatFile)) {
-        this.logger.warn(`Tmp chat file not found at ${this.tmpChatFile}`)
-        return
-      }
-      this.logger.info(`Writing chat to ${this.outChatFile}`)
-      fs.writeFileSync(this.outChatFile, '')
-      await this.processTmpChatFile()
-    } catch (error) {
-      this.logger.error(error.message)
-    }
-  }
-
-  private async processTmpChatFile() {
-    this.logger.silly('processTmpChatFile')
-    const fileStream = fs.createReadStream(this.tmpChatFile)
-    const rl = readline.createInterface({ input: fileStream })
-    let lineCount = 0
-    // eslint-disable-next-line no-restricted-syntax
-    for await (const line of rl) {
-      lineCount += 1
-      try {
-        this.processTmpChatLine(line)
-      } catch (error) {
-        this.logger.error(`Failed to process line ${lineCount}: ${error.message}`)
-      }
-    }
-    this.logger.info(`Chat saved to ${this.outChatFile}`)
-  }
-
-  private processTmpChatLine(payload: string) {
-    const obj = JSON.parse(payload)
-    if (obj.kind !== Periscope.MessageKind.CHAT) {
-      return
-    }
-    this.processChat(obj.payload)
-  }
-
-  private processChat(payload: string) {
-    const obj = JSON.parse(payload)
-    if (!obj.uuid) {
-      return
-    }
-    this.processChatBody(obj.body)
-  }
-
-  private processChatBody(payload: string) {
-    const obj = JSON.parse(payload)
-    if (!obj.final || !obj.body) {
-      return
-    }
-    const msg = `${obj.username}: ${obj.body}\n`
-    fs.appendFileSync(this.outChatFile, msg)
   }
 }
