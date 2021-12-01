@@ -11,7 +11,7 @@ import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
 import { logger as baseLogger } from './logger'
 import { Twitter } from './namespaces/Twitter'
-import { SpaceChat } from './SpaceChat'
+import { SpaceCaptions } from './SpaceCaptions'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
@@ -22,7 +22,7 @@ export class SpaceWatcher extends EventEmitter {
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
 
-  private spaceChat: SpaceChat
+  private spaceCaptions: SpaceCaptions
   private isNotificationNotified = false
 
   constructor(
@@ -58,7 +58,7 @@ export class SpaceWatcher extends EventEmitter {
         this.downloadMedia()
         return
       }
-      this.watchSpaceChat()
+      this.watchSpaceCaptions()
       this.checkDynamicPlaylist()
     } catch (error) {
       this.logger.error(error.message)
@@ -96,7 +96,7 @@ export class SpaceWatcher extends EventEmitter {
       const status = error.response?.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
-        this.unwatchSpaceChat()
+        this.unwatchSpaceCaptions()
         this.checkMasterPlaylist()
         return
       }
@@ -152,19 +152,19 @@ export class SpaceWatcher extends EventEmitter {
     setTimeout(() => this.downloadMedia(), timeoutMs)
   }
 
-  private watchSpaceChat() {
-    this.spaceChat = new SpaceChat(this.spaceId, this.liveStreamStatus, {
+  private watchSpaceCaptions() {
+    this.spaceCaptions = new SpaceCaptions(this.spaceId, this.liveStreamStatus, {
       username: this.getUsername(),
       filename: this.getFilename(),
     })
-    this.spaceChat.watch()
+    this.spaceCaptions.watch()
   }
 
-  private unwatchSpaceChat() {
-    if (!this.spaceChat) {
+  private unwatchSpaceCaptions() {
+    if (!this.spaceCaptions) {
       return
     }
-    this.spaceChat.unwatch()
+    this.spaceCaptions.unwatch()
   }
 
   private async showNotification() {

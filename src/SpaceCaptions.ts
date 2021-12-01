@@ -5,12 +5,12 @@ import readline from 'readline'
 import winston from 'winston'
 import { WebSocket } from 'ws'
 import { Downloader } from './Downloader'
-import { SpaceChatOptions } from './interfaces/SpaceChatOptions.interface'
+import { SpaceCaptionsOptions } from './interfaces/SpaceCaptionsOptions.interface'
 import { logger as baseLogger } from './logger'
 import { Periscope } from './namespaces/Periscope'
 import { Twitter } from './namespaces/Twitter'
 
-export class SpaceChat {
+export class SpaceCaptions {
   private readonly WS_URL = 'wss://prod-chatman-ancillary-ap-northeast-1.pscp.tv/chatapi/v1/chatnow'
   private readonly CHAT_API_URL = 'https://proxsee.pscp.tv/api/v2/accessChatPublic'
 
@@ -24,9 +24,9 @@ export class SpaceChat {
   constructor(
     public spaceId: string,
     private liveStreamStatus: Twitter.LiveVideoStreamStatus,
-    private options: SpaceChatOptions,
+    private options: SpaceCaptionsOptions,
   ) {
-    this.logger = baseLogger.child({ label: `[SpaceChat@${spaceId}]` })
+    this.logger = baseLogger.child({ label: `[SpaceCaptions@${spaceId}]` })
 
     this.tmpChatFile = path.join(Downloader.getMediaDir(this.username), `${this.filename} Chat.jsonl`)
     this.outChatFile = path.join(Downloader.getMediaDir(this.username), `${this.filename} Chat.txt`)
@@ -55,7 +55,7 @@ export class SpaceChat {
     }
     try {
       await this.getAccessChatData()
-      this.initWebSocket()
+      this.initWs()
     } catch (error) {
       this.logger.error(error.message)
     }
@@ -73,12 +73,12 @@ export class SpaceChat {
     this.accessChatData = data
   }
 
-  private initWebSocket() {
+  private initWs() {
     this.ws = new WebSocket(this.WS_URL, {})
-    this.attachWsEvents()
+    this.setupWsEventHandlers()
   }
 
-  private attachWsEvents() {
+  private setupWsEventHandlers() {
     const { ws } = this
     ws.on('error', (error) => {
       this.logger.error(`[WS] Error: ${error.message}`)

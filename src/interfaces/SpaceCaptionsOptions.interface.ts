@@ -1,4 +1,4 @@
-export interface SpaceChatOptions {
+export interface SpaceCaptionsOptions {
   username: string
   filename: string
 }
