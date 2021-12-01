@@ -5,8 +5,10 @@ import readline from 'readline'
 import winston from 'winston'
 import { WebSocket } from 'ws'
 import { Downloader } from './Downloader'
-import { SpaceChatKind } from './enums/SpaceChatKind.enum'
+import { SpaceChatOptions } from './interfaces/SpaceChatOptions.interface'
 import { logger as baseLogger } from './logger'
+import { Periscope } from './namespaces/Periscope'
+import { Twitter } from './namespaces/Twitter'
 
 export class SpaceChat {
   private readonly WS_URL = 'wss://prod-chatman-ancillary-ap-northeast-1.pscp.tv/chatapi/v1/chatnow'
@@ -14,15 +16,15 @@ export class SpaceChat {
 
   private logger: winston.Logger
   private ws: WebSocket
-  private accessChatData: Record<string, any>
+  private accessChatData: Periscope.AccessChat
 
   private tmpChatFile: string
   private outChatFile: string
 
   constructor(
     public spaceId: string,
-    private liveStreamStatus: Record<string, any>,
-    private options: Record<string, any>,
+    private liveStreamStatus: Twitter.LiveVideoStreamStatus,
+    private options: SpaceChatOptions,
   ) {
     this.logger = baseLogger.child({ label: `[SpaceChat@${spaceId}]` })
 
@@ -39,11 +41,11 @@ export class SpaceChat {
   }
 
   private get username(): string {
-    return this.options?.username || ''
+    return this.options.username || ''
   }
 
   private get filename(): string {
-    return this.options?.filename
+    return this.options.filename
   }
 
   public async watch() {
@@ -66,7 +68,7 @@ export class SpaceChat {
   }
 
   private async getAccessChatData() {
-    const { data } = await axios.post<any>(this.CHAT_API_URL, { chat_token: this.chatToken })
+    const { data } = await axios.post(this.CHAT_API_URL, { chat_token: this.chatToken })
     this.logger.debug('accessChat data', data)
     this.accessChatData = data
   }
@@ -88,11 +90,11 @@ export class SpaceChat {
     ws.on('open', () => {
       this.logger.info('[WS] Open')
       const authPayload = JSON.stringify({
-        kind: SpaceChatKind.AUTH,
+        kind: Periscope.MessageKind.AUTH,
         payload: JSON.stringify({ access_token: this.accessChatData.access_token }),
       })
       const controlPayload = JSON.stringify({
-        kind: SpaceChatKind.CONTROL,
+        kind: Periscope.MessageKind.CONTROL,
         payload: JSON.stringify({
           kind: 1,
           body: JSON.stringify({ room: this.spaceId }),
@@ -143,7 +145,7 @@ export class SpaceChat {
 
   private processTmpChatLine(payload: string) {
     const obj = JSON.parse(payload)
-    if (obj.kind !== SpaceChatKind.CHAT) {
+    if (obj.kind !== Periscope.MessageKind.CHAT) {
       return
     }
     this.processChat(obj.payload)

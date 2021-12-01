@@ -30,7 +30,7 @@ export class Downloader {
 
   public static async downloadImage(url: string, filePath: string) {
     logger.debug('Download image', { url, filePath })
-    const response = await axios.get<any>(url, { responseType: 'stream' })
+    const response = await axios.get(url, { responseType: 'stream' })
     const writer = fs.createWriteStream(filePath)
     response.data.pipe(writer)
     await promisify(stream.finished)(writer)

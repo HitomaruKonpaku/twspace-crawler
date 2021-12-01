@@ -10,13 +10,14 @@ import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
 import { logger as baseLogger } from './logger'
+import { Twitter } from './namespaces/Twitter'
 import { SpaceChat } from './SpaceChat'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
-  private metadata: Record<string, any>
-  private liveStreamStatus: Record<string, any>
+  private metadata: Twitter.AudioSpaceMetadata
+  private liveStreamStatus: Twitter.LiveVideoStreamStatus
   private mediaKey: string
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
@@ -50,7 +51,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
       this.showNotification()
       this.mediaKey = this.metadata.media_key
-      this.liveStreamStatus = await Util.getLiveStreamStatus(this.mediaKey, headers)
+      this.liveStreamStatus = await Util.getLiveVideoStreamStatus(this.mediaKey, headers)
       this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
       if (args.force) {

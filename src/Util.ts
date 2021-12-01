@@ -3,6 +3,7 @@ import fs from 'fs'
 import { args } from './args'
 import { APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { logger as baseLogger } from './logger'
+import { Twitter } from './namespaces/Twitter'
 
 const logger = baseLogger.child({ label: '[Util]' })
 
@@ -42,8 +43,8 @@ export class Util {
 
   public static async getTwitterSpacesByCreatorIds(
     ids: string[],
-    headers?: Record<string, any>,
-  ): Promise<any> {
+    headers?: Record<string, string>,
+  ) {
     const { data } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
       headers,
       params: { user_ids: ids.join(',') },
@@ -60,8 +61,8 @@ export class Util {
   public static async getTwitterSpaceMetadata(
     spaceId: string,
     headers?: Record<string, string>,
-  ): Promise<Record<string, any>> {
-    const res = await axios.get<any>('https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById', {
+  ) {
+    const res = await axios.get('https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById', {
       headers,
       params: {
         variables: {
@@ -79,15 +80,15 @@ export class Util {
       },
     })
     const { metadata } = res.data.data.audioSpace
-    return metadata
+    return metadata as Twitter.AudioSpaceMetadata
   }
 
-  public static async getLiveStreamStatus(
+  public static async getLiveVideoStreamStatus(
     mediaKey: string,
     headers?: Record<string, string>,
-  ): Promise<Record<string, any>> {
+  ) {
     const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
-    const res = await axios.get<any>(url, { headers })
+    const res = await axios.get<Twitter.LiveVideoStreamStatus>(url, { headers })
     const { data } = res
     return data
   }
@@ -103,7 +104,7 @@ export class Util {
     mediaKey: string,
     headers?: Record<string, string>,
   ): Promise<string> {
-    const data = await this.getLiveStreamStatus(mediaKey, headers)
+    const data = await this.getLiveVideoStreamStatus(mediaKey, headers)
     const dynamicUrl: string = data.source.location
     return dynamicUrl
   }
