@@ -34,6 +34,7 @@ node ./dist/index.js --config ./config.json
 
 ```
   --debug         Show debug logs
+
   --config        CONFIG_PATH
                   Path to config file (Check sample config.json)
   --user          USER_LIST
@@ -43,7 +44,11 @@ node ./dist/index.js --config ./config.json
   --force         Force download Space when using with --id
   --url           PLAYLIST_URL
                   Download Space with playlist url
+
   --notification  Show native notification about live Space using node-notifier (Windows, iOS...)
+
+  --extract-cc    FILE_PATH
+                  Extract captions from jsonl file and exit
 ```
 
 ## Advance Usage
