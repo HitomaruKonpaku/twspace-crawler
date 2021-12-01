@@ -6,7 +6,7 @@ Script to crawl & download Twitter Spaces.
 
 ## Requirements
 
-- [Node](https://nodejs.org/)
+- [Node 14](https://nodejs.org/)
 - [ffmpeg](https://www.ffmpeg.org/)
 
 ## Installation
