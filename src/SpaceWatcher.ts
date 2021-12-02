@@ -5,19 +5,24 @@ import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
-import { args } from './args'
 import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
+import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 import { logger as baseLogger } from './logger'
+import { program } from './program'
+import { SpaceCaptions } from './SpaceCaptions'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
-  private metadata: Record<string, any>
+  private metadata: AudioSpaceMetadata
+  private liveStreamStatus: LiveVideoStreamStatus
   private mediaKey: string
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
+
+  private spaceCaptions: SpaceCaptions
   private isNotificationNotified = false
 
   constructor(
@@ -26,8 +31,6 @@ export class SpaceWatcher extends EventEmitter {
   ) {
     super()
     this.logger = baseLogger.child({ label: `[SpaceWatcher@${spaceId}]` })
-    this.spaceId = spaceId
-    this.username = username
   }
 
   public get spaceUrl(): string {
@@ -48,12 +51,14 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
       this.showNotification()
       this.mediaKey = this.metadata.media_key
-      this.dynamicPlaylistUrl = await Util.getDynamicUrl(this.mediaKey, headers)
+      this.liveStreamStatus = await Util.getLiveVideoStreamStatus(this.mediaKey, headers)
+      this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
-      if (args.force) {
+      if (program.getOptionValue('force')) {
         this.downloadMedia()
         return
       }
+      this.watchSpaceCaptions()
       this.checkDynamicPlaylist()
     } catch (error) {
       this.logger.error(error.message)
@@ -61,6 +66,20 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Retry watch in ${timeoutMs}ms`)
       setTimeout(() => this.watch(), timeoutMs)
     }
+  }
+
+  private getUsername(): string {
+    const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
+    return username
+  }
+
+  private getFilename(): string {
+    const date = new Date(this.metadata.started_at || this.metadata.created_at)
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, '')
+    const filename = `[${date}] ${this.getUsername()} (${this.spaceId})`
+    return filename
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
@@ -77,6 +96,7 @@ export class SpaceWatcher extends EventEmitter {
       const status = error.response?.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
+        this.unwatchSpaceCaptions()
         this.checkMasterPlaylist()
         return
       }
@@ -108,17 +128,17 @@ export class SpaceWatcher extends EventEmitter {
 
   private async downloadMedia() {
     try {
-      const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
-      const fileName = `[${new Date(this.metadata.created_at).toISOString().slice(0, 10).replace(/-/g, '')}] ${username} (${this.spaceId})`
+      const username = this.getUsername()
+      const filename = this.getFilename()
       const metadata = {
         title: this.metadata.title,
         author: this.metadata.creator_results?.result?.legacy?.name,
         artist: this.metadata.creator_results?.result?.legacy?.name,
         episode_id: this.spaceId,
       }
-      this.logger.info(`File name: ${fileName}`)
+      this.logger.info(`File name: ${filename}`)
       this.logger.info(`File metadata: ${JSON.stringify(metadata)}`)
-      await Downloader.downloadSpace(this.dynamicPlaylistUrl, fileName, username, metadata)
+      await Downloader.downloadSpace(this.dynamicPlaylistUrl, filename, username, metadata)
       this.emit('complete')
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
@@ -132,8 +152,23 @@ export class SpaceWatcher extends EventEmitter {
     setTimeout(() => this.downloadMedia(), timeoutMs)
   }
 
+  private watchSpaceCaptions() {
+    this.spaceCaptions = new SpaceCaptions(this.spaceId, this.liveStreamStatus, {
+      username: this.getUsername(),
+      filename: this.getFilename(),
+    })
+    this.spaceCaptions.watch()
+  }
+
+  private unwatchSpaceCaptions() {
+    if (!this.spaceCaptions) {
+      return
+    }
+    this.spaceCaptions.unwatch()
+  }
+
   private async showNotification() {
-    if (!args.notification || this.isNotificationNotified) {
+    if (!program.getOptionValue('notification') || this.isNotificationNotified) {
       return
     }
     try {
@@ -147,8 +182,8 @@ export class SpaceWatcher extends EventEmitter {
         // Since notifier can not use url, need to download it
         try {
           const imgPathname = profileImgUrl.replace('https://pbs.twimg.com/', '')
-          Downloader.createCacheDir(path.dirname(imgPathname))
-          const imgPath = path.join(Downloader.getCacheDir(), imgPathname)
+          Util.createCacheDir(path.dirname(imgPathname))
+          const imgPath = path.join(Util.getCacheDir(), imgPathname)
           if (!fs.existsSync(imgPath)) {
             await Downloader.downloadImage(profileImgUrl, imgPath)
           }

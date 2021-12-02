@@ -1,8 +1,10 @@
 import axios from 'axios'
 import fs from 'fs'
-import { args } from './args'
-import { APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
+import path from 'path'
+import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
+import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 import { logger as baseLogger } from './logger'
+import { program } from './program'
 
 const logger = baseLogger.child({ label: '[Util]' })
 
@@ -26,9 +28,10 @@ export class Util {
 
   public static getExternalConfig(): Record<string, any> {
     const config = {}
-    if (args.config) {
+    const configPath = program.getOptionValue('config')
+    if (configPath) {
       try {
-        Object.assign(config, JSON.parse(fs.readFileSync(args.config, 'utf-8')))
+        Object.assign(config, JSON.parse(fs.readFileSync(configPath, 'utf-8')))
       } catch (error) {
         logger.error(`Failed to read config: ${error.message}`)
       }
@@ -40,10 +43,26 @@ export class Util {
     return Number(Util.getExternalConfig().interval) || APP_USER_REFRESH_INTERVAL
   }
 
+  public static getCacheDir(subDir = ''): string {
+    return path.join(__dirname, APP_CACHE_DIR, subDir)
+  }
+
+  public static createCacheDir(subDir = ''): string {
+    return fs.mkdirSync(this.getCacheDir(subDir), { recursive: true })
+  }
+
+  public static getMediaDir(subDir = ''): string {
+    return path.join(__dirname, APP_MEDIA_DIR, subDir)
+  }
+
+  public static createMediaDir(subDir = ''): string {
+    return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
+  }
+
   public static async getTwitterSpacesByCreatorIds(
     ids: string[],
-    headers?: Record<string, any>,
-  ): Promise<any> {
+    headers?: Record<string, string>,
+  ) {
     const { data } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
       headers,
       params: { user_ids: ids.join(',') },
@@ -60,8 +79,8 @@ export class Util {
   public static async getTwitterSpaceMetadata(
     spaceId: string,
     headers?: Record<string, string>,
-  ): Promise<Record<string, any>> {
-    const res = await axios.get<any>('https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById', {
+  ) {
+    const res = await axios.get('https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById', {
       headers,
       params: {
         variables: {
@@ -79,7 +98,17 @@ export class Util {
       },
     })
     const { metadata } = res.data.data.audioSpace
-    return metadata
+    return metadata as AudioSpaceMetadata
+  }
+
+  public static async getLiveVideoStreamStatus(
+    mediaKey: string,
+    headers?: Record<string, string>,
+  ) {
+    const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
+    const res = await axios.get<LiveVideoStreamStatus>(url, { headers })
+    const { data } = res
+    return data
   }
 
   public static getMasterUrlFromDynamicUrl(dynamicUrl: string): string {
@@ -93,9 +122,7 @@ export class Util {
     mediaKey: string,
     headers?: Record<string, string>,
   ): Promise<string> {
-    const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
-    const res = await axios.get<any>(url, { headers })
-    const { data } = res
+    const data = await this.getLiveVideoStreamStatus(mediaKey, headers)
     const dynamicUrl: string = data.source.location
     return dynamicUrl
   }

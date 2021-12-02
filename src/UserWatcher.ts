@@ -10,7 +10,6 @@ export class UserWatcher extends EventEmitter {
   constructor(public username: string) {
     super()
     this.logger = baseLogger.child({ label: `[UserWatcher@${username}]` })
-    this.username = username
   }
 
   public async watch(): Promise<void> {
@@ -22,7 +21,7 @@ export class UserWatcher extends EventEmitter {
     const url = 'https://tweespaces-serverless-function.vercel.app/api/space-by-user'
     const body = { username: this.username }
     try {
-      const res = await axios.post<any>(url, body)
+      const res = await axios.post(url, body)
       const liveSpaces: any[] = (res.data.spaces.data || [])
         .filter((v) => v.state === 'live')
       this.logger.debug(`Space count: ${liveSpaces.length}`)
