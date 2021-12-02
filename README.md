@@ -40,7 +40,7 @@ node ./dist/index.js --config ./config.json
   --user <USER>             Watch & download live Spaces from users, separate by comma (,)
   --id <SPACE_ID>           Watch & download live Space with id
   --force                   Force download Space when using with --id
-  --url <PLAYLIST_ID>       Download Space using playlist url
+  --url <PLAYLIST_URL>       Download Space using playlist url
   --notification            Show notification about new live Space
 
   --extract-cc <FILE_PATH>  Extract captions from jsonl file and exit
