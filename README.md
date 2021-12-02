@@ -33,22 +33,17 @@ node ./dist/index.js --config ./config.json
 ## Arguments
 
 ```
-  --debug         Show debug logs
+  -h, --help                Display help
+  -d, --debug               Show debug logs
 
-  --config        CONFIG_PATH
-                  Path to config file (Check sample config.json)
-  --user          USER_LIST
-                  Watch & get Spaces from users to download, separate by comma (,)
-  --id            SPACE_ID
-                  Watch & wait for specific Space with id to complete & download
-  --force         Force download Space when using with --id
-  --url           PLAYLIST_URL
-                  Download Space with playlist url
+  --config <CONFIG_PATH>    Load config file (Check config.json)
+  --user <USER>             Watch & download live Spaces from users, separate by comma (,)
+  --id <SPACE_ID>           Watch & download live Space with id
+  --force                   Force download Space when using with --id
+  --url <PLAYLIST_ID>       Download Space using playlist url
+  --notification            Show notification about new live Space
 
-  --notification  Show native notification about live Space using node-notifier (Windows, iOS...)
-
-  --extract-cc    FILE_PATH
-                  Extract captions from jsonl file and exit
+  --extract-cc <FILE_PATH>  Extract captions from jsonl file and exit
 ```
 
 ## Advance Usage
