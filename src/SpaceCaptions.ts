@@ -101,8 +101,8 @@ export class SpaceCaptions {
           body: JSON.stringify({ room: this.spaceId }),
         }),
       })
-      this.logger.debug(authPayload)
-      this.logger.debug(controlPayload)
+      this.logger.debug('[WS] Auth payload', authPayload)
+      this.logger.debug('[WS] Control payload', controlPayload)
       ws.send(authPayload)
       ws.send(controlPayload)
     })
