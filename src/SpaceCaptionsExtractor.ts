@@ -26,6 +26,7 @@ export class SpaceCaptionsExtractor {
       this.logger.warn(`Temp chat file not found at ${this.inpFile}`)
       return
     }
+    fs.writeFileSync(this.outFile, '')
     this.logger.info(`Loading chat from ${this.inpFile}`)
     const fileStream = fs.createReadStream(this.inpFile)
     const rl = readline.createInterface({ input: fileStream })
