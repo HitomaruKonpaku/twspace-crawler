@@ -1,7 +1,7 @@
 import { program } from 'commander'
 
 program
-  .version('1.4.3')
+  .version('1.5.0')
   .description('Script to crawl & download Twitter Spaces.')
   .option('-d, --debug', 'Show debug logs')
   .option('--config <CONFIG_PATH>', 'Load config file (Check config.json)')
