@@ -3,10 +3,11 @@ import fs from 'fs'
 import path from 'path'
 import winston from 'winston'
 import { WebSocket } from 'ws'
+import { MessageKind } from './enums/Periscope.enum'
+import { AccessChat } from './interfaces/Periscope.interface'
 import { SpaceCaptionsOptions } from './interfaces/SpaceCaptionsOptions.interface'
+import { LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 import { logger as baseLogger } from './logger'
-import { Periscope } from './namespaces/Periscope'
-import { Twitter } from './namespaces/Twitter'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
 import { Util } from './Util'
 
@@ -16,14 +17,14 @@ export class SpaceCaptions {
 
   private logger: winston.Logger
   private ws: WebSocket
-  private accessChatData: Periscope.AccessChat
+  private accessChatData: AccessChat
 
   private tmpChatFile: string
   private outChatFile: string
 
   constructor(
     public spaceId: string,
-    private liveStreamStatus: Twitter.LiveVideoStreamStatus,
+    private liveStreamStatus: LiveVideoStreamStatus,
     private options: SpaceCaptionsOptions,
   ) {
     this.logger = baseLogger.child({ label: `[SpaceCaptions@${spaceId}]` })
@@ -90,11 +91,11 @@ export class SpaceCaptions {
     ws.on('open', () => {
       this.logger.info('[WS] Open')
       const authPayload = JSON.stringify({
-        kind: Periscope.MessageKind.AUTH,
+        kind: MessageKind.AUTH,
         payload: JSON.stringify({ access_token: this.accessChatData.access_token }),
       })
       const controlPayload = JSON.stringify({
-        kind: Periscope.MessageKind.CONTROL,
+        kind: MessageKind.CONTROL,
         payload: JSON.stringify({
           kind: 1,
           body: JSON.stringify({ room: this.spaceId }),

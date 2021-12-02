@@ -8,16 +8,16 @@ import winston from 'winston'
 import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
+import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 import { logger as baseLogger } from './logger'
-import { Twitter } from './namespaces/Twitter'
 import { program } from './program'
 import { SpaceCaptions } from './SpaceCaptions'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
-  private metadata: Twitter.AudioSpaceMetadata
-  private liveStreamStatus: Twitter.LiveVideoStreamStatus
+  private metadata: AudioSpaceMetadata
+  private liveStreamStatus: LiveVideoStreamStatus
   private mediaKey: string
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
