@@ -28,8 +28,8 @@ export class SpaceCaptions {
   ) {
     this.logger = baseLogger.child({ label: `[SpaceCaptions@${spaceId}]` })
 
-    this.tmpChatFile = path.join(Util.getMediaDir(this.username), `${this.filename} Chat.jsonl`)
-    this.outChatFile = path.join(Util.getMediaDir(this.username), `${this.filename} Chat.txt`)
+    this.tmpChatFile = path.join(Util.getMediaDir(this.username), `${this.filename} CC.jsonl`)
+    this.outChatFile = path.join(Util.getMediaDir(this.username), `${this.filename} CC.txt`)
 
     Util.createMediaDir(this.username)
     this.logger.info(`Tmp chat file ${this.tmpChatFile}`)

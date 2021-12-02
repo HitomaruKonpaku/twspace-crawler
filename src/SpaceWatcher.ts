@@ -5,12 +5,12 @@ import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
-import { args } from './args'
 import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
 import { logger as baseLogger } from './logger'
 import { Twitter } from './namespaces/Twitter'
+import { program } from './program'
 import { SpaceCaptions } from './SpaceCaptions'
 import { Util } from './Util'
 
@@ -54,7 +54,7 @@ export class SpaceWatcher extends EventEmitter {
       this.liveStreamStatus = await Util.getLiveVideoStreamStatus(this.mediaKey, headers)
       this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
-      if (args.force) {
+      if (program.getOptionValue('force')) {
         this.downloadMedia()
         return
       }
@@ -168,7 +168,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async showNotification() {
-    if (!args.notification || this.isNotificationNotified) {
+    if (!program.getOptionValue('notification') || this.isNotificationNotified) {
       return
     }
     try {

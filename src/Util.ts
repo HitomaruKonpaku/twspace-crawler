@@ -1,10 +1,10 @@
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path'
-import { args } from './args'
 import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { logger as baseLogger } from './logger'
 import { Twitter } from './namespaces/Twitter'
+import { program } from './program'
 
 const logger = baseLogger.child({ label: '[Util]' })
 
@@ -28,9 +28,10 @@ export class Util {
 
   public static getExternalConfig(): Record<string, any> {
     const config = {}
-    if (args.config) {
+    const configPath = program.getOptionValue('config')
+    if (configPath) {
       try {
-        Object.assign(config, JSON.parse(fs.readFileSync(args.config, 'utf-8')))
+        Object.assign(config, JSON.parse(fs.readFileSync(configPath, 'utf-8')))
       } catch (error) {
         logger.error(`Failed to read config: ${error.message}`)
       }
