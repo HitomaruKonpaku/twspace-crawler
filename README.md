@@ -22,6 +22,14 @@ npm run build
 
 ## Usage
 
+Download live Space with audio & captions
+
+```
+node ./dist/index.js --id 1yoJMWneoZwKQ
+```
+
+Wait for live Space and download
+
 ```
 node ./dist/index.js --user nakiriayame
 ```
@@ -46,10 +54,26 @@ node ./dist/index.js --config ./config.json
 ```
 ## Commands
 
+Use to manually process audio/captions
+
+### List
+
 ```
   cc download|d <SPACE_ID> <TOKEN>  Download Space captions
-  cc extract|e <FILE>               Extract Space captions
+                                    TOKEN is chat access_token
+  cc extract|e <FILE_PATH>          Extract Space captions
 ```
+
+### Sample
+
+```
+node ./dist/index.js cc d 1yoJMWneoZwKQ 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
+```
+
+```
+node ./dist/index.js cc e /download/sample_cc.jsonl
+```
+
 
 ## Advance Usage
 
