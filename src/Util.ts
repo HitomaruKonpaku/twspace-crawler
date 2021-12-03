@@ -1,10 +1,11 @@
 import axios from 'axios'
+import { program } from 'commander'
 import fs from 'fs'
 import path from 'path'
 import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
+import { AccessChat } from './interfaces/Periscope.interface'
 import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 import { logger as baseLogger } from './logger'
-import { program } from './program'
 
 const logger = baseLogger.child({ label: '[Util]' })
 
@@ -108,6 +109,14 @@ export class Util {
     const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
     const res = await axios.get<LiveVideoStreamStatus>(url, { headers })
     const { data } = res
+    return data
+  }
+
+  public static async getAccessChatData(chatToken: string) {
+    const { data } = await axios.post<AccessChat>(
+      'https://proxsee.pscp.tv/api/v2/accessChatPublic',
+      { chat_token: chatToken },
+    )
     return data
   }
 

@@ -11,7 +11,7 @@ import { logger as baseLogger } from './logger'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
 import { Util } from './Util'
 
-export class SpaceCaptions {
+export class SpaceCaptionsWatcher {
   private readonly WS_URL = 'wss://prod-chatman-ancillary-ap-northeast-1.pscp.tv/chatapi/v1/chatnow'
   private readonly CHAT_API_URL = 'https://proxsee.pscp.tv/api/v2/accessChatPublic'
 
@@ -86,7 +86,7 @@ export class SpaceCaptions {
     })
     ws.on('close', (code, reason) => {
       this.logger.info(`[WS] Close with code: ${code}, reason: ${reason.toString('utf-8') || 'not found'}`)
-      new SpaceCaptionsExtractor().extract(this.tmpChatFile, this.outChatFile)
+      new SpaceCaptionsExtractor(this.tmpChatFile, this.outChatFile).extract()
     })
     ws.on('open', () => {
       this.logger.info('[WS] Open')
