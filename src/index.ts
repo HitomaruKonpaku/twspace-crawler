@@ -33,7 +33,7 @@ program.action(async (args) => {
 
   logger.debug('Args', args)
 
-  const { url } = args
+  const { url, id, user } = args
   if (url) {
     logger.info('Starting in url mode', { url })
     await Downloader.downloadSpace(url, Util.getTimeString())
@@ -41,7 +41,6 @@ program.action(async (args) => {
   }
 
   const main = new Main()
-  const { id } = args
   if (id) {
     logger.info('Starting in space id mode', { id })
     main.addSpaceWatcher(id)
@@ -49,15 +48,15 @@ program.action(async (args) => {
   }
 
   const externalConfig = Util.getExternalConfig()
-  const users = (args.user || '').split(',')
+  const usernames = (user || '').split(',')
     .concat((externalConfig.users || []).map((v) => v.username))
-    .filter((v) => v)
-  if (users.length) {
-    logger.info('Starting in user mode', { users })
+    .filter((v) => v) as string[]
+  if (usernames.length) {
+    logger.info('Starting in user mode', { users: usernames })
     if (!Util.getTwitterAuthorization()) {
-      users.forEach((user) => main.addUserWatcher(user))
+      usernames.forEach((username) => main.addUserWatcher(username))
     } else {
-      main.runUserListWatcher(users)
+      main.runUserListWatcher(usernames)
     }
   }
 })
