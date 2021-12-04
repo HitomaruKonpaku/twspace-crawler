@@ -1,7 +1,6 @@
 import winston, { format } from 'winston'
 import DailyRotateFile from 'winston-daily-rotate-file'
 import { LOGGER_DATE_PATTERN, LOGGER_DIR } from './constants/logger.constant'
-import { program } from './program'
 
 function getPrintFormat() {
   return format.printf((info) => (Object.keys(info.metadata).length
@@ -25,7 +24,7 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console({
-      level: program.getOptionValue('debug') ? 'silly' : 'verbose',
+      level: 'verbose',
       format: format.combine(
         format.colorize(),
         getPrintFormat(),

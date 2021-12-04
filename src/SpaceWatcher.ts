@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { program } from 'commander'
 import EventEmitter from 'events'
 import fs from 'fs'
 import nodeNotifier from 'node-notifier'
@@ -8,21 +9,22 @@ import winston from 'winston'
 import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
+import { AccessChat } from './interfaces/Periscope.interface'
 import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 import { logger as baseLogger } from './logger'
-import { program } from './program'
-import { SpaceCaptions } from './SpaceCaptions'
+import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
+import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
   private metadata: AudioSpaceMetadata
   private liveStreamStatus: LiveVideoStreamStatus
+  private accessChatData: AccessChat
   private mediaKey: string
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
 
-  private spaceCaptions: SpaceCaptions
   private isNotificationNotified = false
 
   constructor(
@@ -52,13 +54,16 @@ export class SpaceWatcher extends EventEmitter {
       this.showNotification()
       this.mediaKey = this.metadata.media_key
       this.liveStreamStatus = await Util.getLiveVideoStreamStatus(this.mediaKey, headers)
+      this.logger.debug('liveStreamStatus', this.liveStreamStatus)
+      this.accessChatData = await Util.getAccessChatData(this.liveStreamStatus.chatToken)
+      this.logger.debug('accessChat data', this.accessChatData)
+      this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
       this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
       if (program.getOptionValue('force')) {
         this.downloadMedia()
         return
       }
-      this.watchSpaceCaptions()
       this.checkDynamicPlaylist()
     } catch (error) {
       this.logger.error(error.message)
@@ -96,7 +101,6 @@ export class SpaceWatcher extends EventEmitter {
       const status = error.response?.status
       if (status === 404) {
         this.logger.info(`Status: ${status}`)
-        this.unwatchSpaceCaptions()
         this.checkMasterPlaylist()
         return
       }
@@ -115,6 +119,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.debug(`Master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
       if (!this.lastChunkIndex || masterChunkSize >= this.lastChunkIndex) {
         this.downloadMedia()
+        this.downloadCaptions()
         return
       }
       this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
@@ -152,19 +157,19 @@ export class SpaceWatcher extends EventEmitter {
     setTimeout(() => this.downloadMedia(), timeoutMs)
   }
 
-  private watchSpaceCaptions() {
-    this.spaceCaptions = new SpaceCaptions(this.spaceId, this.liveStreamStatus, {
-      username: this.getUsername(),
-      filename: this.getFilename(),
-    })
-    this.spaceCaptions.watch()
-  }
-
-  private unwatchSpaceCaptions() {
-    if (!this.spaceCaptions) {
-      return
+  private async downloadCaptions() {
+    try {
+      const username = this.getUsername()
+      const filename = this.getFilename()
+      const tmpFile = path.join(Util.getMediaDir(username), `${filename} CC.jsonl`)
+      const outFile = path.join(Util.getMediaDir(username), `${filename} CC.txt`)
+      Util.createMediaDir(this.username)
+      // eslint-disable-next-line max-len
+      await new SpaceCaptionsDownloader(this.spaceId, this.accessChatData.access_token, tmpFile).download()
+      await new SpaceCaptionsExtractor(tmpFile, outFile).extract()
+    } catch (error) {
+      this.logger.error(error.message)
     }
-    this.spaceCaptions.unwatch()
   }
 
   private async showNotification() {

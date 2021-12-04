@@ -1,3 +1,5 @@
+import { MessageKind } from '../enums/Periscope.enum'
+
 /* eslint-disable camelcase */
 export interface AccessChat {
   subscriber: string
@@ -19,4 +21,15 @@ export interface AccessChat {
     pb: number
     cm: number
   }
+}
+
+export interface ChatMessage {
+  kind: MessageKind | number
+  payload: string
+  signature: string
+}
+
+export interface ChatHistory {
+  messages: ChatMessage[]
+  cursor: string
 }
