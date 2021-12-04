@@ -3,7 +3,7 @@ import { SpaceCaptionsDownloader } from '../SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from '../SpaceCaptionsExtractor'
 
 const command = new Command('cc')
-  .description('Space captions')
+  .description('Process captions')
 
 command
   .command('download <SPACE_ID> <TOKEN>')
