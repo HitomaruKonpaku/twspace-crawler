@@ -64,7 +64,7 @@ Use to manually process audio/captions
   cc extract|e <FILE_PATH>          Extract Space captions
 ```
 
-### Sample
+### Example
 
 ```
 node ./dist/index.js cc d 1yoJMWneoZwKQ 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
