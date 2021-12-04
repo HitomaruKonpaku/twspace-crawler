@@ -2,6 +2,7 @@ import fs from 'fs'
 import readline from 'readline'
 import winston from 'winston'
 import { MessageKind } from './enums/Periscope.enum'
+import { ChatMessage } from './interfaces/Periscope.interface'
 import { logger as baseLogger } from './logger'
 
 export class SpaceCaptionsExtractor {
@@ -60,7 +61,7 @@ export class SpaceCaptionsExtractor {
   }
 
   private processLine(payload: string) {
-    const obj = JSON.parse(payload)
+    const obj = JSON.parse(payload) as ChatMessage
     if (obj.kind !== MessageKind.CHAT) {
       return
     }

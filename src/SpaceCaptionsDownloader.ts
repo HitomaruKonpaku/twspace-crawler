@@ -1,6 +1,7 @@
 import axios from 'axios'
 import fs from 'fs'
 import winston from 'winston'
+import { ChatHistory } from './interfaces/Periscope.interface'
 import { logger as baseLogger } from './logger'
 
 export class SpaceCaptionsDownloader {
@@ -29,10 +30,9 @@ export class SpaceCaptionsDownloader {
         this.logger.info(`Downloading part ${this.count}`)
         // eslint-disable-next-line no-await-in-loop
         const history = await this.getChatHistory()
-        const messages = Array.from(history.messages)
+        const { messages } = history
         messages.forEach((message) => {
-          const payload = `${JSON.stringify(message)}\n`
-          fs.appendFileSync(this.file, payload)
+          fs.appendFileSync(this.file, `${JSON.stringify(message)}\n`)
         })
         this.cursor = history.cursor
       } while (this.cursor)
@@ -42,7 +42,7 @@ export class SpaceCaptionsDownloader {
   }
 
   private async getChatHistory() {
-    const { data } = await axios.post(this.API_URL, {
+    const { data } = await axios.post<ChatHistory>(this.API_URL, {
       room: this.spaceId,
       access_token: this.accessToken,
       cursor: this.cursor,
