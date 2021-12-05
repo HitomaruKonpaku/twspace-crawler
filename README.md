@@ -59,16 +59,20 @@ Use to manually process audio/captions
 
 ### List
 
+- cc
+
 ```
-  cc download|d <SPACE_ID> <TOKEN>  Download Space captions
-                                    TOKEN is chat access_token
-  cc extract|e <FILE_PATH>          Extract Space captions
+  download|d <SPACE_ID> <ENDPOINT> <TOKEN>  Download Space captions, with
+                                            - ENDPOINT: Chat endpoint
+                                            - TOKEN: Chat access token
+
+  extract|e <FILE>                          Extract Space captions
 ```
 
 ### Example
 
 ```
-node ./dist/index.js cc d 1yoJMWneoZwKQ 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
+node ./dist/index.js cc d 1yoJMWneoZwKQ https://prod-chatman-ancillary-ap-northeast-1.pscp.tv 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
 ```
 
 ```
