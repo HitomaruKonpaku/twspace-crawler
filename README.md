@@ -19,7 +19,6 @@ npm install
 npm run build
 ```
 
-
 ## Usage
 
 Download live Space with audio & captions
@@ -28,7 +27,7 @@ Download live Space with audio & captions
 node ./dist/index.js --id 1yoJMWneoZwKQ
 ```
 
-Wait for live Space and download
+Monitor user(s) indefinitely, wait for live Space and download
 
 ```
 node ./dist/index.js --user nakiriayame
@@ -45,13 +44,15 @@ node ./dist/index.js --config ./config.json
   -d, --debug               Show debug logs
 
   --config <CONFIG_PATH>    Load config file (Check config.json)
-  --user <USER>             Watch & download live Spaces from users, separate by comma (,)
-  --id <SPACE_ID>           Watch & download live Space with id
+  --user <USER>             Monitor & download live Spaces from users indefinitely,
+                            separate by comma (,)
+  --id <SPACE_ID>           Monitor & download live Space with id
   --force                   Force download Space when using with --id
   --url <PLAYLIST_URL>      Download Space using playlist url
 
   --notification            Show notification about new live Space
 ```
+
 ## Commands
 
 Use to manually process audio/captions
@@ -74,13 +75,13 @@ node ./dist/index.js cc d 1yoJMWneoZwKQ 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
 node ./dist/index.js cc e /download/sample_cc.jsonl
 ```
 
-
 ## Advance Usage
 
-- To watch multiple users, it is better to use [Twitter API](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
+- To monitor multiple users, it is better to use [Twitter API](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
     1. Clone `.env.example` and rename to `.env`
     2. Get `Bearer Token` ([Docs](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api))
     3. Set `TWITTER_AUTHORIZATION` value to `Bearer Token` value
+
        ```
        TWITTER_AUTHORIZATION = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs..."
        ```
