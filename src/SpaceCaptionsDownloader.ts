@@ -10,7 +10,7 @@ export class SpaceCaptionsDownloader {
   private logger: winston.Logger
 
   private apiUrl: string
-  private count = 0
+  private chunkCount = 1
   private cursor = ''
 
   constructor(
@@ -29,14 +29,14 @@ export class SpaceCaptionsDownloader {
       this.logger.info(`Downloading captions to ${this.file}`)
       fs.writeFileSync(this.file, '')
       do {
-        this.count += 1
-        this.logger.info(`Downloading part ${this.count}`)
+        this.logger.info(`Downloading chunk ${this.chunkCount}`)
         // eslint-disable-next-line no-await-in-loop
         const history = await this.getChatHistory()
         const { messages } = history
         messages.forEach((message) => {
           fs.appendFileSync(this.file, `${JSON.stringify(message)}\n`)
         })
+        this.chunkCount += 1
         this.cursor = history.cursor
       } while (this.cursor)
     } catch (error) {
