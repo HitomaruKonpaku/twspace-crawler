@@ -6,11 +6,11 @@ const command = new Command('cc')
   .description('Process captions')
 
 command
-  .command('download <SPACE_ID> <TOKEN>')
+  .command('download <SPACE_ID> <ENDPOINT> <TOKEN>')
   .alias('d')
   .description('Download Space captions')
-  .action((spaceId, token) => {
-    new SpaceCaptionsDownloader(spaceId, token).download()
+  .action((spaceId, endpoint, token) => {
+    new SpaceCaptionsDownloader(spaceId, endpoint, token).download()
   })
 
 command

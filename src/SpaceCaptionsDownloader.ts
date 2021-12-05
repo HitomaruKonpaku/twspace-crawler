@@ -5,19 +5,22 @@ import { ChatHistory } from './interfaces/Periscope.interface'
 import { logger as baseLogger } from './logger'
 
 export class SpaceCaptionsDownloader {
-  private readonly API_URL = 'https://prod-chatman-ancillary-ap-northeast-1.pscp.tv/chatapi/v1/history'
+  private readonly API_PATH = 'chatapi/v1/history'
 
   private logger: winston.Logger
 
+  private apiUrl: string
   private count = 0
   private cursor = ''
 
   constructor(
     private spaceId: string,
+    private endpoint: string,
     private accessToken: string,
     private file?: string,
   ) {
     this.logger = baseLogger.child({ label: `[SpaceCaptionsDownloader@${spaceId}]` })
+    this.apiUrl = new URL(this.API_PATH, endpoint).href
     this.file = this.file || `${new Date().toISOString().replace(/[^\d]/g, '').substring(2, 14)} (${spaceId}) CC.jsonl`
   }
 
@@ -42,7 +45,7 @@ export class SpaceCaptionsDownloader {
   }
 
   private async getChatHistory() {
-    const { data } = await axios.post<ChatHistory>(this.API_URL, {
+    const { data } = await axios.post<ChatHistory>(this.apiUrl, {
       room: this.spaceId,
       access_token: this.accessToken,
       cursor: this.cursor,

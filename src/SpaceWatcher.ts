@@ -57,6 +57,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
       this.accessChatData = await Util.getAccessChatData(this.liveStreamStatus.chatToken)
       this.logger.debug('accessChat data', this.accessChatData)
+      this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
       this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
       this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
       this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
@@ -165,7 +166,7 @@ export class SpaceWatcher extends EventEmitter {
       const outFile = path.join(Util.getMediaDir(username), `${filename} CC.txt`)
       Util.createMediaDir(this.username)
       // eslint-disable-next-line max-len
-      await new SpaceCaptionsDownloader(this.spaceId, this.accessChatData.access_token, tmpFile).download()
+      await new SpaceCaptionsDownloader(this.spaceId, this.accessChatData.endpoint, this.accessChatData.access_token, tmpFile).download()
       await new SpaceCaptionsExtractor(tmpFile, outFile).extract()
     } catch (error) {
       this.logger.error(error.message)
