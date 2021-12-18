@@ -34,6 +34,10 @@ node ./dist/index.js --user nakiriayame
 ```
 
 ```
+node ./dist/index.js --user nakiriayame,sakamatachloe
+```
+
+```
 node ./dist/index.js --config ./config.json
 ```
 
@@ -81,10 +85,12 @@ node ./dist/index.js cc e /download/sample_cc.jsonl
 
 ## Advance Usage
 
-- To monitor multiple users, it is better to use [Twitter API](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
-    1. Clone `.env.example` and rename to `.env`
-    2. Get `Bearer Token` ([Docs](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api))
-    3. Set `TWITTER_AUTHORIZATION` value to `Bearer Token` value
+- To monitor multiple users, it is better to use [Twitter API v2](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
+    1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
+    2. Navigate to [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) to create new app (or use existing app)
+    3. Clone `.env.example` and rename to `.env`
+    4. Get app `Bearer Token` in `Keys and tokens` tab
+    5. Set `TWITTER_AUTHORIZATION` value to `Bearer Token` value
 
        ```
        TWITTER_AUTHORIZATION = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs..."
