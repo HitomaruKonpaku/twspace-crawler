@@ -88,9 +88,10 @@ node ./dist/index.js cc e /download/sample_cc.jsonl
 - To monitor multiple users, it is better to use [Twitter API v2](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
     1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
     2. Navigate to [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) to create new app (or use existing app)
-    3. Clone `.env.example` and rename to `.env`
-    4. Get app `Bearer Token` in `Keys and tokens` tab
-    5. Set `TWITTER_AUTHORIZATION` value to `Bearer Token` value
+    3. Clone `config.example.json` and rename to `config.json` or run app with `--config`
+    4. Clone `.env.example` and rename to `.env`
+    5. Get app `Bearer Token` in `Keys and tokens` tab
+    6. Set `TWITTER_AUTHORIZATION` value to `Bearer Token` value
 
        ```
        TWITTER_AUTHORIZATION = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs..."
