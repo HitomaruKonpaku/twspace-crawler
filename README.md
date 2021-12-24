@@ -83,7 +83,7 @@ node ./dist/index.js cc d 1yoJMWneoZwKQ https://prod-chatman-ancillary-ap-northe
 node ./dist/index.js cc e /download/sample_cc.jsonl
 ```
 
-## Advance Usage
+## Advanced Usage
 
 - To monitor multiple users, it is better to use [Twitter API v2](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
     1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
