@@ -6,7 +6,7 @@ import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
-import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
+import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
 import { AccessChat } from './interfaces/Periscope.interface'
@@ -26,6 +26,7 @@ export class SpaceWatcher extends EventEmitter {
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
 
+  private chunkVerifyCount = 0
   private isNotificationNotified = false
 
   constructor(
@@ -118,12 +119,16 @@ export class SpaceWatcher extends EventEmitter {
       // eslint-disable-next-line max-len
       const masterChunkSize = Util.getChunks(await Downloader.getRawTranscodePlaylist(this.dynamicPlaylistUrl)).length
       this.logger.debug(`Master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
-      if (!this.lastChunkIndex || masterChunkSize >= this.lastChunkIndex) {
+      const canDownload = !this.lastChunkIndex
+        || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
+        || masterChunkSize >= this.lastChunkIndex
+      if (canDownload) {
         this.downloadMedia()
         this.downloadCaptions()
         return
       }
       this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
+      this.chunkVerifyCount += 1
     } catch (error) {
       this.logger.error(error.message)
     }
