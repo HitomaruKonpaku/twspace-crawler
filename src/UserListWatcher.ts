@@ -68,7 +68,7 @@ export class UserListWatcher extends EventEmitter {
   private async getSpaces(ids: string[]) {
     try {
       this.logger.silly(`User ids: ${ids.join(',')}`)
-      const { data: { data: spaces } } = await TwitterApi.getSpacesByCreatorIds(
+      const { data: spaces } = await TwitterApi.getSpacesByCreatorIds(
         ids,
         { authorization: Util.getTwitterAuthorization() },
       )
