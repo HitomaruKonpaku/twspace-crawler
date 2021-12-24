@@ -4,13 +4,13 @@ import { SpaceWatcher } from './SpaceWatcher'
 import { UserListWatcher } from './UserListWatcher'
 import { UserWatcher } from './UserWatcher'
 
-export class Main {
+class Manager {
   private logger: winston.Logger
   private userWatchers: Record<string, UserWatcher> = {}
   private spaceWatchers: Record<string, SpaceWatcher> = {}
 
   constructor() {
-    this.logger = baseLogger.child({ label: '[Main]' })
+    this.logger = baseLogger.child({ label: '[Manager]' })
   }
 
   public addSpaceWatcher(spaceId: string, username = '') {
@@ -52,3 +52,5 @@ export class Main {
     })
   }
 }
+
+export const manager = new Manager()
