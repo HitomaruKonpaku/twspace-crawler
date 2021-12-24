@@ -4,8 +4,12 @@ import { AudioSpaceMetadata, LiveVideoStreamStatus, User } from './interfaces/Tw
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {
     const { data } = await axios.get<string>('https://twitter.com/')
-    const token = /(?<=gt=)\d{19}/.exec(data)[0]
-    return token
+    try {
+      const token = /(?<=gt=)\d{19}/.exec(data)[0]
+      return token
+    } catch (error) {
+      throw new Error('Guest token not found')
+    }
   }
 
   public static async getUsersLookup(usernames: string[], headers: Record<string, string>) {

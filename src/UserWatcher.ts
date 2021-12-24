@@ -37,6 +37,7 @@ export class UserWatcher extends EventEmitter {
       await this.getGuestToken()
     } catch (error) {
       this.logger.error(`getSpaces: ${error.message}`)
+      this.logger.info(`Retry in ${TWITTER_GUEST_TOKEN_RETRY_MS}ms`)
       setTimeout(() => this.getSpaces(), TWITTER_GUEST_TOKEN_RETRY_MS)
       return
     }
