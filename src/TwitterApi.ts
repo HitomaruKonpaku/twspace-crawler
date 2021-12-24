@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {
@@ -71,6 +72,18 @@ export class TwitterApi {
         },
       },
     })
+    return data
+  }
+
+  public static async getSpaceMetadata(spaceId: string, headers: Record<string, string>) {
+    const data = await this.getAudioSpaceById(spaceId, headers)
+    const { metadata } = data.data.audioSpace
+    return metadata as AudioSpaceMetadata
+  }
+
+  public static async getLiveVideoStreamStatus(mediaKey: string, headers: Record<string, string>) {
+    const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
+    const { data } = await axios.get<LiveVideoStreamStatus>(url, { headers })
     return data
   }
 }

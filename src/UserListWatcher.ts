@@ -3,6 +3,7 @@ import EventEmitter from 'events'
 import winston from 'winston'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { logger as baseLogger } from './logger'
+import { TwitterApi } from './TwitterApi'
 import { Util } from './Util'
 
 export class UserListWatcher extends EventEmitter {
@@ -67,12 +68,11 @@ export class UserListWatcher extends EventEmitter {
   private async getSpaces(ids: string[]) {
     try {
       this.logger.silly(`User ids: ${ids.join(',')}`)
-      const { data: { data: spaces } } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
-        headers: { authorization: Util.getTwitterAuthorization() },
-        params: { user_ids: ids.join(',') },
-      })
-      const liveSpaces = (spaces || [])
-        .filter((v) => v.state === 'live')
+      const { data: { data: spaces } } = await TwitterApi.getSpacesByCreatorIds(
+        ids,
+        { authorization: Util.getTwitterAuthorization() },
+      )
+      const liveSpaces = (spaces || []).filter((v) => v.state === 'live')
       this.logger.debug(`Space count: ${liveSpaces.length}`)
       if (liveSpaces.length) {
         this.logger.debug(`Space ids: ${liveSpaces.map((v) => v.id).join(', ')}`)
@@ -86,7 +86,6 @@ export class UserListWatcher extends EventEmitter {
         },
       })
     }
-
     setTimeout(() => this.getSpaces(ids), Util.getUserRefreshInterval())
   }
 }

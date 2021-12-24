@@ -14,6 +14,7 @@ import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.
 import { logger as baseLogger } from './logger'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
+import { TwitterApi } from './TwitterApi'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
@@ -43,17 +44,16 @@ export class SpaceWatcher extends EventEmitter {
     this.logger.info('Watching...')
     this.logger.info(`Space url: ${this.spaceUrl}`)
     try {
-      const guestToken = await Util.getTwitterGuestToken()
-      this.logger.debug(`Guest token: ${guestToken}`)
+      const guestToken = await TwitterApi.getGuestToken()
       const headers = {
         authorization: TWITTER_AUTHORIZATION,
         'x-guest-token': guestToken,
       }
-      this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, headers)
+      this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
       this.showNotification()
       this.mediaKey = this.metadata.media_key
-      this.liveStreamStatus = await Util.getLiveVideoStreamStatus(this.mediaKey, headers)
+      this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.mediaKey, headers)
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
       this.accessChatData = await Util.getAccessChatData(this.liveStreamStatus.chatToken)
       this.logger.debug('accessChat data', this.accessChatData)
