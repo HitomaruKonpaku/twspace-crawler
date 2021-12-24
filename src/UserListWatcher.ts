@@ -1,8 +1,9 @@
-import axios from 'axios'
 import EventEmitter from 'events'
 import winston from 'winston'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
+import { SpaceState } from './enums/Twitter.enum'
 import { logger as baseLogger } from './logger'
+import { TwitterApi } from './TwitterApi'
 import { Util } from './Util'
 
 export class UserListWatcher extends EventEmitter {
@@ -10,7 +11,7 @@ export class UserListWatcher extends EventEmitter {
 
   private logger: winston.Logger
 
-  private users: any[] = []
+  private users: { id: string, username: string }[] = []
   private usernameChunks: string[][] = []
 
   constructor(private usernames: string[]) {
@@ -34,8 +35,7 @@ export class UserListWatcher extends EventEmitter {
           .filter((v) => v))
       idChunks.forEach((idChunk) => this.getSpaces(idChunk))
     } catch (error) {
-      this.logger.error('Failed to start watcher')
-      this.logger.error(error.message, {
+      this.logger.error(`watch: ${error.message}`, {
         response: {
           data: error.response?.data,
           headers: error.response?.headers,
@@ -48,13 +48,15 @@ export class UserListWatcher extends EventEmitter {
   }
 
   private async initUsers() {
-    const responses = await Promise.all(this.usernameChunks.map((v) => axios.get<any[]>('https://api.twitter.com/1.1/users/lookup.json', {
-      headers: { authorization: TWITTER_AUTHORIZATION },
-      params: { screen_name: v.join(',') },
-    })))
+    const responses = await Promise.all(
+      this.usernameChunks.map((v) => TwitterApi.getUsersLookup(
+        v,
+        { authorization: TWITTER_AUTHORIZATION },
+      )),
+    )
     this.users = []
-    responses.forEach((res) => {
-      res.data.forEach((user) => {
+    responses.forEach((users) => {
+      users.forEach((user) => {
         this.users.push({
           id: user.id_str,
           username: user.screen_name,
@@ -65,28 +67,26 @@ export class UserListWatcher extends EventEmitter {
   }
 
   private async getSpaces(ids: string[]) {
+    this.logger.debug('>>> getSpaces', { ids })
     try {
-      this.logger.silly(`User ids: ${ids.join(',')}`)
-      const { data: { data: spaces } } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
-        headers: { authorization: Util.getTwitterAuthorization() },
-        params: { user_ids: ids.join(',') },
-      })
-      const liveSpaces = (spaces || [])
-        .filter((v) => v.state === 'live')
-      this.logger.debug(`Space count: ${liveSpaces.length}`)
+      const { data: spaces } = await TwitterApi.getSpacesByCreatorIds(
+        ids,
+        { authorization: Util.getTwitterAuthorization() },
+      )
+      this.logger.debug('<<< getSpaces', { spaces })
+      const liveSpaces = (spaces || []).filter((v) => v.state === SpaceState.LIVE)
       if (liveSpaces.length) {
-        this.logger.debug(`Space ids: ${liveSpaces.map((v) => v.id).join(', ')}`)
+        this.logger.debug(`Live space ids: ${liveSpaces.map((v) => v.id).join(', ')}`)
         liveSpaces.forEach((space) => this.emit('data', space.id))
       }
     } catch (error) {
-      this.logger.error(error.message, {
+      this.logger.error(`getSpaces: ${error.message}`, {
         response: {
           data: error.response?.data,
           headers: error.response?.headers,
         },
       })
     }
-
     setTimeout(() => this.getSpaces(ids), Util.getUserRefreshInterval())
   }
 }

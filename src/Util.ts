@@ -4,8 +4,8 @@ import fs from 'fs'
 import path from 'path'
 import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { AccessChat } from './interfaces/Periscope.interface'
-import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
 import { logger as baseLogger } from './logger'
+import { TwitterApi } from './TwitterApi'
 
 const logger = baseLogger.child({ label: '[Util]' })
 
@@ -60,58 +60,6 @@ export class Util {
     return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
   }
 
-  public static async getTwitterSpacesByCreatorIds(
-    ids: string[],
-    headers?: Record<string, string>,
-  ) {
-    const { data } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
-      headers,
-      params: { user_ids: ids.join(',') },
-    })
-    return data
-  }
-
-  public static async getTwitterGuestToken(): Promise<string> {
-    const { data } = await axios.get<string>('https://twitter.com/')
-    const token = /(?<=gt=)\d{19}/.exec(data)[0]
-    return token
-  }
-
-  public static async getTwitterSpaceMetadata(
-    spaceId: string,
-    headers?: Record<string, string>,
-  ) {
-    const res = await axios.get('https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById', {
-      headers,
-      params: {
-        variables: {
-          id: spaceId,
-          isMetatagsQuery: false,
-          withSuperFollowsUserFields: false,
-          withUserResults: false,
-          withBirdwatchPivots: false,
-          withReactionsMetadata: false,
-          withReactionsPerspective: false,
-          withSuperFollowsTweetFields: false,
-          withReplays: false,
-          withScheduledSpaces: false,
-        },
-      },
-    })
-    const { metadata } = res.data.data.audioSpace
-    return metadata as AudioSpaceMetadata
-  }
-
-  public static async getLiveVideoStreamStatus(
-    mediaKey: string,
-    headers?: Record<string, string>,
-  ) {
-    const url = `https://twitter.com/i/api/1.1/live_video_stream/status/${mediaKey}`
-    const res = await axios.get<LiveVideoStreamStatus>(url, { headers })
-    const { data } = res
-    return data
-  }
-
   public static async getAccessChatData(chatToken: string) {
     const { data } = await axios.post<AccessChat>(
       'https://proxsee.pscp.tv/api/v2/accessChatPublic',
@@ -131,7 +79,7 @@ export class Util {
     mediaKey: string,
     headers?: Record<string, string>,
   ): Promise<string> {
-    const data = await this.getLiveVideoStreamStatus(mediaKey, headers)
+    const data = await TwitterApi.getLiveVideoStreamStatus(mediaKey, headers)
     const dynamicUrl: string = data.source.location
     return dynamicUrl
   }

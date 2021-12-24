@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
 import { Downloader } from './Downloader'
 import { logger } from './logger'
-import { Main } from './Main'
+import { manager } from './manager'
 import { Util } from './Util'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -40,10 +40,9 @@ program.action(async (args) => {
     return
   }
 
-  const main = new Main()
   if (id) {
     logger.info('Starting in space id mode', { id })
-    main.addSpaceWatcher(id)
+    manager.addSpaceWatcher(id)
     return
   }
 
@@ -54,9 +53,9 @@ program.action(async (args) => {
   if (usernames.length) {
     logger.info('Starting in user mode', { users: usernames })
     if (!Util.getTwitterAuthorization()) {
-      usernames.forEach((username) => main.addUserWatcher(username))
+      usernames.forEach((username) => manager.addUserWatcher(username))
     } else {
-      main.runUserListWatcher(usernames)
+      manager.runUserListWatcher(usernames)
     }
   }
 })

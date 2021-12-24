@@ -6,7 +6,7 @@ import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
-import { APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
+import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
 import { AccessChat } from './interfaces/Periscope.interface'
@@ -14,6 +14,7 @@ import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.
 import { logger as baseLogger } from './logger'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
+import { TwitterApi } from './TwitterApi'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
@@ -25,6 +26,7 @@ export class SpaceWatcher extends EventEmitter {
   private dynamicPlaylistUrl: string
   private lastChunkIndex: number
 
+  private chunkVerifyCount = 0
   private isNotificationNotified = false
 
   constructor(
@@ -43,17 +45,16 @@ export class SpaceWatcher extends EventEmitter {
     this.logger.info('Watching...')
     this.logger.info(`Space url: ${this.spaceUrl}`)
     try {
-      const guestToken = await Util.getTwitterGuestToken()
-      this.logger.debug(`Guest token: ${guestToken}`)
+      const guestToken = await TwitterApi.getGuestToken()
       const headers = {
         authorization: TWITTER_AUTHORIZATION,
         'x-guest-token': guestToken,
       }
-      this.metadata = await Util.getTwitterSpaceMetadata(this.spaceId, headers)
+      this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
       this.showNotification()
       this.mediaKey = this.metadata.media_key
-      this.liveStreamStatus = await Util.getLiveVideoStreamStatus(this.mediaKey, headers)
+      this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.mediaKey, headers)
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
       this.accessChatData = await Util.getAccessChatData(this.liveStreamStatus.chatToken)
       this.logger.debug('accessChat data', this.accessChatData)
@@ -67,7 +68,7 @@ export class SpaceWatcher extends EventEmitter {
       }
       this.checkDynamicPlaylist()
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`watch: ${error.message}`)
       const timeoutMs = 5000
       this.logger.info(`Retry watch in ${timeoutMs}ms`)
       setTimeout(() => this.watch(), timeoutMs)
@@ -89,10 +90,10 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
-    this.logger.debug('Checking dynamic playlist', { url: this.dynamicPlaylistUrl })
+    this.logger.debug('>>> checkDynamicPlaylist', { url: this.dynamicPlaylistUrl })
     try {
       const { status, data } = await axios.get<string>(this.dynamicPlaylistUrl)
-      this.logger.debug(`Status: ${status}`)
+      this.logger.debug('<<< checkDynamicPlaylist', { status })
       const chunkIndexes = Util.getChunks(data)
       if (chunkIndexes.length) {
         this.logger.debug(`Found chunks: ${chunkIndexes.join(',')}`)
@@ -101,11 +102,11 @@ export class SpaceWatcher extends EventEmitter {
     } catch (error) {
       const status = error.response?.status
       if (status === 404) {
-        this.logger.info(`Status: ${status}`)
+        this.logger.info(`Dynamic playlist status: ${status}`)
         this.checkMasterPlaylist()
         return
       }
-      this.logger.error(error.message)
+      this.logger.error(`checkDynamicPlaylist: ${error.message}`)
     }
     const ms = APP_PLAYLIST_REFRESH_INTERVAL
     this.logger.debug(`Recheck dynamic playlist in ${ms}ms`)
@@ -113,19 +114,23 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async checkMasterPlaylist(): Promise<void> {
-    this.logger.debug('Checking master playlist')
+    this.logger.debug('>>> checkMasterPlaylist')
     try {
       // eslint-disable-next-line max-len
       const masterChunkSize = Util.getChunks(await Downloader.getRawTranscodePlaylist(this.dynamicPlaylistUrl)).length
       this.logger.debug(`Master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
-      if (!this.lastChunkIndex || masterChunkSize >= this.lastChunkIndex) {
+      const canDownload = !this.lastChunkIndex
+        || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
+        || masterChunkSize >= this.lastChunkIndex
+      if (canDownload) {
         this.downloadMedia()
         this.downloadCaptions()
         return
       }
       this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
+      this.chunkVerifyCount += 1
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`checkMasterPlaylist: ${error.message}`)
     }
     const ms = APP_PLAYLIST_REFRESH_INTERVAL
     this.logger.info(`Recheck master playlist in ${ms}ms`)
@@ -148,7 +153,7 @@ export class SpaceWatcher extends EventEmitter {
       this.emit('complete')
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
-      this.logger.error(error.message)
+      this.logger.error(`downloadMedia: ${error.message}`)
       this.retryDownload(10000)
     }
   }
@@ -169,7 +174,7 @@ export class SpaceWatcher extends EventEmitter {
       await new SpaceCaptionsDownloader(this.spaceId, this.accessChatData.endpoint, this.accessChatData.access_token, tmpFile).download()
       await new SpaceCaptionsExtractor(tmpFile, outFile).extract()
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`downloadCaptions: ${error.message}`)
     }
   }
 
@@ -195,7 +200,7 @@ export class SpaceWatcher extends EventEmitter {
           }
           notification.icon = imgPath
         } catch (error) {
-          this.logger.error(error.message)
+          this.logger.error(`showNotification: ${error.message}`)
         }
       }
       this.logger.debug('Notification:', notification)
@@ -208,7 +213,7 @@ export class SpaceWatcher extends EventEmitter {
       })
       this.isNotificationNotified = true
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`showNotification: ${error.message}`)
     }
   }
 }
