@@ -101,9 +101,9 @@ export class UserWatcher extends EventEmitter {
     }
   }
 
-  private cleanCacheSpaceIds(ids: string[]) {
+  private cleanCacheSpaceIds(keepIds: string[]) {
     Array.from(this.cacheSpaceIds).forEach((id) => {
-      if (ids.includes(id)) {
+      if (keepIds.includes(id)) {
         return
       }
       this.cacheSpaceIds.delete(id)
