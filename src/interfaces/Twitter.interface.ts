@@ -1,4 +1,16 @@
 /* eslint-disable camelcase */
+export interface User {
+  id: number
+  id_str: string
+  name: string
+  screen_name: string
+  protected: boolean
+  verified: boolean
+  created_at: string
+  profile_banner_url: string
+  profile_image_url_https: string
+}
+
 export interface AudioSpaceMetadata {
   rest_id: string
   state: string
