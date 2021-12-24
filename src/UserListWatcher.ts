@@ -35,8 +35,7 @@ export class UserListWatcher extends EventEmitter {
           .filter((v) => v))
       idChunks.forEach((idChunk) => this.getSpaces(idChunk))
     } catch (error) {
-      this.logger.error('Failed to start watcher')
-      this.logger.error(error.message, {
+      this.logger.error(`watch: ${error.message}`, {
         response: {
           data: error.response?.data,
           headers: error.response?.headers,

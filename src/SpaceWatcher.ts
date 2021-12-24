@@ -68,7 +68,7 @@ export class SpaceWatcher extends EventEmitter {
       }
       this.checkDynamicPlaylist()
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`watch: ${error.message}`)
       const timeoutMs = 5000
       this.logger.info(`Retry watch in ${timeoutMs}ms`)
       setTimeout(() => this.watch(), timeoutMs)
@@ -90,10 +90,10 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
-    this.logger.debug('Checking dynamic playlist', { url: this.dynamicPlaylistUrl })
+    this.logger.debug('>>> checkDynamicPlaylist', { url: this.dynamicPlaylistUrl })
     try {
       const { status, data } = await axios.get<string>(this.dynamicPlaylistUrl)
-      this.logger.debug(`Status: ${status}`)
+      this.logger.debug('<<< checkDynamicPlaylist', { status })
       const chunkIndexes = Util.getChunks(data)
       if (chunkIndexes.length) {
         this.logger.debug(`Found chunks: ${chunkIndexes.join(',')}`)
@@ -102,11 +102,11 @@ export class SpaceWatcher extends EventEmitter {
     } catch (error) {
       const status = error.response?.status
       if (status === 404) {
-        this.logger.info(`Status: ${status}`)
+        this.logger.info(`Dynamic playlist status: ${status}`)
         this.checkMasterPlaylist()
         return
       }
-      this.logger.error(error.message)
+      this.logger.error(`checkDynamicPlaylist: ${error.message}`)
     }
     const ms = APP_PLAYLIST_REFRESH_INTERVAL
     this.logger.debug(`Recheck dynamic playlist in ${ms}ms`)
@@ -114,7 +114,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async checkMasterPlaylist(): Promise<void> {
-    this.logger.debug('Checking master playlist')
+    this.logger.debug('>>> checkMasterPlaylist')
     try {
       // eslint-disable-next-line max-len
       const masterChunkSize = Util.getChunks(await Downloader.getRawTranscodePlaylist(this.dynamicPlaylistUrl)).length
@@ -130,7 +130,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
       this.chunkVerifyCount += 1
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`checkMasterPlaylist: ${error.message}`)
     }
     const ms = APP_PLAYLIST_REFRESH_INTERVAL
     this.logger.info(`Recheck master playlist in ${ms}ms`)
@@ -153,7 +153,7 @@ export class SpaceWatcher extends EventEmitter {
       this.emit('complete')
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404
-      this.logger.error(error.message)
+      this.logger.error(`downloadMedia: ${error.message}`)
       this.retryDownload(10000)
     }
   }
@@ -174,7 +174,7 @@ export class SpaceWatcher extends EventEmitter {
       await new SpaceCaptionsDownloader(this.spaceId, this.accessChatData.endpoint, this.accessChatData.access_token, tmpFile).download()
       await new SpaceCaptionsExtractor(tmpFile, outFile).extract()
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`downloadCaptions: ${error.message}`)
     }
   }
 
@@ -200,7 +200,7 @@ export class SpaceWatcher extends EventEmitter {
           }
           notification.icon = imgPath
         } catch (error) {
-          this.logger.error(error.message)
+          this.logger.error(`showNotification: ${error.message}`)
         }
       }
       this.logger.debug('Notification:', notification)
@@ -213,7 +213,7 @@ export class SpaceWatcher extends EventEmitter {
       })
       this.isNotificationNotified = true
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`showNotification: ${error.message}`)
     }
   }
 }

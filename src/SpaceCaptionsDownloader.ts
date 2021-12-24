@@ -46,11 +46,11 @@ export class SpaceCaptionsDownloader {
           if (!['socket hang up', 'connect ETIMEDOUT'].some((v) => msg.includes(v))) {
             throw error
           }
-          this.logger.error(msg)
+          this.logger.error(`download: ${msg}`)
         }
       } while (this.cursor || this.chunkCount <= 1)
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(`download: ${error.message}`)
     }
   }
 
