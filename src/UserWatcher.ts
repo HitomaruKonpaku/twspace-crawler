@@ -74,11 +74,13 @@ export class UserWatcher extends EventEmitter {
     const data = await TwitterApi.getUserTweets(this.userId, this.headers)
     const { instructions } = data.data.user.result.timeline.timeline
     const instruction = instructions.find((v) => v.type === 'TimelineAddEntries')
-    const tweets = instruction.entries
+    const tweets: any[] = instruction.entries
       .filter((v) => v.content.entryType === 'TimelineTimelineItem')
       .map((v) => v.content.itemContent.tweet_results.result)
       .filter((v) => v.card)
-    const ids: string[] = tweets.map((tweet) => tweet.card.legacy.binding_values.find((v) => v.key === 'id').value.string_value)
+    const ids: string[] = tweets
+      .map((tweet) => tweet.card.legacy.binding_values.find((v) => v.key === 'id')?.value?.string_value)
+      .filter((v) => v)
     ids.forEach((id) => this.getAudioSpaceById(id))
     this.cleanCacheSpaceIds(ids)
   }
