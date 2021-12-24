@@ -2,6 +2,7 @@ import axios from 'axios'
 import EventEmitter from 'events'
 import winston from 'winston'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
+import { SpaceState } from './enums/Twitter.enum'
 import { logger as baseLogger } from './logger'
 import { TwitterApi } from './TwitterApi'
 import { Util } from './Util'
@@ -72,8 +73,8 @@ export class UserListWatcher extends EventEmitter {
         ids,
         { authorization: Util.getTwitterAuthorization() },
       )
-      const liveSpaces = (spaces || []).filter((v) => v.state === 'live')
       this.logger.debug(`Space count: ${liveSpaces.length}`)
+      const liveSpaces = (spaces || []).filter((v) => v.state === SpaceState.LIVE)
       if (liveSpaces.length) {
         this.logger.debug(`Space ids: ${liveSpaces.map((v) => v.id).join(', ')}`)
         liveSpaces.forEach((space) => this.emit('data', space.id))
