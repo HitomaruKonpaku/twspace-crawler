@@ -6,6 +6,8 @@ import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
+import { PeriscopeApi } from './apis/PeriscopeApi'
+import { TwitterApi } from './apis/TwitterApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
@@ -14,7 +16,6 @@ import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.
 import { logger as baseLogger } from './logger'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
-import { TwitterApi } from './TwitterApi'
 import { Util } from './Util'
 
 export class SpaceWatcher extends EventEmitter {
@@ -56,7 +57,7 @@ export class SpaceWatcher extends EventEmitter {
       this.mediaKey = this.metadata.media_key
       this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.mediaKey, headers)
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
-      this.accessChatData = await Util.getAccessChatData(this.liveStreamStatus.chatToken)
+      this.accessChatData = await PeriscopeApi.getAccessChat(this.liveStreamStatus.chatToken)
       this.logger.debug('accessChat data', this.accessChatData)
       this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
       this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)

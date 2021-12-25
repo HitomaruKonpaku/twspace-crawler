@@ -1,9 +1,9 @@
 import EventEmitter from 'events'
 import winston from 'winston'
+import { TwitterApi } from './apis/TwitterApi'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { SpaceState } from './enums/Twitter.enum'
 import { logger as baseLogger } from './logger'
-import { TwitterApi } from './TwitterApi'
 import { Util } from './Util'
 
 export class UserListWatcher extends EventEmitter {

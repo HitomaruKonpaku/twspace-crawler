@@ -1,7 +1,6 @@
-import axios from 'axios'
 import fs from 'fs'
 import winston from 'winston'
-import { ChatHistory } from './interfaces/Periscope.interface'
+import { PeriscopeApi } from './apis/PeriscopeApi'
 import { logger as baseLogger } from './logger'
 
 export class SpaceCaptionsDownloader {
@@ -9,7 +8,6 @@ export class SpaceCaptionsDownloader {
 
   private logger: winston.Logger
 
-  private apiUrl: string
   private chunkCount = 1
   private cursor = ''
 
@@ -20,7 +18,6 @@ export class SpaceCaptionsDownloader {
     private file?: string,
   ) {
     this.logger = baseLogger.child({ label: `[SpaceCaptionsDownloader@${spaceId}]` })
-    this.apiUrl = new URL(this.API_PATH, endpoint).href
     this.file = this.file || `${new Date().toISOString().replace(/[^\d]/g, '').substring(2, 14)} (${spaceId}) CC.jsonl`
   }
 
@@ -33,7 +30,12 @@ export class SpaceCaptionsDownloader {
           this.logger.info(`Downloading chunk ${this.chunkCount}`)
           this.logger.debug(`Current cursor: "${this.cursor}"`)
           // eslint-disable-next-line no-await-in-loop
-          const history = await this.getChatHistory()
+          const history = await PeriscopeApi.getChatHistory(
+            this.endpoint,
+            this.spaceId,
+            this.accessToken,
+            this.cursor,
+          )
           const { messages } = history
           messages.forEach((message) => {
             fs.appendFileSync(this.file, `${JSON.stringify(message)}\n`)
@@ -52,14 +54,5 @@ export class SpaceCaptionsDownloader {
     } catch (error) {
       this.logger.error(`download: ${error.message}`)
     }
-  }
-
-  private async getChatHistory() {
-    const { data } = await axios.post<ChatHistory>(this.apiUrl, {
-      room: this.spaceId,
-      access_token: this.accessToken,
-      cursor: this.cursor,
-    })
-    return data
   }
 }

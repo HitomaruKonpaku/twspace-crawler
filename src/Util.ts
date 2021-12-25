@@ -2,10 +2,10 @@ import axios from 'axios'
 import { program } from 'commander'
 import fs from 'fs'
 import path from 'path'
+import { TwitterApi } from './apis/TwitterApi'
 import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
 import { AccessChat } from './interfaces/Periscope.interface'
 import { logger as baseLogger } from './logger'
-import { TwitterApi } from './TwitterApi'
 
 const logger = baseLogger.child({ label: '[Util]' })
 

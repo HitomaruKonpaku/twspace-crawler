@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { AudioSpaceMetadata, LiveVideoStreamStatus, User } from './interfaces/Twitter.interface'
+import { AudioSpaceMetadata, LiveVideoStreamStatus, User } from '../interfaces/Twitter.interface'
 
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {
