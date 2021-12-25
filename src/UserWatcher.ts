@@ -1,7 +1,8 @@
 import EventEmitter from 'events'
 import winston from 'winston'
 import { TwitterApi } from './apis/TwitterApi'
-import { TWITTER_AUTHORIZATION, TWITTER_GUEST_TOKEN_DURATION, TWITTER_GUEST_TOKEN_RETRY_MS } from './constants/twitter.constant'
+import { configManager } from './ConfigManager'
+import { TWITTER_AUTHORIZATION, TWITTER_GUEST_TOKEN_RETRY_MS } from './constants/twitter.constant'
 import { SpaceMetadataState } from './enums/Twitter.enum'
 import { logger as baseLogger } from './logger'
 import { Util } from './Util'
@@ -9,8 +10,6 @@ import { Util } from './Util'
 export class UserWatcher extends EventEmitter {
   private logger: winston.Logger
 
-  private guestToken: string
-  private guestTokenTime: number
   private userId: string
   private cacheSpaceIds = new Set<string>()
 
@@ -19,10 +18,11 @@ export class UserWatcher extends EventEmitter {
     this.logger = baseLogger.child({ label: `[UserWatcher@${username}]` })
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private get headers() {
     return {
       authorization: TWITTER_AUTHORIZATION,
-      'x-guest-token': this.guestToken,
+      'x-guest-token': configManager.guestToken,
     }
   }
 
@@ -34,7 +34,7 @@ export class UserWatcher extends EventEmitter {
   private async getSpaces(): Promise<void> {
     this.logger.debug('>>> getSpaces')
     try {
-      await this.getGuestToken()
+      await configManager.getGuestToken()
     } catch (error) {
       this.logger.error(`getSpaces: ${error.message}`)
       this.logger.info(`Retry in ${TWITTER_GUEST_TOKEN_RETRY_MS}ms`)
@@ -49,16 +49,6 @@ export class UserWatcher extends EventEmitter {
       this.logger.error(`getSpaces: ${error.message}`)
     }
     setTimeout(() => this.getSpaces(), Util.getUserRefreshInterval())
-  }
-
-  private async getGuestToken() {
-    const guestTokenTimeDelta = Date.now() - (this.guestTokenTime || 0)
-    if (this.guestToken && guestTokenTimeDelta <= TWITTER_GUEST_TOKEN_DURATION) {
-      return
-    }
-    this.logger.debug('>>> getGuestToken')
-    this.guestToken = await TwitterApi.getGuestToken()
-    this.guestTokenTime = Date.now()
   }
 
   private async getUserId() {
@@ -84,6 +74,7 @@ export class UserWatcher extends EventEmitter {
       .filter((v) => v)
     ids.forEach((id) => this.getAudioSpaceById(id))
     this.cleanCacheSpaceIds(ids)
+    this.logger.debug('<<< getUserTweets', { spaceIds: ids })
   }
 
   private async getAudioSpaceById(id: string) {

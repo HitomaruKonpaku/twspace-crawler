@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.24.0",
+    "bottleneck": "^2.19.5",
     "commander": "^8.3.0",
     "dotenv": "^10.0.0",
     "node-notifier": "^10.0.0",

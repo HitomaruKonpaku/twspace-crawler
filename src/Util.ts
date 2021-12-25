@@ -23,7 +23,8 @@ export class Util {
   }
 
   public static getUserRefreshInterval(): number {
-    return Number(configManager.config.interval || APP_USER_REFRESH_INTERVAL)
+    const interval = Number(configManager.config.interval || APP_USER_REFRESH_INTERVAL)
+    return interval
   }
 
   public static getCacheDir(subDir = ''): string {
