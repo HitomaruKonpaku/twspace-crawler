@@ -1,13 +1,8 @@
-import axios from 'axios'
-import { program } from 'commander'
 import fs from 'fs'
 import path from 'path'
 import { TwitterApi } from './apis/TwitterApi'
+import { configManager } from './ConfigManager'
 import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from './constants/app.constant'
-import { AccessChat } from './interfaces/Periscope.interface'
-import { logger as baseLogger } from './logger'
-
-const logger = baseLogger.child({ label: '[Util]' })
 
 export class Util {
   public static getTwitterAuthorization(): string {
@@ -27,21 +22,8 @@ export class Util {
     return s
   }
 
-  public static getExternalConfig(): Record<string, any> {
-    const config = {}
-    const configPath = program.getOptionValue('config')
-    if (configPath) {
-      try {
-        Object.assign(config, JSON.parse(fs.readFileSync(configPath, 'utf-8')))
-      } catch (error) {
-        logger.error(`Failed to read config: ${error.message}`)
-      }
-    }
-    return config
-  }
-
   public static getUserRefreshInterval(): number {
-    return Number(Util.getExternalConfig().interval) || APP_USER_REFRESH_INTERVAL
+    return Number(configManager.config.interval || APP_USER_REFRESH_INTERVAL)
   }
 
   public static getCacheDir(subDir = ''): string {
@@ -58,14 +40,6 @@ export class Util {
 
   public static createMediaDir(subDir = ''): string {
     return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
-  }
-
-  public static async getAccessChatData(chatToken: string) {
-    const { data } = await axios.post<AccessChat>(
-      'https://proxsee.pscp.tv/api/v2/accessChatPublic',
-      { chat_token: chatToken },
-    )
-    return data
   }
 
   public static getMasterUrlFromDynamicUrl(dynamicUrl: string): string {

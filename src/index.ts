@@ -1,6 +1,7 @@
 import { program } from 'commander'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
+import { configManager } from './ConfigManager'
 import { Downloader } from './Downloader'
 import { logger } from './logger'
 import { manager } from './manager'
@@ -32,6 +33,7 @@ program.action(async (args) => {
   }
 
   logger.debug('Args', args)
+  configManager.load()
 
   const { url, id, user } = args
   if (url) {
@@ -46,9 +48,8 @@ program.action(async (args) => {
     return
   }
 
-  const externalConfig = Util.getExternalConfig()
   const usernames = (user || '').split(',')
-    .concat((externalConfig.users || []).map((v) => v.username))
+    .concat((configManager.config.users || []).map((v) => v.username))
     .filter((v) => v) as string[]
   if (usernames.length) {
     logger.info('Starting in user mode', { users: usernames })
