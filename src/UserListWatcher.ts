@@ -25,7 +25,7 @@ export class UserListWatcher extends EventEmitter {
   }
 
   public async watch(): Promise<void> {
-    this.logger.info('Watching...')
+    this.logger.info('Starting...')
     try {
       await this.initUsers()
       const idChunks = this.usernameChunks
@@ -33,15 +33,22 @@ export class UserListWatcher extends EventEmitter {
           .map((username) => this.users
             .find((user) => user.username.toLowerCase() === username.toLowerCase())?.id)
           .filter((v) => v))
+      this.logger.info('Watching...')
       idChunks.forEach((idChunk) => this.getSpaces(idChunk))
     } catch (error) {
+      const { status, headers, data } = (error.response || {})
       this.logger.error(`watch: ${error.message}`, {
-        response: {
-          data: error.response?.data,
-          headers: error.response?.headers,
-        },
+        response: { status, data, headers },
       })
-      const timeoutMs = 5000
+
+      let timeoutMs = 5000
+      // Rate limit exceeded
+      if (status === 429) {
+        const xRateLimitReset = Number(headers?.['x-rate-limit-reset']) * 1000
+        if (xRateLimitReset) {
+          timeoutMs = Math.max(xRateLimitReset - Date.now(), timeoutMs)
+        }
+      }
       this.logger.info(`Retry in ${timeoutMs}ms`)
       setTimeout(() => this.watch(), timeoutMs)
     }
