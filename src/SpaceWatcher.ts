@@ -1,13 +1,14 @@
 import axios from 'axios'
 import { program } from 'commander'
 import EventEmitter from 'events'
-import fs from 'fs'
+import { existsSync } from 'fs'
 import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
 import { PeriscopeApi } from './apis/PeriscopeApi'
 import { TwitterApi } from './apis/TwitterApi'
+import { configManager } from './ConfigManager'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
 import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
 import { Downloader } from './Downloader'
@@ -46,7 +47,7 @@ export class SpaceWatcher extends EventEmitter {
     this.logger.info('Watching...')
     this.logger.info(`Space url: ${this.spaceUrl}`)
     try {
-      const guestToken = await TwitterApi.getGuestToken()
+      const guestToken = await configManager.getGuestToken()
       const headers = {
         authorization: TWITTER_AUTHORIZATION,
         'x-guest-token': guestToken,
@@ -196,7 +197,7 @@ export class SpaceWatcher extends EventEmitter {
           const imgPathname = profileImgUrl.replace('https://pbs.twimg.com/', '')
           Util.createCacheDir(path.dirname(imgPathname))
           const imgPath = path.join(Util.getCacheDir(), imgPathname)
-          if (!fs.existsSync(imgPath)) {
+          if (!existsSync(imgPath)) {
             await Downloader.downloadImage(profileImgUrl, imgPath)
           }
           notification.icon = imgPath
