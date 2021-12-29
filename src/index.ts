@@ -2,10 +2,10 @@ import { program } from 'commander'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
 import { configManager } from './ConfigManager'
-import { Downloader } from './Downloader'
 import { logger } from './logger'
 import { manager } from './manager'
-import { Util } from './Util'
+import { SpaceDownloader } from './modules/SpaceDownloader'
+import { Util } from './utils/Util'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json')
@@ -38,7 +38,7 @@ program.action(async (args) => {
   const { url, id, user } = args
   if (url) {
     logger.info('Starting in url mode', { url })
-    await Downloader.downloadSpace(url, Util.getTimeString())
+    new SpaceDownloader(url, Util.getTimeString()).download()
     return
   }
 

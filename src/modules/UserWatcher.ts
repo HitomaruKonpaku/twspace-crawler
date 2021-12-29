@@ -1,11 +1,11 @@
 import EventEmitter from 'events'
 import winston from 'winston'
-import { TwitterApi } from './apis/TwitterApi'
-import { configManager } from './ConfigManager'
-import { TWITTER_AUTHORIZATION, TWITTER_GUEST_TOKEN_RETRY_MS } from './constants/twitter.constant'
-import { SpaceMetadataState } from './enums/Twitter.enum'
-import { logger as baseLogger } from './logger'
-import { Util } from './Util'
+import { TwitterApi } from '../apis/TwitterApi'
+import { configManager } from '../ConfigManager'
+import { TWITTER_AUTHORIZATION, TWITTER_GUEST_TOKEN_RETRY_MS } from '../constants/twitter.constant'
+import { SpaceMetadataState } from '../enums/Twitter.enum'
+import { logger as baseLogger } from '../logger'
+import { Util } from '../utils/Util'
 
 export class UserWatcher extends EventEmitter {
   private logger: winston.Logger

@@ -1,11 +1,10 @@
 import fs from 'fs'
+import path from 'path'
 import winston from 'winston'
-import { PeriscopeApi } from './apis/PeriscopeApi'
-import { logger as baseLogger } from './logger'
+import { PeriscopeApi } from '../apis/PeriscopeApi'
+import { logger as baseLogger } from '../logger'
 
 export class SpaceCaptionsDownloader {
-  private readonly API_PATH = 'chatapi/v1/history'
-
   private logger: winston.Logger
 
   private chunkCount = 1
@@ -24,6 +23,7 @@ export class SpaceCaptionsDownloader {
   public async download() {
     try {
       this.logger.info(`Downloading captions to ${this.file}`)
+      fs.mkdirSync(path.dirname(this.file), { recursive: true })
       fs.writeFileSync(this.file, '')
       do {
         try {

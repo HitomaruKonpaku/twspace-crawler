@@ -6,21 +6,25 @@ import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
-import { PeriscopeApi } from './apis/PeriscopeApi'
-import { TwitterApi } from './apis/TwitterApi'
-import { configManager } from './ConfigManager'
-import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from './constants/app.constant'
-import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
-import { Downloader } from './Downloader'
-import { AccessChat } from './interfaces/Periscope.interface'
-import { AudioSpaceMetadata, LiveVideoStreamStatus } from './interfaces/Twitter.interface'
-import { logger as baseLogger } from './logger'
+import { PeriscopeApi } from '../apis/PeriscopeApi'
+import { TwitterApi } from '../apis/TwitterApi'
+import { configManager } from '../ConfigManager'
+import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from '../constants/app.constant'
+import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
+import { Downloader } from '../Downloader'
+import { AccessChat } from '../interfaces/Periscope.interface'
+import { AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
+import { logger as baseLogger } from '../logger'
+import { PeriscopeUtil } from '../utils/PeriscopeUtil'
+import { Util } from '../utils/Util'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
-import { Util } from './Util'
+import { SpaceDownloader } from './SpaceDownloader'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
+  private downloader: SpaceDownloader
+
   private metadata: AudioSpaceMetadata
   private liveStreamStatus: LiveVideoStreamStatus
   private accessChatData: AccessChat
@@ -37,6 +41,7 @@ export class SpaceWatcher extends EventEmitter {
   ) {
     super()
     this.logger = baseLogger.child({ label: `[SpaceWatcher@${spaceId}]` })
+    // open(this.spaceUrl)
   }
 
   public get spaceUrl(): string {
@@ -96,7 +101,7 @@ export class SpaceWatcher extends EventEmitter {
     try {
       const { status, data } = await axios.get<string>(this.dynamicPlaylistUrl)
       this.logger.debug('<<< checkDynamicPlaylist', { status })
-      const chunkIndexes = Util.getChunks(data)
+      const chunkIndexes = PeriscopeUtil.getChunks(data)
       if (chunkIndexes.length) {
         this.logger.debug(`Found chunks: ${chunkIndexes.join(',')}`)
         this.lastChunkIndex = Math.max(...chunkIndexes)
@@ -119,7 +124,7 @@ export class SpaceWatcher extends EventEmitter {
     this.logger.debug('>>> checkMasterPlaylist')
     try {
       // eslint-disable-next-line max-len
-      const masterChunkSize = Util.getChunks(await Downloader.getRawTranscodePlaylist(this.dynamicPlaylistUrl)).length
+      const masterChunkSize = PeriscopeUtil.getChunks(await PeriscopeApi.getFinalPlaylist(this.dynamicPlaylistUrl)).length
       this.logger.debug(`Master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
       const canDownload = !this.lastChunkIndex
         || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
@@ -151,7 +156,10 @@ export class SpaceWatcher extends EventEmitter {
       }
       this.logger.info(`File name: ${filename}`)
       this.logger.info(`File metadata: ${JSON.stringify(metadata)}`)
-      await Downloader.downloadSpace(this.dynamicPlaylistUrl, filename, username, metadata)
+      if (!this.downloader) {
+        this.downloader = new SpaceDownloader(this.dynamicPlaylistUrl, filename, username, metadata)
+      }
+      await this.downloader.download()
       this.emit('complete')
     } catch (error) {
       // Attemp to download transcode playlist right after space end could return 404

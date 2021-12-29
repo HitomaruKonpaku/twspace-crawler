@@ -1,10 +1,10 @@
 import EventEmitter from 'events'
 import winston from 'winston'
-import { TwitterApi } from './apis/TwitterApi'
-import { TWITTER_AUTHORIZATION } from './constants/twitter.constant'
-import { SpaceState } from './enums/Twitter.enum'
-import { logger as baseLogger } from './logger'
-import { Util } from './Util'
+import { TwitterApi } from '../apis/TwitterApi'
+import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
+import { SpaceState } from '../enums/Twitter.enum'
+import { logger as baseLogger } from '../logger'
+import { Util } from '../utils/Util'
 
 export class UserListWatcher extends EventEmitter {
   private readonly CHUNK_SIZE = 100
