@@ -16,12 +16,20 @@ export class PeriscopeUtil {
 
   public static getChunkPrefix(playlistUrl: string) {
     const url = new URL(playlistUrl)
-    const { origin } = url
-    const pathname = url.pathname
-      .split('/')
-      .filter((_, i) => ![8, 10].includes(i))
+    const chunks = url.pathname.split('/')
+    const audioSpaceIndex = chunks.findIndex((v) => v === 'audio-space')
+    const filteredChunks = chunks.filter((v, i) => {
+      if (i === audioSpaceIndex - 1) {
+        // Check audio JWT & ignore if exist
+        // with 86 is hls key length
+        return v.length <= 86
+      }
+      return i <= audioSpaceIndex
+    })
+    const pathname = filteredChunks
       .join('/')
       .replace('/transcode/', '/non_transcode/')
-    return `${origin + pathname}/`
+    const prefix = `${url.origin + pathname}/`
+    return prefix
   }
 }
