@@ -8,6 +8,10 @@ function getPrintFormat() {
     : `${info.timestamp} | [${info.level}] ${[info.label, info.message].filter((v) => v).join(' ')}`))
 }
 
+function getFileName() {
+  return `${process.env.NODE_ENV === 'production' ? '' : 'dev.'}%DATE%`
+}
+
 const logger = winston.createLogger({
   format: format.combine(
     format.timestamp(),
@@ -35,14 +39,14 @@ const logger = winston.createLogger({
       format: format.combine(getPrintFormat()),
       datePattern: LOGGER_DATE_PATTERN,
       dirname: LOGGER_DIR,
-      filename: '%DATE%.log',
+      filename: `${getFileName()}.log`,
     }),
     new DailyRotateFile({
       level: 'silly',
       format: format.combine(getPrintFormat()),
       datePattern: LOGGER_DATE_PATTERN,
       dirname: LOGGER_DIR,
-      filename: '%DATE%_all.log',
+      filename: `${getFileName()}_all.log`,
     }),
   ],
 })
