@@ -1,6 +1,7 @@
 import { program } from 'commander'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
+import { testCommand } from './commands/test.command'
 import { configManager } from './ConfigManager'
 import { logger } from './logger'
 import { manager } from './manager'
@@ -21,6 +22,7 @@ program
   .option('--url <PLAYLIST_ID>', 'Download Space using playlist url')
   .option('--notification', 'Show notification about new live Space')
   .addCommand(ccCommand)
+  .addCommand(testCommand)
 
 program.action(async (args) => {
   if (args.debug) {
