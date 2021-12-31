@@ -1257,9 +1257,10 @@ command
       // ================================================================================
     ]
 
+    const spaceIds = ids.split(',').filter((v) => v)
     const filteredSpaces = spaces
       .filter((v) => v.playlist_url)
-      .filter((v) => ids.split(',').some((id) => id === v.id))
+      .filter((v) => spaceIds.some((id) => id === v.id))
 
     filteredSpaces.forEach((space) => {
       const user = users.find((v) => v.screen_name === space.screen_name)
