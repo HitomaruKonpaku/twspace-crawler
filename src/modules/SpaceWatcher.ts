@@ -58,6 +58,10 @@ export class SpaceWatcher extends EventEmitter {
         'x-guest-token': guestToken,
       }
       this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
+      this.logger.info('Host info', {
+        screenName: this.metadata.creator_results?.result?.legacy?.screen_name,
+        displayName: this.metadata.creator_results?.result?.legacy?.name,
+      })
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
       this.showNotification()
       this.mediaKey = this.metadata.media_key
