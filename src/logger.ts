@@ -9,7 +9,7 @@ function getPrintFormat() {
 }
 
 function getFileName() {
-  return `${process.env.NODE_ENV === 'production' ? '' : 'dev.'}%DATE%`
+  return `${process.env.NODE_ENV || 'dev'}.%DATE%`
 }
 
 const logger = winston.createLogger({
