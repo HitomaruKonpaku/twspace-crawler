@@ -3,6 +3,10 @@ export class PeriscopeUtil {
     return /playlist_\d+\.m3u8/g.test(url)
   }
 
+  public static getFinalPlaylistName(data: string) {
+    return /playlist_\d+/g.exec(data)[0]
+  }
+
   public static getMasterPlaylistUrl(url: string) {
     return url
       .replace('?type=live', '')

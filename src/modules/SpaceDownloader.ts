@@ -35,7 +35,7 @@ export class SpaceDownloader {
     this.logger.debug('download', { playlistUrl: this.playlistUrl, originUrl: this.originUrl })
     if (!this.playlistUrl) {
       this.playlistUrl = await PeriscopeApi.getFinalPlaylistUrl(this.originUrl)
-      this.logger.info('download', { playlistUrl: this.playlistUrl, originUrl: this.originUrl })
+      this.logger.info(`Final playlist url: ${this.playlistUrl}`)
     }
     Util.createMediaDir(this.subDir)
     await this.saveFinalPlaylist()
