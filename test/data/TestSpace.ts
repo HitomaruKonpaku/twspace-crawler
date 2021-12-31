@@ -689,6 +689,14 @@ export const spaces = [
     date: '20211227',
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/46BI0C11jDZG_0hPBxZkkFj5-9A5FjC3Hq7mluvPu2a1ZiQHXgwPTBGKz_3LG43e3iZemvOLRKcMrG_6tpy4bg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
+  {
+    screen_name: 'LaplusDarknesss',
+    id: '1LyxBoZmPYbKN',
+    started_at: 1640983750833,
+    title: 'お風呂からすぺーす',
+    date: '20211231',
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/Ro7IJetfh8SWSAB_ZgQqk_lzUz7goojXdKlJvtxMI-l1C7FEeEMf7QtQqxnygmGIhfr5VopXgef6R0Jv2usdgg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
   // ================================================================================
   // ================================================================================
   {
