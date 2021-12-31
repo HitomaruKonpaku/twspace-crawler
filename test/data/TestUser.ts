@@ -1,6 +1,4 @@
-import { User } from '../interfaces/User.interface'
-
-export const users: User[] = [
+export const users = [
   {
     id: '1064352899705143297',
     name: '友人A(えーちゃん)@ホロライブSTAFF',

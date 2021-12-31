@@ -1,7 +1,7 @@
 import { expect } from '@hapi/code'
 import * as Lab from '@hapi/lab'
 import axios from 'axios'
-import { spaces } from './data/Space'
+import { spaces } from './data/TestSpace'
 
 const lab = Lab.script()
 const { describe, it } = lab
