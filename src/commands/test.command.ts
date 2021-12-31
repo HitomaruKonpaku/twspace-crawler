@@ -3,7 +3,12 @@ import { SpaceDownloader } from '../modules/SpaceDownloader'
 
 const command = new Command('test')
   .description('Test!')
-  .action(() => {
+
+command
+  .command('download <SPACE_IDS>')
+  .alias('d')
+  .description('Test download space by id(s)')
+  .action((ids: string) => {
     const users = [
       {
         id: '1064352899705143297',
@@ -1254,7 +1259,7 @@ const command = new Command('test')
 
     const filteredSpaces = spaces
       .filter((v) => v.playlist_url)
-    // .filter((v) => v.id === '1yoJMWvbybNKQ')
+      .filter((v) => ids.split(',').some((id) => id === v.id))
 
     filteredSpaces.forEach((space) => {
       const user = users.find((v) => v.screen_name === space.screen_name)
