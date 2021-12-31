@@ -95,7 +95,7 @@ export class SpaceWatcher extends EventEmitter {
     const date = new Date(this.metadata.started_at || this.metadata.created_at)
       .toISOString()
       .replace(/[^\d]/g, '')
-      .substring(0, 8)
+      .substring(2, 12)
     const filename = `[${date}] ${this.getUsername()} (${this.spaceId})`
     return filename
   }

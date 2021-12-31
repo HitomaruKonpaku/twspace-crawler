@@ -1268,7 +1268,7 @@ command
         date = new Date(space.started_at)
           .toISOString()
           .replace(/[^\d]/g, '')
-          .substring(0, 8)
+          .substring(2, 12)
       }
       const name = `[${space.screen_name}][${date}] ${space.title || 'NA'} (${space.id})`
       const metadata = {
