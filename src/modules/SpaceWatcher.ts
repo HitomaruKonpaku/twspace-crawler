@@ -96,8 +96,9 @@ export class SpaceWatcher extends EventEmitter {
       .toISOString()
       .replace(/[^\d]/g, '')
       .substring(2, 12)
-    const filename = `[${date}] ${this.getUsername()} (${this.spaceId})`
-    return filename
+    // const name = `[${date}] ${this.getUsername()} (${this.spaceId})`
+    const name = `[${this.getUsername()}][${date}] ${this.metadata.title || 'NA'} (${this.spaceId})`
+    return name
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
