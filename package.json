@@ -7,7 +7,8 @@
     "build": "tsc",
     "test": "lab --transform node_modules/lab-transform-typescript",
     "lint": "eslint src --ext .ts",
-    "lint-fix": "eslint src --ext .ts --fix"
+    "lint-fix": "eslint src --ext .ts --fix",
+    "prepare": "npm run build"
   },
   "author": "HitomaruKonpaku",
   "license": "ISC",
