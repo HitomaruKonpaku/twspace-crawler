@@ -1,14 +1,19 @@
 import axios from 'axios'
+import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { AudioSpaceMetadata, LiveVideoStreamStatus, User } from '../interfaces/Twitter.interface'
 
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {
-    const { data } = await axios.get<string>('https://twitter.com/')
     try {
-      const token = /(?<=gt=)\d{19}/.exec(data)[0]
-      return token
+      const { data } = await axios.request({
+        method: 'POST',
+        url: 'https://api.twitter.com/1.1/guest/activate.json',
+        headers: { authorization: TWITTER_AUTHORIZATION },
+      })
+      return data.guest_token
     } catch (error) {
-      throw new Error('Guest token not found')
+      debugger
+      throw error
     }
   }
 
