@@ -74,7 +74,11 @@ export class UserWatcher extends EventEmitter {
       .filter((v) => v)
     ids.forEach((id) => this.getAudioSpaceById(id))
     this.cleanCacheSpaceIds(ids)
-    this.logger.debug('<<< getUserTweets', { spaceIds: ids })
+    const meta = {}
+    if (ids.length) {
+      Object.assign(meta, { spaceIds: ids })
+    }
+    this.logger.debug('<<< getUserTweets', meta)
   }
 
   private async getAudioSpaceById(id: string) {
