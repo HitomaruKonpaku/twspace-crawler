@@ -38,7 +38,7 @@ export const spaces = [
   {
     screen_name: 'tokino_sora',
     id: '1YqxopBdPDaKv',
-    started_at: 1641481195280,
+    started_at: 1641481183044,
     title: null,
     date: null,
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/suh94NJxF7iB6Z93cKTm5E_U8-XTi6UGGbXtnbbuUJM4-K53KK5nM0n7aevv9sRFXJkVYT5WPOsFa45Qk2PaWg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
