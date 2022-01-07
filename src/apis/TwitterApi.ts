@@ -4,17 +4,12 @@ import { AudioSpaceMetadata, LiveVideoStreamStatus, User } from '../interfaces/T
 
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {
-    try {
-      const { data } = await axios.request({
-        method: 'POST',
-        url: 'https://api.twitter.com/1.1/guest/activate.json',
-        headers: { authorization: TWITTER_AUTHORIZATION },
-      })
-      return data.guest_token
-    } catch (error) {
-      debugger
-      throw error
-    }
+    const { data } = await axios.request({
+      method: 'POST',
+      url: 'https://api.twitter.com/1.1/guest/activate.json',
+      headers: { authorization: TWITTER_AUTHORIZATION },
+    })
+    return data.guest_token
   }
 
   public static async getUsersLookup(usernames: string[], headers: Record<string, string>) {

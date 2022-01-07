@@ -32,20 +32,17 @@ class ConfigManager {
   }
 
   public async getGuestToken() {
-    const guestTokenTimeDelta = Date.now() - (this.guestTokenTime || 0)
-    if (!(this.guestToken && guestTokenTimeDelta <= TWITTER_GUEST_TOKEN_DURATION)) {
-      try {
+    const token = await guestTokenRequestLimiter.schedule(async () => {
+      const tokenDeltaTime = Date.now() - (this.guestTokenTime || 0)
+      if (!(this.guestToken && tokenDeltaTime < TWITTER_GUEST_TOKEN_DURATION)) {
         this.logger.debug('>>> getGuestToken')
-        this.guestToken = await guestTokenRequestLimiter.schedule(() => TwitterApi.getGuestToken())
+        this.guestToken = await TwitterApi.getGuestToken()
         this.guestTokenTime = Date.now()
-        this.logger.debug('<<< getGuestToken')
-      } catch (error) {
-        if (!this.guestToken) {
-          throw error
-        }
+        this.logger.debug('<<< getGuestToken', { guestToken: this.guestToken })
       }
-    }
-    return this.guestToken
+      return Promise.resolve(this.guestToken)
+    })
+    return token
   }
 }
 
