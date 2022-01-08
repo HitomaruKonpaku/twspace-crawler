@@ -4,7 +4,7 @@ import winston from 'winston'
 import { TwitterApi } from './apis/TwitterApi'
 import { TWITTER_GUEST_TOKEN_DURATION } from './constants/twitter.constant'
 import { Config } from './interfaces/App.interface'
-import { guestTokenRequestLimiter } from './Limiter'
+import { twitterGuestTokenLimiter } from './Limiter'
 import { logger as baseLogger } from './logger'
 
 class ConfigManager {
@@ -32,7 +32,7 @@ class ConfigManager {
   }
 
   public async getGuestToken() {
-    const token = await guestTokenRequestLimiter.schedule(async () => {
+    const token = await twitterGuestTokenLimiter.schedule(async () => {
       const tokenDeltaTime = Date.now() - (this.guestTokenTime || 0)
       if (!(this.guestToken && tokenDeltaTime < TWITTER_GUEST_TOKEN_DURATION)) {
         this.logger.debug('>>> getGuestToken')
