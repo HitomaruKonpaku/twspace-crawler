@@ -8,6 +8,10 @@ export class Util {
     return process.env.TWITTER_AUTHORIZATION
   }
 
+  public static getTwitterAuthToken(): string {
+    return process.env.TWITTER_AUTH_TOKEN
+  }
+
   public static getTimeString(): string {
     const date = new Date()
     const s = [
@@ -40,5 +44,10 @@ export class Util {
 
   public static createMediaDir(subDir = ''): string {
     return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
+  }
+
+  public static splitArrayIntoChunk<T>(arr: T[], chunkSize: number) {
+    return [...Array(Math.ceil(arr.length / chunkSize))]
+      .map(() => arr.splice(0, chunkSize))
   }
 }
