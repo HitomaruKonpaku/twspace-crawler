@@ -44,9 +44,9 @@ export class SpaceDownloader {
   }
 
   private async saveFinalPlaylist() {
-    this.logger.debug(`>>> saveFinalPlaylist: ${this.playlistUrl}`)
+    this.logger.debug(`--> saveFinalPlaylist: ${this.playlistUrl}`)
     const { data } = await axios.get<string>(this.playlistUrl)
-    this.logger.debug(`<<< saveFinalPlaylist: ${this.playlistUrl}`)
+    this.logger.debug(`<-- saveFinalPlaylist: ${this.playlistUrl}`)
     const prefix = PeriscopeUtil.getChunkPrefix(this.playlistUrl)
     this.logger.debug(`Chunk prefix: ${prefix}`)
     const newData = data.replace(/^chunk/gm, `${prefix}chunk`)

@@ -2,10 +2,11 @@ import { program } from 'commander'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
 import { testCommand } from './commands/test.command'
-import { configManager } from './ConfigManager'
 import { logger } from './logger'
-import { manager } from './manager'
+import { configManager } from './modules/ConfigManager'
+import { mainManager } from './modules/MainManager'
 import { SpaceDownloader } from './modules/SpaceDownloader'
+import { userManager } from './modules/UserManager'
 import { Util } from './utils/Util'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -25,6 +26,7 @@ program
   .addCommand(testCommand)
 
 program.action(async (args) => {
+  logger.info(Array(80).fill('=').join(''))
   if (args.debug) {
     // eslint-disable-next-line dot-notation
     const transports = logger.transports.filter((v) => v['name'] === 'console')
@@ -46,7 +48,7 @@ program.action(async (args) => {
 
   if (id) {
     logger.info('Starting in space id mode', { id })
-    manager.addSpaceWatcher(id)
+    mainManager.addSpaceWatcher(id)
     return
   }
 
@@ -55,10 +57,11 @@ program.action(async (args) => {
     .filter((v) => v) as string[]
   if (usernames.length) {
     logger.info('Starting in user mode', { users: usernames })
-    if (!Util.getTwitterAuthorization()) {
-      usernames.forEach((username) => manager.addUserWatcher(username))
+    await userManager.add(usernames)
+    if (Util.getTwitterAuthorization() || Util.getTwitterAuthToken()) {
+      mainManager.runUserListWatcher()
     } else {
-      manager.runUserListWatcher(usernames)
+      usernames.forEach((username) => mainManager.addUserWatcher(username))
     }
   }
 })

@@ -1,16 +1,16 @@
 import winston from 'winston'
-import { logger as baseLogger } from './logger'
-import { SpaceWatcher } from './modules/SpaceWatcher'
-import { UserListWatcher } from './modules/UserListWatcher'
-import { UserWatcher } from './modules/UserWatcher'
+import { logger as baseLogger } from '../logger'
+import { SpaceWatcher } from './SpaceWatcher'
+import { UserListWatcher } from './UserListWatcher'
+import { UserWatcher } from './UserWatcher'
 
-class Manager {
+class MainManager {
   private logger: winston.Logger
   private userWatchers: Record<string, UserWatcher> = {}
   private spaceWatchers: Record<string, SpaceWatcher> = {}
 
   constructor() {
-    this.logger = baseLogger.child({ label: '[Manager]' })
+    this.logger = baseLogger.child({ label: '[MainManager]' })
   }
 
   public addSpaceWatcher(spaceId: string, username = '') {
@@ -40,12 +40,12 @@ class Manager {
     watchers[username] = watcher
     watcher.watch()
     watcher.on('data', (id) => {
-      this.addSpaceWatcher(id, username)
+      this.addSpaceWatcher(id)
     })
   }
 
-  public runUserListWatcher(usernames: string[]) {
-    const watcher = new UserListWatcher(usernames)
+  public runUserListWatcher() {
+    const watcher = new UserListWatcher()
     watcher.watch()
     watcher.on('data', (id) => {
       this.addSpaceWatcher(id)
@@ -53,4 +53,4 @@ class Manager {
   }
 }
 
-export const manager = new Manager()
+export const mainManager = new MainManager()
