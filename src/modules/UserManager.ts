@@ -63,7 +63,7 @@ class UserManager extends EventEmitter {
   private async fetchUsers() {
     try {
       if (Util.getTwitterAuthorization()) {
-        await this.fetchUsersByLoopup()
+        await this.fetchUsersByLookup()
       } else {
         await this.fetchUsersByScreenName()
       }
@@ -77,8 +77,8 @@ class UserManager extends EventEmitter {
     }
   }
 
-  private async fetchUsersByLoopup() {
-    this.logger.debug('--> fetchUsersByLoopup')
+  private async fetchUsersByLookup() {
+    this.logger.debug('--> fetchUsersByLookup')
     const chunks = Util.splitArrayIntoChunk(
       this.getUsersWithoutId().map((v) => v.username),
       TWITTER_API_LIST_SIZE,
@@ -105,7 +105,7 @@ class UserManager extends EventEmitter {
         })
       })
     })
-    this.logger.debug('<-- fetchUsersByLoopup')
+    this.logger.debug('<-- fetchUsersByLookup')
   }
 
   private async fetchUsersByScreenName() {

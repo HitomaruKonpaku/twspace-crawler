@@ -26,6 +26,7 @@ program
   .addCommand(testCommand)
 
 program.action(async (args) => {
+  logger.info(Array(80).fill('=').join(''))
   if (args.debug) {
     // eslint-disable-next-line dot-notation
     const transports = logger.transports.filter((v) => v['name'] === 'console')
