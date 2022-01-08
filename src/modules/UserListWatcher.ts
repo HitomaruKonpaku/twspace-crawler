@@ -16,19 +16,15 @@ export class UserListWatcher extends EventEmitter {
     this.logger = baseLogger.child({ label: '[UserListWatcher]' })
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private get users() {
-    return userManager.getUsers()
-  }
-
   public watch() {
     this.logger.info('Watching...')
     this.getUserSpaces()
   }
 
   private async getUserSpaces() {
-    if (this.users.length) {
-      const idChunks = Util.splitArrayIntoChunk(this.users.map((v) => v.id), TWITTER_API_LIST_SIZE)
+    const users = userManager.getUsersWithId()
+    if (users.length) {
+      const idChunks = Util.splitArrayIntoChunk(users.map((v) => v.id), TWITTER_API_LIST_SIZE)
       await Promise.allSettled(
         idChunks.map((ids) => twitterApiLimiter.schedule(() => this.getSpaces(ids))),
       )

@@ -33,6 +33,10 @@ class UserManager extends EventEmitter {
     return this.users.find((v) => v.username.toLowerCase() === username.toLowerCase())
   }
 
+  public getUsersWithId() {
+    return this.users.filter((v) => v.id)
+  }
+
   public getUsersWithoutId() {
     return this.users.filter((v) => !v.id)
   }
