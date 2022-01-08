@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import EventEmitter from 'events'
 import winston from 'winston'
 import { TwitterApi } from '../apis/TwitterApi'
@@ -33,7 +34,8 @@ export class UserListWatcher extends EventEmitter {
   }
 
   private async getSpaces(userIds: string[]) {
-    this.logger.debug('--> getSpaces', { userIds })
+    const requestId = randomUUID()
+    this.logger.debug('--> getSpaces', { requestId, userIds })
     try {
       const liveSpaceIds: string[] = []
       if (Util.getTwitterAuthorization()) {
@@ -41,7 +43,7 @@ export class UserListWatcher extends EventEmitter {
           userIds,
           { authorization: Util.getTwitterAuthorization() },
         )
-        this.logger.debug('<-- getSpaces', { userIds })
+        this.logger.debug('<-- getSpaces', { requestId })
         liveSpaceIds.push(
           ...(spaces || [])
             .filter((v) => v.state === SpaceState.LIVE)
@@ -55,7 +57,7 @@ export class UserListWatcher extends EventEmitter {
             cookie: [`auth_token=${Util.getTwitterAuthToken()}`].join(';'),
           },
         )
-        this.logger.debug('<-- getSpaces', { userIds })
+        this.logger.debug('<-- getSpaces', { requestId })
         liveSpaceIds.push(
           ...Object.values(data.users)
             .map((v: any) => v.spaces?.live_content?.audiospace?.broadcast_id)

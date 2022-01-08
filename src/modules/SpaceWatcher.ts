@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { program } from 'commander'
+import { randomUUID } from 'crypto'
 import EventEmitter from 'events'
 import { existsSync } from 'fs'
 import nodeNotifier from 'node-notifier'
@@ -102,10 +103,11 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
-    this.logger.debug('--> checkDynamicPlaylist', { url: this.dynamicPlaylistUrl })
+    const requestId = randomUUID()
+    this.logger.debug('--> checkDynamicPlaylist', { requestId })
     try {
       const { data } = await axios.get<string>(this.dynamicPlaylistUrl)
-      this.logger.debug('<-- checkDynamicPlaylist')
+      this.logger.debug('<-- checkDynamicPlaylist', { requestId })
       const chunkIndexes = PeriscopeUtil.getChunks(data)
       if (chunkIndexes.length) {
         this.logger.debug(`Found chunks: ${chunkIndexes.join(',')}`)
@@ -121,7 +123,6 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.error(`checkDynamicPlaylist: ${error.message}`)
     }
     const ms = APP_PLAYLIST_REFRESH_INTERVAL
-    this.logger.debug(`Recheck dynamic playlist in ${ms}ms`)
     setTimeout(() => this.checkDynamicPlaylist(), ms)
   }
 
