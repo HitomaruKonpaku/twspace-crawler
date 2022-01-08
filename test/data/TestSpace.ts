@@ -133,6 +133,14 @@ export const spaces = [
     date: null,
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/huuxT6Dxr-BBb1Xx5tqMjG4NHMZfsQf47e7YsZZDbFgwySFJ1cYqYRMD2Ubu9DUiPViWc2Kxjld3Ui7g_RoAmg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
+  {
+    screen_name: 'shirakamifubuki',
+    id: '1BdGYwDwYQZxX',
+    started_at: 1641600493090,
+    title: 'のんびり準備しながら雑談',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/BdPjEI44Z03J4OlngtDdfiqcKs643z3XOb-ol3I16dpwuo1A3PDz6UFJOIbaMOfM2GQogtufbWbNUQDp1KrYnw/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
   // ================================================================================
   // ================================================================================
   {
