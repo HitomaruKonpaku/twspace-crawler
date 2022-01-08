@@ -18,7 +18,7 @@ export class UserListWatcher extends EventEmitter {
 
   // eslint-disable-next-line class-methods-use-this
   private get users() {
-    return userManager.users
+    return userManager.getUsers()
   }
 
   public watch() {

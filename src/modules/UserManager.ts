@@ -13,28 +13,28 @@ interface User {
 }
 
 class UserManager extends EventEmitter {
-  public users: User[] = []
-
   private logger: winston.Logger
+  private users: User[] = []
 
   constructor() {
     super()
     this.logger = baseLogger.child({ label: '[UserManager]' })
   }
 
+  public getUsers() {
+    return this.users
+  }
+
   public getUserById(id: string) {
-    const user = this.users.find((v) => v.id === id)
-    return user
+    return this.users.find((v) => v.id === id)
   }
 
   public getUserByUsername(username: string) {
-    const user = this.users.find((v) => v.username.toLowerCase() === username.toLowerCase())
-    return user
+    return this.users.find((v) => v.username.toLowerCase() === username.toLowerCase())
   }
 
-  public getUserWithoutId() {
-    const users = this.users.filter((v) => !v.id)
-    return users
+  public getUsersWithoutId() {
+    return this.users.filter((v) => !v.id)
   }
 
   public async add(usernames: string[]) {
@@ -66,7 +66,7 @@ class UserManager extends EventEmitter {
     } catch (error) {
       this.logger.error(`fetchUsers: ${error.message}`)
     }
-    const users = this.getUserWithoutId()
+    const users = this.getUsersWithoutId()
     if (users.length) {
       this.logger.warn(`fetchUsers: Found some users without id. Retry in ${TWITTER_USER_FETCH_INTERVAL}ms`, { usernames: users.map((v) => v.username) })
       setTimeout(() => this.fetchUsers(), TWITTER_USER_FETCH_INTERVAL)
@@ -76,7 +76,7 @@ class UserManager extends EventEmitter {
   private async fetchUsersByLoopup() {
     this.logger.debug('--> fetchUsersByLoopup')
     const chunks = Util.splitArrayIntoChunk(
-      this.getUserWithoutId().map((v) => v.username),
+      this.getUsersWithoutId().map((v) => v.username),
       TWITTER_API_LIST_SIZE,
     )
     const responses = await Promise.allSettled(
@@ -108,7 +108,7 @@ class UserManager extends EventEmitter {
     this.logger.debug('--> fetchUsersByScreenName')
     await configManager.getGuestToken()
     const responses = await Promise.allSettled(
-      this.getUserWithoutId().map((v, i) => twitterApiLimiter.schedule(async () => {
+      this.getUsersWithoutId().map((v, i) => twitterApiLimiter.schedule(async () => {
         this.logger.debug(`--> getUserByScreenName #${i + 1}`, { username: v.username })
         const user = await TwitterApi.getUserByScreenName(v.username, {
           authorization: TWITTER_AUTHORIZATION,
