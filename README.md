@@ -4,6 +4,11 @@
 
 Script to crawl & download Twitter Spaces.
 
+## Note
+
+- Please set `TWITTER_AUTHORIZATION` or `TWITTER_AUTH_TOKEN` for better Spaces lookup
+- Without above config, script will try to fetch user tweets for live Spaces, which could result empty if user not tweet that Space
+
 ## Requirements
 
 - [Node 14](https://nodejs.org/)
@@ -83,7 +88,7 @@ node ./dist/index.js cc d 1yoJMWneoZwKQ https://prod-chatman-ancillary-ap-northe
 node ./dist/index.js cc e /download/sample_cc.jsonl
 ```
 
-## Advanced Usage
+## Advanced Usage ##
 
 - To monitor multiple users, it is better to use [Twitter API v2](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
     1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
@@ -96,3 +101,13 @@ node ./dist/index.js cc e /download/sample_cc.jsonl
        ```
        TWITTER_AUTHORIZATION = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs..."
        ```
+
+- How to get `TWITTER_AUTH_TOKEN`
+  1. Sign in Twitter
+  2. Install [Get cookies.txt](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid)
+  3. Export Twitter cookies
+  4. Get `auth_token` value from this line
+
+     ```
+     .twitter.com	TRUE	/	TRUE	1776344450	auth_token	c97ca3ac55d292fb...
+     ```
