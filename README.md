@@ -104,10 +104,10 @@ node ./dist/index.js cc e /download/sample_cc.jsonl
 
 - How to get `TWITTER_AUTH_TOKEN`
   1. Sign in Twitter
-  2. Install [Get cookies.txt](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid)
-  3. Export Twitter cookies
-  4. Get `auth_token` value from this line
+  2. Open new tab (Chrome)
 
      ```
-     .twitter.com	TRUE	/	TRUE	1776344450	auth_token	c97ca3ac55d292fb...
+     chrome://settings/cookies/detail?site=twitter.com&search=cookies
      ```
+
+  3. Copy `Content` of `auth_token`
