@@ -1,90 +1,74 @@
 import EventEmitter from 'events'
 import winston from 'winston'
 import { TwitterApi } from '../apis/TwitterApi'
-import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
+import { TWITTER_API_LIST_SIZE, TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { SpaceState } from '../enums/Twitter.enum'
+import { twitterApiLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
+import { userManager } from './UserManager'
 
 export class UserListWatcher extends EventEmitter {
-  private readonly CHUNK_SIZE = 100
-
   private logger: winston.Logger
 
-  private users: { id: string, username: string }[] = []
-  private usernameChunks: string[][] = []
-
-  constructor(private usernames: string[]) {
+  constructor() {
     super()
     this.logger = baseLogger.child({ label: '[UserListWatcher]' })
-    this.logger.info(`Usernames: ${usernames}`)
-    this.logger.info(`Username count: ${usernames.length}`)
-    this.usernameChunks = [...Array(Math.ceil(usernames.length / this.CHUNK_SIZE))]
-      .map(() => usernames.splice(0, this.CHUNK_SIZE))
-    this.logger.info(`User chunk count: ${this.usernameChunks.length}`)
   }
 
-  public async watch(): Promise<void> {
-    this.logger.info('Starting...')
-    try {
-      await this.initUsers()
-      const idChunks = this.usernameChunks
-        .map((chunk) => chunk
-          .map((username) => this.users
-            .find((user) => user.username.toLowerCase() === username.toLowerCase())?.id)
-          .filter((v) => v))
-      this.logger.info('Watching...')
-      idChunks.forEach((idChunk) => this.getSpaces(idChunk))
-    } catch (error) {
-      const { status, headers, data } = (error.response || {})
-      this.logger.error(`watch: ${error.message}`, {
-        response: { status, data, headers },
-      })
-
-      let timeoutMs = 5000
-      // Rate limit exceeded
-      if (status === 429) {
-        const xRateLimitReset = Number(headers?.['x-rate-limit-reset']) * 1000
-        if (xRateLimitReset) {
-          timeoutMs = Math.max(xRateLimitReset - Date.now(), timeoutMs)
-        }
-      }
-      this.logger.info(`Retry in ${timeoutMs}ms`)
-      setTimeout(() => this.watch(), timeoutMs)
-    }
+  // eslint-disable-next-line class-methods-use-this
+  private get users() {
+    return userManager.users
   }
 
-  private async initUsers() {
-    const responses = await Promise.all(
-      this.usernameChunks.map((v) => TwitterApi.getUsersLookup(
-        v,
-        { authorization: TWITTER_AUTHORIZATION },
-      )),
-    )
-    this.users = []
-    responses.forEach((users) => {
-      users.forEach((user) => {
-        this.users.push({
-          id: user.id_str,
-          username: user.screen_name,
-        })
-      })
-    })
-    this.logger.debug(`User list: ${JSON.stringify(this.users)}`)
+  public watch() {
+    this.logger.info('Watching...')
+    this.getUserSpaces()
   }
 
-  private async getSpaces(ids: string[]) {
-    this.logger.debug('>>> getSpaces', { ids })
-    try {
-      const { data: spaces } = await TwitterApi.getSpacesByCreatorIds(
-        ids,
-        { authorization: Util.getTwitterAuthorization() },
+  private async getUserSpaces() {
+    if (this.users.length) {
+      const idChunks = Util.splitArrayIntoChunk(this.users.map((v) => v.id), TWITTER_API_LIST_SIZE)
+      await Promise.allSettled(
+        idChunks.map((ids) => twitterApiLimiter.schedule(() => this.getSpaces(ids))),
       )
-      this.logger.debug('<<< getSpaces', { spaces })
-      const liveSpaces = (spaces || []).filter((v) => v.state === SpaceState.LIVE)
-      if (liveSpaces.length) {
-        this.logger.debug(`Live space ids: ${liveSpaces.map((v) => v.id).join(', ')}`)
-        liveSpaces.forEach((space) => this.emit('data', space.id))
+    }
+    setTimeout(() => this.getUserSpaces(), Util.getUserRefreshInterval())
+  }
+
+  private async getSpaces(userIds: string[]) {
+    this.logger.debug('--> getSpaces', { userIds })
+    try {
+      const liveSpaceIds: string[] = []
+      if (Util.getTwitterAuthorization()) {
+        const { data: spaces } = await TwitterApi.getSpacesByCreatorIds(
+          userIds,
+          { authorization: Util.getTwitterAuthorization() },
+        )
+        this.logger.debug('<-- getSpaces', { userIds })
+        liveSpaceIds.push(
+          ...(spaces || [])
+            .filter((v) => v.state === SpaceState.LIVE)
+            .map((v) => v.id),
+        )
+      } else if (Util.getTwitterAuthToken()) {
+        const data = await TwitterApi.getSpacesByFleetsAvatarContent(
+          userIds,
+          {
+            authorization: TWITTER_AUTHORIZATION,
+            cookie: [`auth_token=${Util.getTwitterAuthToken()}`].join(';'),
+          },
+        )
+        this.logger.debug('<-- getSpaces', { userIds })
+        liveSpaceIds.push(
+          ...Object.values(data.users)
+            .map((v: any) => v.spaces?.live_content?.audiospace?.broadcast_id)
+            .filter((v) => v),
+        )
+      }
+      if (liveSpaceIds.length) {
+        this.logger.debug(`Live space ids: ${liveSpaceIds.join(',')}`)
+        liveSpaceIds.forEach((id) => this.emit('data', id))
       }
     } catch (error) {
       this.logger.error(`getSpaces: ${error.message}`, {
@@ -94,6 +78,5 @@ export class UserListWatcher extends EventEmitter {
         },
       })
     }
-    setTimeout(() => this.getSpaces(ids), Util.getUserRefreshInterval())
   }
 }

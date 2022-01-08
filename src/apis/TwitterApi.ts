@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import axios from 'axios'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { AudioSpaceMetadata, LiveVideoStreamStatus, User } from '../interfaces/Twitter.interface'
@@ -20,10 +21,21 @@ export class TwitterApi {
     return data
   }
 
-  public static async getSpacesByCreatorIds(ids: string[], headers: Record<string, string>) {
+  public static async getSpacesByCreatorIds(userIds: string[], headers: Record<string, string>) {
     const { data } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
       headers,
-      params: { user_ids: ids.join(',') },
+      params: { user_ids: userIds.join(',') },
+    })
+    return data
+  }
+
+  public static async getSpacesByFleetsAvatarContent(userIds: string[], headers: Record<string, string>) {
+    const { data } = await axios.get('https://twitter.com/i/api/fleets/v1/avatar_content', {
+      headers,
+      params: {
+        user_ids: userIds.join(','),
+        only_spaces: true,
+      },
     })
     return data
   }

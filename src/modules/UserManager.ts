@@ -1,22 +1,24 @@
+import { EventEmitter } from 'stream'
 import winston from 'winston'
 import { TwitterApi } from '../apis/TwitterApi'
-import { configManager } from '../ConfigManager'
 import { TWITTER_API_LIST_SIZE, TWITTER_AUTHORIZATION, TWITTER_USER_FETCH_INTERVAL } from '../constants/twitter.constant'
 import { twitterApiLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
+import { configManager } from './ConfigManager'
 
 interface User {
   id: string
   username: string
 }
 
-class UserManager {
+class UserManager extends EventEmitter {
+  public users: User[] = []
+
   private logger: winston.Logger
 
-  private users: User[] = []
-
   constructor() {
+    super()
     this.logger = baseLogger.child({ label: '[UserManager]' })
   }
 
@@ -72,19 +74,19 @@ class UserManager {
   }
 
   private async fetchUsersByLoopup() {
-    this.logger.debug('>>> fetchUsersByLoopup')
+    this.logger.debug('--> fetchUsersByLoopup')
     const chunks = Util.splitArrayIntoChunk(
       this.getUserWithoutId().map((v) => v.username),
       TWITTER_API_LIST_SIZE,
     )
     const responses = await Promise.allSettled(
       chunks.map((usernames, i) => twitterApiLimiter.schedule(async () => {
-        this.logger.debug(`>>> getUsersLookup #${i + 1}`, { usernames })
+        this.logger.debug(`--> getUsersLookup #${i + 1}`, { usernames })
         const users = await TwitterApi.getUsersLookup(
           usernames,
           { authorization: Util.getTwitterAuthorization() },
         )
-        this.logger.debug(`<<< getUsersLookup #${i + 1}`, { usernames })
+        this.logger.debug(`<-- getUsersLookup #${i + 1}`, { usernames })
         return Promise.resolve(users)
       })),
     )
@@ -99,20 +101,20 @@ class UserManager {
         })
       })
     })
-    this.logger.debug('<<< fetchUsersByLoopup')
+    this.logger.debug('<-- fetchUsersByLoopup')
   }
 
   private async fetchUsersByScreenName() {
-    this.logger.debug('>>> fetchUsersByScreenName')
+    this.logger.debug('--> fetchUsersByScreenName')
     await configManager.getGuestToken()
     const responses = await Promise.allSettled(
       this.getUserWithoutId().map((v, i) => twitterApiLimiter.schedule(async () => {
-        this.logger.debug(`>>> getUserByScreenName #${i + 1}`, { username: v.username })
+        this.logger.debug(`--> getUserByScreenName #${i + 1}`, { username: v.username })
         const user = await TwitterApi.getUserByScreenName(v.username, {
           authorization: TWITTER_AUTHORIZATION,
           'x-guest-token': configManager.guestToken,
         })
-        this.logger.debug(`<<< getUserByScreenName #${i + 1}`, { username: v.username })
+        this.logger.debug(`<-- getUserByScreenName #${i + 1}`, { username: v.username })
         return Promise.resolve(user)
       })),
     )
@@ -126,7 +128,7 @@ class UserManager {
         username: result.legacy.screen_name,
       })
     })
-    this.logger.debug('<<< fetchUsersByScreenName')
+    this.logger.debug('<-- fetchUsersByScreenName')
   }
 }
 

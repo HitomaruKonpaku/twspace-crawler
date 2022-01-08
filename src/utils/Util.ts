@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { configManager } from '../ConfigManager'
 import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from '../constants/app.constant'
+import { configManager } from '../modules/ConfigManager'
 
 export class Util {
   public static getTwitterAuthorization(): string {
