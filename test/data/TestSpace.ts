@@ -443,6 +443,22 @@ export const spaces = [
     date: null,
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/s8kAahrx1jPQp7qgwuDwqWmt6LvVmG1j-oDoVS85p13pisP1AT0ZLXc-5hzDh-6aqFGUofw39ktYEyKqME9S5g/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
+  {
+    screen_name: 'akaihaato',
+    id: '1LyxBokvyaoKN',
+    started_at: 1641832492351,
+    title: '#HAACHAMANOW 🤪🙌💫',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/BUN8vvQE_eJvSUf8bJv3o0YQ0gzsUrV2a43H5dsXn0Khoy3IZCAC7ljTgZHnkqQ2Rgkga24Mqw3Nbudl_wnFdQ/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  {
+    screen_name: 'akaihaato',
+    id: '1LyxBokvAgPKN',
+    started_at: 1641833234002,
+    title: '#HAACHAMARAP 🤪🙌💫',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/i-UsXgUwf8vIv3ahPVpVu4yCo71UFtmJUdXpBn0O2G024zkTRGzg6odXDcSD3S998pZYCLZhY7nQdupfWhuE-w/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
   // ================================================================================
   // ================================================================================
   {
@@ -512,6 +528,14 @@ export const spaces = [
     title: '#おはようちょこ先生',
     date: null,
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/C1D1SOuxHIFTWxeU7eiUomAeEmOBqU_tsD88CZtaUfSGnTJ_nxxkH8FLi7qTibWhwrDJcLedihlKkIO4UUTHzg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  {
+    screen_name: 'yuzukichococh',
+    id: '1djxXPDVbLNxZ',
+    started_at: 1641685759369,
+    title: '#ちょこ朝',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/Y9F3T1ep49Eh01oLmoqtzOSFsYpJnynYrJzl1EhWZaqdJ5akLIp7QOKF7hDZaAX9ali-mbiDbkg5YDxDl2jiUg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
   // ================================================================================
   // ================================================================================
