@@ -86,12 +86,17 @@ class UserManager extends EventEmitter {
     const responses = await Promise.allSettled(
       chunks.map((usernames, i) => twitterApiLimiter.schedule(async () => {
         this.logger.debug(`--> getUsersLookup ${i + 1}`, { usernames })
-        const users = await TwitterApi.getUsersLookup(
-          usernames,
-          { authorization: Util.getTwitterAuthorization() },
-        )
-        this.logger.debug(`<-- getUsersLookup ${i + 1}`, { usernames })
-        return Promise.resolve(users)
+        try {
+          const users = await TwitterApi.getUsersLookup(
+            usernames,
+            { authorization: Util.getTwitterAuthorization() },
+          )
+          this.logger.debug(`<-- getUsersLookup ${i + 1}`, { usernames })
+          return Promise.resolve(users)
+        } catch (error) {
+          this.logger.error(`fetchUsersByLookup: ${error.message}`, { usernames })
+          throw error
+        }
       })),
     )
     responses.forEach((response) => {
@@ -113,13 +118,19 @@ class UserManager extends EventEmitter {
     await configManager.getGuestToken()
     const responses = await Promise.allSettled(
       this.getUsersWithoutId().map((v, i) => twitterApiLimiter.schedule(async () => {
-        this.logger.debug(`--> getUserByScreenName ${i + 1}`, { username: v.username })
-        const user = await TwitterApi.getUserByScreenName(v.username, {
-          authorization: TWITTER_AUTHORIZATION,
-          'x-guest-token': configManager.guestToken,
-        })
-        this.logger.debug(`<-- getUserByScreenName ${i + 1}`, { username: v.username })
-        return Promise.resolve(user)
+        const { username } = v
+        this.logger.debug(`--> getUserByScreenName ${i + 1}`, { username })
+        try {
+          const user = await TwitterApi.getUserByScreenName(username, {
+            authorization: TWITTER_AUTHORIZATION,
+            'x-guest-token': configManager.guestToken,
+          })
+          this.logger.debug(`<-- getUserByScreenName ${i + 1}`, { username })
+          return Promise.resolve(user)
+        } catch (error) {
+          this.logger.error(`fetchUsersByScreenName: ${error.message}`, { username })
+          throw error
+        }
       })),
     )
     responses.forEach((response) => {
