@@ -16,11 +16,13 @@ import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger } from '../logger'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
+import { TwitterUtil } from '../utils/TwitterUtil'
 import { Util } from '../utils/Util'
 import { configManager } from './ConfigManager'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
 import { SpaceDownloader } from './SpaceDownloader'
+import { Webhook } from './Webhook'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
@@ -46,7 +48,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   public get spaceUrl(): string {
-    return `https://twitter.com/i/spaces/${this.spaceId}`
+    return TwitterUtil.getSpaceUrl(this.spaceId)
   }
 
   public async watch(): Promise<void> {
@@ -59,11 +61,11 @@ export class SpaceWatcher extends EventEmitter {
         'x-guest-token': guestToken,
       }
       this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
-      this.logger.info('Host info', {
-        screenName: this.metadata.creator_results?.result?.legacy?.screen_name,
-        displayName: this.metadata.creator_results?.result?.legacy?.name,
-      })
+      const screenName = this.metadata.creator_results?.result?.legacy?.screen_name
+      const displayName = this.metadata.creator_results?.result?.legacy?.name
+      this.logger.info('Host info', { screenName, displayName })
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
+      new Webhook(screenName, this.spaceId).send()
       this.showNotification()
       this.mediaKey = this.metadata.media_key
       this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.mediaKey, headers)

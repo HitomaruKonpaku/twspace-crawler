@@ -6,5 +6,14 @@ export interface Config {
 
   interval?: number
 
-  [key: string]: any
+  webhooks?: {
+    discord?: {
+      urls: string[]
+      usernames: ('<all>' | string)[]
+      mentions?: {
+        roleIds?: string[]
+        userIds?: string[]
+      }
+    }[]
+  }
 }
