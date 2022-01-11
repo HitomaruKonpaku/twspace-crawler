@@ -45,6 +45,9 @@ export class Webhook {
     this.logger.debug('sendDiscord')
     const configs = Array.from(this.config?.discord || [])
     configs.forEach((config) => {
+      if (!config.active) {
+        return
+      }
       const urls = Array.from(config.urls || [])
         .filter((v) => v)
       const usernames = Array.from(config.usernames || [])

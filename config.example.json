@@ -182,6 +182,7 @@
   "webhooks": {
     "discord": [
       {
+        "active": true,
         "urls": [],
         "usernames": [
           "<all>"

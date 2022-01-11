@@ -8,6 +8,7 @@ export interface Config {
 
   webhooks?: {
     discord?: {
+      active: boolean
       urls: string[]
       usernames: ('<all>' | string)[]
       mentions?: {
