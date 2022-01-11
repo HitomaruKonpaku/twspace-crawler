@@ -1,4 +1,5 @@
 {
+  "interval": 30000,
   "users": [
     {
       "username": "achan_UGA"
@@ -178,5 +179,18 @@
       "username": "8HaChi_hacchi"
     }
   ],
-  "interval": 30000
+  "webhooks": {
+    "discord": [
+      {
+        "urls": [],
+        "usernames": [
+          "<all>"
+        ],
+        "mentions": {
+          "roleIds": [],
+          "userIds": []
+        }
+      }
+    ]
+  }
 }
