@@ -327,6 +327,14 @@ export const spaces = [
     date: null,
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/DE-OVC82hb9ZjFu2HVm0K1wao251aPPZEZJ-A8MbHer32YascROZSD2dLSOVTkXinBnnrDmEilTXm10TnwqRYA/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
+  {
+    screen_name: 'natsuiromatsuri',
+    id: '1lDxLLqwqLZxm',
+    started_at: 1641962493003,
+    title: 'おぎだ #まつりスペース',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/I6R0U4m4EZ9F6ya_B_bicGwo3swfb_EnilH5ikA_mNnVcFjjP3BDONtlFSV3jb1sadhz43v2_d5pEIEi8Ymozw/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
   // ================================================================================
   // ================================================================================
   {
@@ -458,6 +466,14 @@ export const spaces = [
     title: '#HAACHAMARAP 🤪🙌💫',
     date: null,
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/i-UsXgUwf8vIv3ahPVpVu4yCo71UFtmJUdXpBn0O2G024zkTRGzg6odXDcSD3S998pZYCLZhY7nQdupfWhuE-w/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  {
+    screen_name: 'akaihaato',
+    id: '1mrxmalLejgxy',
+    started_at: 1641995991218,
+    title: 'EN KARAOKE🎤 #はあちゃますぺーす草',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/yP-TU5ShvXpS-rCrTfXXzG0G__4RDbIWPwLDpQHM47uqG-sTNKLB-7vACrdKQq7zjBHF99ZMJvED0xQTsfCNVw/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
   // ================================================================================
   // ================================================================================
@@ -868,6 +884,26 @@ export const spaces = [
   // ================================================================================
   // ================================================================================
   {
+    screen_name: 'irys_en',
+    id: '1vAxRkRjNdZKl',
+    started_at: 1641913252430,
+    title: '#IRySJourney New EP Released! Btw idk how to use this lol',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/gQwuBdKMXEf2SCqHC8Z7XUm9Hz8eLkKQVciY9zsWQOLdsR0PXx7HVpa254TAZuKAw1UdItn5o_bjPuuEdlCE8w/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  // ================================================================================
+  // ================================================================================
+  {
+    screen_name: 'nanashimumei_en',
+    id: '1rmxPgEVpqMJN',
+    started_at: 1641963380063,
+    title: 'Kitchen Time #MumeiCooking',
+    date: null,
+    playlist_url: 'https://prod-fastly-us-east-1.video.pscp.tv/Transcoding/v1/hls/05Tir_GOzzhoCGUX3TKUwCHfmRrMIBeQpAn_sRHGAAFVzSkchZ-lITZO6FCyhjVMEUyKAFORk3_6X6W4WrYubg/non_transcode/us-east-1/periscope-replay-direct-prod-us-east-1-public/audio-space/master_playlist.m3u8',
+  },
+  // ================================================================================
+  // ================================================================================
+  {
     screen_name: 'hakosbaelz',
     id: '1RDxlgXWgNOJL',
     started_at: 1636032915035,
@@ -1020,6 +1056,26 @@ export const spaces = [
     title: 'ういの宇宙',
     date: null,
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/LziQqBSwZ_Bd0ru6N1WwabkK0hun-zUCcWpNx1q2CvygFu-KAziR7649NUq1_eYxDMqOzrAMSsdgxREgvc8ijw/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  // ================================================================================
+  // ================================================================================
+  {
+    screen_name: '8HaChi_hacchi',
+    id: '1YpKkZjbRAExj',
+    started_at: 1641873028986,
+    title: 'おひるごはん #たやスペ',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/mjVCaYQro3Ayf0-ghn3iBlVo6mXOApSNriDdBZ_jPW6A0xRLG_YWyUjfYjv2nFrwQpVzIq4V8RPurXjHXaHg_A/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  // ================================================================================
+  // ================================================================================
+  {
+    screen_name: 'nonoo_4405',
+    id: '1lDxLLqwymmxm',
+    started_at: 1641979515104,
+    title: '#ののばなし',
+    date: null,
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/Dq_9NfYLu4aJbTiGwYKrmQTRziek4pQafwASUEhyl6i2PyH3H4ED-3sk8DPmIiFZLfY-zJQKcwy6xzrOrAt-tQ/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
   // ================================================================================
   // ================================================================================
