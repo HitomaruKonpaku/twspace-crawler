@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { randomUUID } from 'crypto'
 import winston from 'winston'
+import { discordWebhookLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { configManager } from './ConfigManager'
@@ -82,7 +83,7 @@ export class Webhook {
           ],
         }
         // Send
-        urls.forEach((url) => this.post(url, payload))
+        urls.forEach((url) => discordWebhookLimiter.schedule(() => this.post(url, payload)))
       } catch (error) {
         this.logger.error(`sendDiscord: ${error.message}`)
       }
