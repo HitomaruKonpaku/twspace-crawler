@@ -7,7 +7,14 @@ import { TwitterUtil } from '../utils/TwitterUtil'
 import { configManager } from './ConfigManager'
 
 interface WebhookMeta {
-  spaceTitle?: string
+  author?: {
+    name?: string
+    url?: string
+    iconUrl?: string
+  }
+  space?: {
+    title?: string
+  }
 }
 
 export class Webhook {
@@ -81,10 +88,15 @@ export class Webhook {
           embeds: [
             {
               type: 'rich',
-              title: `[${this.username}] Space started!`,
-              description: this.meta?.spaceTitle,
+              title: 'Space started!',
+              description: this.meta?.space?.title,
               url: TwitterUtil.getSpaceUrl(this.spaceId),
               color: 0x1d9bf0,
+              author: {
+                name: this.meta?.author?.name,
+                url: this.meta?.author?.url,
+                icon_url: this.meta?.author?.iconUrl,
+              },
             },
           ],
         }

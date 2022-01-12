@@ -227,7 +227,14 @@ export class SpaceWatcher extends EventEmitter {
     const webhook = new Webhook(
       this.screenName,
       this.spaceId,
-      { spaceTitle: this.spaceTitle },
+      {
+        author: {
+          name: `${this.displayName} (@${this.screenName})`.trim(),
+          url: TwitterUtil.getUserUrl(this.screenName),
+          iconUrl: this.profileImgUrl,
+        },
+        space: { title: this.spaceTitle },
+      },
     )
     webhook.send()
   }
