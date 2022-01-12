@@ -111,3 +111,9 @@ node ./dist/index.js cc e /download/sample_cc.jsonl
      ```
 
   3. Copy `Content` of `auth_token`
+
+## Webhooks
+
+Currently support Discord Webooks
+
+Check `config.example.json` for more detail
