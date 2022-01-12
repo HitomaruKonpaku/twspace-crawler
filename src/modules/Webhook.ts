@@ -6,12 +6,17 @@ import { logger as baseLogger } from '../logger'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { configManager } from './ConfigManager'
 
+interface WebhookMeta {
+  spaceTitle?: string
+}
+
 export class Webhook {
   private logger: winston.Logger
 
   constructor(
     private readonly username: string,
     private readonly spaceId: string,
+    private readonly meta?: WebhookMeta,
   ) {
     this.logger = baseLogger.child({ label: `[Webhook] [${username}] [${spaceId}]` })
   }
@@ -77,6 +82,7 @@ export class Webhook {
             {
               type: 'rich',
               title: `[${this.username}] Space started!`,
+              description: this.meta?.spaceTitle,
               url: TwitterUtil.getSpaceUrl(this.spaceId),
               color: 0x1d9bf0,
             },

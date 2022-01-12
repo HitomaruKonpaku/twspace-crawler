@@ -70,6 +70,7 @@ export class UserListWatcher extends EventEmitter {
       }
     } catch (error) {
       this.logger.error(`getSpaces: ${error.message}`, {
+        requestId,
         response: {
           data: error.response?.data,
           headers: error.response?.headers,

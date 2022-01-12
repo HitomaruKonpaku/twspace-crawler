@@ -2,16 +2,12 @@ import axios from 'axios'
 import { program } from 'commander'
 import { randomUUID } from 'crypto'
 import EventEmitter from 'events'
-import { existsSync } from 'fs'
-import nodeNotifier from 'node-notifier'
-import open from 'open'
 import path from 'path'
 import winston from 'winston'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { TwitterApi } from '../apis/TwitterApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from '../constants/app.constant'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
-import { Downloader } from '../Downloader'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger } from '../logger'
@@ -19,6 +15,7 @@ import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { Util } from '../utils/Util'
 import { configManager } from './ConfigManager'
+import { Notification } from './Notification'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
 import { SpaceDownloader } from './SpaceDownloader'
@@ -51,6 +48,22 @@ export class SpaceWatcher extends EventEmitter {
     return TwitterUtil.getSpaceUrl(this.spaceId)
   }
 
+  public get spaceTitle(): string {
+    return this.metadata.title
+  }
+
+  public get screenName(): string {
+    return this.metadata.creator_results?.result?.legacy?.screen_name
+  }
+
+  public get displayName(): string {
+    return this.metadata.creator_results?.result?.legacy?.name
+  }
+
+  public get profileImgUrl(): string {
+    return this.metadata.creator_results?.result?.legacy?.profile_image_url_https?.replace?.('_normal', '')
+  }
+
   public async watch(): Promise<void> {
     this.logger.info('Watching...')
     this.logger.info(`Space url: ${this.spaceUrl}`)
@@ -61,12 +74,10 @@ export class SpaceWatcher extends EventEmitter {
         'x-guest-token': guestToken,
       }
       this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
-      const screenName = this.metadata.creator_results?.result?.legacy?.screen_name
-      const displayName = this.metadata.creator_results?.result?.legacy?.name
-      this.logger.info('Host info', { screenName, displayName })
+      this.logger.info('Host info', { screenName: this.screenName, displayName: this.displayName })
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
-      new Webhook(screenName, this.spaceId).send()
       this.showNotification()
+      this.sendWebhooks()
       this.mediaKey = this.metadata.media_key
       this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.mediaKey, headers)
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
@@ -90,7 +101,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private getUsername(): string {
-    const username = this.username || this.metadata.creator_results?.result?.legacy?.screen_name
+    const username = this.username || this.screenName
     return username
   }
 
@@ -122,7 +133,7 @@ export class SpaceWatcher extends EventEmitter {
         this.checkMasterPlaylist()
         return
       }
-      this.logger.error(`checkDynamicPlaylist: ${error.message}`)
+      this.logger.error(`checkDynamicPlaylist: ${error.message}`, { requestId })
     }
     const ms = APP_PLAYLIST_REFRESH_INTERVAL
     setTimeout(() => this.checkDynamicPlaylist(), ms)
@@ -200,38 +211,24 @@ export class SpaceWatcher extends EventEmitter {
     if (!program.getOptionValue('notification') || this.isNotificationNotified) {
       return
     }
-    try {
-      const user = this.metadata.creator_results?.result
-      const notification: nodeNotifier.Notification = {
-        title: `${user.legacy?.name || ''} Space Live`.trim(),
-        message: `${this.metadata.title || ''}`,
-      }
-      const profileImgUrl: string = user.legacy?.profile_image_url_https?.replace('_normal', '')
-      if (profileImgUrl) {
-        // Since notifier can not use url, need to download it
-        try {
-          const imgPathname = profileImgUrl.replace('https://pbs.twimg.com/', '')
-          Util.createCacheDir(path.dirname(imgPathname))
-          const imgPath = path.join(Util.getCacheDir(), imgPathname)
-          if (!existsSync(imgPath)) {
-            await Downloader.downloadImage(profileImgUrl, imgPath)
-          }
-          notification.icon = imgPath
-        } catch (error) {
-          this.logger.error(`showNotification: ${error.message}`)
-        }
-      }
-      this.logger.debug('Notification:', notification)
-      nodeNotifier.notify(notification, (error, response) => {
-        this.logger.debug('Notification callback', { response, error })
-        // Tested on win32/macOS, response can be undefined, activate, timeout
-        if (!error && (!response || response === 'activate')) {
-          open(this.spaceUrl)
-        }
-      })
-      this.isNotificationNotified = true
-    } catch (error) {
-      this.logger.error(`showNotification: ${error.message}`)
-    }
+    this.isNotificationNotified = true
+    const notification = new Notification(
+      {
+        title: `${this.displayName || ''} Space Live!`.trim(),
+        message: `${this.spaceTitle || ''}`,
+        icon: this.profileImgUrl,
+      },
+      this.spaceUrl,
+    )
+    notification.notify()
+  }
+
+  private sendWebhooks() {
+    const webhook = new Webhook(
+      this.screenName,
+      this.spaceId,
+      { spaceTitle: this.spaceTitle },
+    )
+    webhook.send()
   }
 }

@@ -1,10 +1,10 @@
 export interface Config {
+  interval?: number
+
   users?: {
     username: string
     [key: string]: any
   }[]
-
-  interval?: number
 
   webhooks?: {
     discord?: {
