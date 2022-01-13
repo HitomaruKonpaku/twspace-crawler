@@ -39,6 +39,7 @@ export class UserWatcher extends EventEmitter {
   private async getSpaces() {
     if (this.user.id) {
       try {
+        await configManager.getGuestToken()
         await this.getUserTweets()
       } catch (error) {
         this.logger.error(`getSpaces: ${error.message}`)
