@@ -22,6 +22,7 @@ program
   .option('--force', 'Force download Space when using with --id')
   .option('--url <PLAYLIST_ID>', 'Download Space using playlist url')
   .option('--notification', 'Show notification about new live Space')
+  .option('--force-open', 'Force open Space in browser')
   .addCommand(ccCommand)
   .addCommand(testCommand)
 

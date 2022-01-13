@@ -72,6 +72,7 @@ node ./dist/index.js --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1
   --url <PLAYLIST_URL>      Download Space using playlist url
 
   --notification            Show notification about new live Space
+  --force-open              Force open Space in browser
 ```
 
 ## Commands

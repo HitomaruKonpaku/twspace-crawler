@@ -42,7 +42,7 @@ export class SpaceWatcher extends EventEmitter {
     this.logger = baseLogger.child({ label: `[SpaceWatcher@${spaceId}]` })
 
     // Force open space url in browser (no need to wait for notification)
-    if (program.getOptionValue('force-open')) {
+    if (program.getOptionValue('forceOpen')) {
       open(this.spaceUrl)
     }
   }
