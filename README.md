@@ -26,13 +26,7 @@ npm run build
 
 ## Usage
 
-Download live Space with audio & captions
-
-```
-node ./dist/index.js --id 1yoJMWneoZwKQ
-```
-
-Monitor user(s) indefinitely, wait for live Space and download
+Monitor user(s) indefinitely, wait for live Space and download when Space ended
 
 ```
 node ./dist/index.js --user nakiriayame
@@ -44,6 +38,24 @@ node ./dist/index.js --user nakiriayame,sakamatachloe
 
 ```
 node ./dist/index.js --config ./config.json
+```
+
+Monitor & download Space by id
+
+```
+node ./dist/index.js --id 1yoJMWvbybNKQ
+```
+
+Download Space by playlist url
+
+```
+node ./dist/index.js --url https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/1Nq1QFkYTQ4v1X4BTV_aJ_pFeQhYyuYXY7ykz5xB7v5NvGwFMJMKwnRBmxyi9twF4BZ90ZKks5wdGKqESVsjLw...
+```
+
+Download Space by playlist url with additional metadata (if Space url still available)
+
+```
+node ./dist/index.js --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/1Nq1QFkYTQ4v1X4BTV_aJ_pFeQhYyuYXY7ykz5xB7v5NvGwFMJMKwnRBmxyi9twF4BZ90ZKks5wdGKqESVsjLw...
 ```
 
 ## Options
