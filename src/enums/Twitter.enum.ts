@@ -4,4 +4,5 @@ export enum SpaceState {
 
 export enum SpaceMetadataState {
   RUNNING = 'Running',
+  ENDED = 'Ended',
 }

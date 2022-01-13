@@ -40,7 +40,7 @@ program.action(async (args) => {
   configManager.load()
 
   const { url, id, user } = args
-  if (url) {
+  if (url && !id) {
     logger.info('Starting in url mode', { url })
     new SpaceDownloader(url, Util.getTimeString()).download()
     return

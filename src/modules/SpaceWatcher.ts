@@ -9,6 +9,7 @@ import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { TwitterApi } from '../apis/TwitterApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from '../constants/app.constant'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
+import { SpaceMetadataState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger } from '../logger'
@@ -78,10 +79,10 @@ export class SpaceWatcher extends EventEmitter {
     try {
       await this.initData()
     } catch (error) {
+      const ms = 5000
       this.logger.error(`watch: ${error.message}`)
-      const timeoutMs = 5000
-      this.logger.info(`Retry watch in ${timeoutMs}ms`)
-      setTimeout(() => this.watch(), timeoutMs)
+      this.logger.info(`Retry watch in ${ms}ms`)
+      setTimeout(() => this.watch(), ms)
     }
   }
 
@@ -108,12 +109,15 @@ export class SpaceWatcher extends EventEmitter {
   private async initData() {
     if (!this.metadata) {
       await this.getSpaceMetadata()
-      this.showNotification()
-      this.sendWebhooks()
+      if (this.metadata.state === SpaceMetadataState.RUNNING) {
+        this.showNotification()
+        this.sendWebhooks()
+      }
     }
 
     // Download space by url with available metadata
-    if (program.getOptionValue('url')) {
+    this.dynamicPlaylistUrl = program.getOptionValue('url')
+    if (this.dynamicPlaylistUrl) {
       this.downloadAudio()
       return
     }
