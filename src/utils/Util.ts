@@ -12,16 +12,13 @@ export class Util {
     return process.env.TWITTER_AUTH_TOKEN
   }
 
-  public static getTimeString(): string {
-    const date = new Date()
-    const s = [
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds(),
-    ].map((v) => String(v).padStart(2, '0').slice(-2)).join('')
+  public static getTimeString(ms?: number): string {
+    const date = ms
+      ? new Date(ms)
+      : new Date()
+    const s = date.toISOString()
+      .replace(/[^\d]/g, '')
+      .substring(2, 12)
     return s
   }
 

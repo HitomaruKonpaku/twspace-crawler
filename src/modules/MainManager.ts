@@ -13,12 +13,12 @@ class MainManager {
     this.logger = baseLogger.child({ label: '[MainManager]' })
   }
 
-  public addSpaceWatcher(spaceId: string, username = '') {
+  public addSpaceWatcher(spaceId: string) {
     const watchers = this.spaceWatchers
     if (watchers[spaceId]) {
       return
     }
-    const watcher = new SpaceWatcher(spaceId, username)
+    const watcher = new SpaceWatcher(spaceId)
     watchers[spaceId] = watcher
     watcher.watch()
     watcher.once('complete', () => {

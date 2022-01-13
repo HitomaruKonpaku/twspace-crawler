@@ -2,6 +2,7 @@ import axios from 'axios'
 import { program } from 'commander'
 import { randomUUID } from 'crypto'
 import EventEmitter from 'events'
+import open from 'open'
 import path from 'path'
 import winston from 'winston'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
@@ -28,20 +29,21 @@ export class SpaceWatcher extends EventEmitter {
   private metadata: AudioSpaceMetadata
   private liveStreamStatus: LiveVideoStreamStatus
   private accessChatData: AccessChat
-  private mediaKey: string
   private dynamicPlaylistUrl: string
-  private lastChunkIndex: number
 
+  private lastChunkIndex: number
   private chunkVerifyCount = 0
+
   private isNotificationNotified = false
 
-  constructor(
-    public spaceId: string,
-    public username = null,
-  ) {
+  constructor(public spaceId: string) {
     super()
     this.logger = baseLogger.child({ label: `[SpaceWatcher@${spaceId}]` })
-    // open(this.spaceUrl)
+
+    // Force open space url in browser (no need to wait for notification)
+    if (program.getOptionValue('force-open')) {
+      open(this.spaceUrl)
+    }
   }
 
   public get spaceUrl(): string {
@@ -52,46 +54,29 @@ export class SpaceWatcher extends EventEmitter {
     return this.metadata.title
   }
 
-  public get screenName(): string {
+  public get userScreenName(): string {
     return this.metadata.creator_results?.result?.legacy?.screen_name
   }
 
-  public get displayName(): string {
+  public get userDisplayName(): string {
     return this.metadata.creator_results?.result?.legacy?.name
   }
 
-  public get profileImgUrl(): string {
+  public get userProfileImgUrl(): string {
     return this.metadata.creator_results?.result?.legacy?.profile_image_url_https?.replace?.('_normal', '')
+  }
+
+  private get filename(): string {
+    const time = Util.getTimeString(this.metadata.started_at || this.metadata.created_at)
+    const name = `[${this.userScreenName}][${time}] ${this.spaceTitle || 'NA'} (${this.spaceId})`
+    return name
   }
 
   public async watch(): Promise<void> {
     this.logger.info('Watching...')
     this.logger.info(`Space url: ${this.spaceUrl}`)
     try {
-      const guestToken = await configManager.getGuestToken()
-      const headers = {
-        authorization: TWITTER_AUTHORIZATION,
-        'x-guest-token': guestToken,
-      }
-      this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
-      this.logger.info('Host info', { screenName: this.screenName, displayName: this.displayName })
-      this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
-      this.showNotification()
-      this.sendWebhooks()
-      this.mediaKey = this.metadata.media_key
-      this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.mediaKey, headers)
-      this.logger.debug('liveStreamStatus', this.liveStreamStatus)
-      this.accessChatData = await PeriscopeApi.getAccessChat(this.liveStreamStatus.chatToken)
-      this.logger.debug('accessChat data', this.accessChatData)
-      this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
-      this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
-      this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
-      this.logger.info(`Playlist url: ${this.dynamicPlaylistUrl}`)
-      if (program.getOptionValue('force')) {
-        this.downloadMedia()
-        return
-      }
-      this.checkDynamicPlaylist()
+      await this.initData()
     } catch (error) {
       this.logger.error(`watch: ${error.message}`)
       const timeoutMs = 5000
@@ -100,19 +85,68 @@ export class SpaceWatcher extends EventEmitter {
     }
   }
 
-  private getUsername(): string {
-    const username = this.username || this.screenName
-    return username
+  // eslint-disable-next-line class-methods-use-this
+  private async getHeaders() {
+    const guestToken = await configManager.getGuestToken()
+    const headers = {
+      authorization: TWITTER_AUTHORIZATION,
+      'x-guest-token': guestToken,
+    }
+    return headers
   }
 
-  private getFilename(): string {
-    const date = new Date(this.metadata.started_at || this.metadata.created_at)
-      .toISOString()
-      .replace(/[^\d]/g, '')
-      .substring(2, 12)
-    // const name = `[${date}] ${this.getUsername()} (${this.spaceId})`
-    const name = `[${this.getUsername()}][${date}] ${this.metadata.title || 'NA'} (${this.spaceId})`
-    return name
+  private async getSpaceMetadata() {
+    const requestId = randomUUID()
+    const headers = await this.getHeaders()
+    this.logger.debug('--> getSpaceMetadata', { requestId })
+    this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
+    this.logger.debug('<-- getSpaceMetadata', { requestId })
+    this.logger.info('Host info', { screenName: this.userScreenName, displayName: this.userDisplayName })
+    this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
+  }
+
+  private async initData() {
+    if (!this.metadata) {
+      await this.getSpaceMetadata()
+      this.showNotification()
+      this.sendWebhooks()
+    }
+
+    // Download space by url with available metadata
+    if (program.getOptionValue('url')) {
+      this.downloadAudio()
+      return
+    }
+
+    if (!this.liveStreamStatus) {
+      const requestId = randomUUID()
+      const headers = await this.getHeaders()
+      this.logger.debug('--> getLiveVideoStreamStatus', { requestId })
+      // eslint-disable-next-line max-len
+      this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.metadata.media_key, headers)
+      this.logger.debug('<-- getLiveVideoStreamStatus', { requestId })
+      this.logger.debug('liveStreamStatus', this.liveStreamStatus)
+    }
+
+    if (!this.accessChatData) {
+      const requestId = randomUUID()
+      this.logger.debug('--> getAccessChat', { requestId })
+      this.accessChatData = await PeriscopeApi.getAccessChat(this.liveStreamStatus.chatToken)
+      this.logger.debug('<-- getAccessChat', { requestId })
+      this.logger.debug('accessChat data', this.accessChatData)
+      this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
+      this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
+    }
+
+    this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
+
+    // Force download space
+    if (program.getOptionValue('force')) {
+      this.downloadAudio()
+      return
+    }
+
+    this.checkDynamicPlaylist()
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
@@ -149,7 +183,7 @@ export class SpaceWatcher extends EventEmitter {
         || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
         || masterChunkSize >= this.lastChunkIndex
       if (canDownload) {
-        this.downloadMedia()
+        this.downloadAudio()
         this.downloadCaptions()
         return
       }
@@ -163,44 +197,50 @@ export class SpaceWatcher extends EventEmitter {
     setTimeout(() => this.checkMasterPlaylist(), ms)
   }
 
-  private async downloadMedia() {
+  private async downloadAudio() {
     try {
-      const username = this.getUsername()
-      const filename = this.getFilename()
       const metadata = {
-        title: this.metadata.title,
-        author: this.metadata.creator_results?.result?.legacy?.name,
-        artist: this.metadata.creator_results?.result?.legacy?.name,
+        title: this.spaceTitle,
+        author: this.userDisplayName,
+        artist: this.userDisplayName,
         episode_id: this.spaceId,
       }
-      this.logger.info(`File name: ${filename}`)
+      this.logger.info(`File name: ${this.filename}`)
       this.logger.info(`File metadata: ${JSON.stringify(metadata)}`)
       if (!this.downloader) {
-        this.downloader = new SpaceDownloader(this.dynamicPlaylistUrl, filename, username, metadata)
+        this.downloader = new SpaceDownloader(
+          this.dynamicPlaylistUrl,
+          this.filename,
+          this.userScreenName,
+          metadata,
+        )
       }
       await this.downloader.download()
       this.emit('complete')
     } catch (error) {
+      const ms = 10000
       // Attemp to download transcode playlist right after space end could return 404
-      this.logger.error(`downloadMedia: ${error.message}`)
-      this.retryDownload(10000)
+      this.logger.error(`downloadAudio: ${error.message}`)
+      this.logger.info(`Retry download audio in ${ms}ms`)
+      setTimeout(() => this.downloadAudio(), ms)
     }
   }
 
-  private retryDownload(timeoutMs: number) {
-    this.logger.info(`Retry download in ${timeoutMs}ms`)
-    setTimeout(() => this.downloadMedia(), timeoutMs)
-  }
-
   private async downloadCaptions() {
+    if (!this.accessChatData) {
+      return
+    }
     try {
-      const username = this.getUsername()
-      const filename = this.getFilename()
-      const tmpFile = path.join(Util.getMediaDir(username), `${filename} CC.jsonl`)
-      const outFile = path.join(Util.getMediaDir(username), `${filename} CC.txt`)
-      Util.createMediaDir(this.username)
-      // eslint-disable-next-line max-len
-      await new SpaceCaptionsDownloader(this.spaceId, this.accessChatData.endpoint, this.accessChatData.access_token, tmpFile).download()
+      const username = this.userScreenName
+      const tmpFile = path.join(Util.getMediaDir(username), `${this.filename} CC.jsonl`)
+      const outFile = path.join(Util.getMediaDir(username), `${this.filename} CC.txt`)
+      Util.createMediaDir(username)
+      await new SpaceCaptionsDownloader(
+        this.spaceId,
+        this.accessChatData.endpoint,
+        this.accessChatData.access_token,
+        tmpFile,
+      ).download()
       await new SpaceCaptionsExtractor(tmpFile, outFile).extract()
     } catch (error) {
       this.logger.error(`downloadCaptions: ${error.message}`)
@@ -214,9 +254,9 @@ export class SpaceWatcher extends EventEmitter {
     this.isNotificationNotified = true
     const notification = new Notification(
       {
-        title: `${this.displayName || ''} Space Live!`.trim(),
+        title: `${this.userDisplayName || ''} Space Live!`.trim(),
         message: `${this.spaceTitle || ''}`,
-        icon: this.profileImgUrl,
+        icon: this.userProfileImgUrl,
       },
       this.spaceUrl,
     )
@@ -225,13 +265,13 @@ export class SpaceWatcher extends EventEmitter {
 
   private sendWebhooks() {
     const webhook = new Webhook(
-      this.screenName,
+      this.userScreenName,
       this.spaceId,
       {
         author: {
-          name: `${this.displayName} (@${this.screenName})`.trim(),
-          url: TwitterUtil.getUserUrl(this.screenName),
-          iconUrl: this.profileImgUrl,
+          name: `${this.userDisplayName} (@${this.userScreenName})`.trim(),
+          url: TwitterUtil.getUserUrl(this.userScreenName),
+          iconUrl: this.userProfileImgUrl,
         },
         space: { title: this.spaceTitle },
       },
