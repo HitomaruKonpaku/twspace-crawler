@@ -97,13 +97,18 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async getSpaceMetadata() {
-    const requestId = randomUUID()
     const headers = await this.getHeaders()
-    this.logger.debug('--> getSpaceMetadata', { requestId })
-    this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
-    this.logger.debug('<-- getSpaceMetadata', { requestId })
-    this.logger.info('Host info', { screenName: this.userScreenName, displayName: this.userDisplayName })
-    this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
+    const requestId = randomUUID()
+    try {
+      this.logger.debug('--> getSpaceMetadata', { requestId })
+      this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
+      this.logger.debug('<-- getSpaceMetadata', { requestId })
+      this.logger.info('Host info', { screenName: this.userScreenName, displayName: this.userDisplayName })
+      this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
+    } catch (error) {
+      this.logger.debug(`getSpaceMetadata: ${error.message}`, { requestId })
+      throw error
+    }
   }
 
   private async initData() {
@@ -206,7 +211,7 @@ export class SpaceWatcher extends EventEmitter {
       // Get latest metadata in case title changed
       await this.getSpaceMetadata()
     } catch (error) {
-      // Ignore
+      this.logger.warn(`processDownload: ${error.message}`)
     }
     this.downloadAudio()
     this.downloadCaptions()
