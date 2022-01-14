@@ -186,25 +186,29 @@ export class SpaceWatcher extends EventEmitter {
       const canDownload = !this.lastChunkIndex
         || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
         || masterChunkSize >= this.lastChunkIndex
-      if (!canDownload) {
-        this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
-        this.chunkVerifyCount += 1
+      if (canDownload) {
+        await this.processDownload()
         return
       }
-      try {
-        // Get latest metadata in case title changed
-        await this.getSpaceMetadata()
-      } catch (error) {
-        // Ignore
-      }
-      this.downloadAudio()
-      this.downloadCaptions()
+      this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
+      this.chunkVerifyCount += 1
     } catch (error) {
       this.logger.error(`checkMasterPlaylist: ${error.message}`)
     }
     const ms = APP_PLAYLIST_REFRESH_INTERVAL
     this.logger.info(`Recheck master playlist in ${ms}ms`)
     setTimeout(() => this.checkMasterPlaylist(), ms)
+  }
+
+  private async processDownload() {
+    try {
+      // Get latest metadata in case title changed
+      await this.getSpaceMetadata()
+    } catch (error) {
+      // Ignore
+    }
+    this.downloadAudio()
+    this.downloadCaptions()
   }
 
   private async downloadAudio() {
