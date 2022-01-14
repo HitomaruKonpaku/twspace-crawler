@@ -207,6 +207,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async processDownload() {
+    this.logger.debug('processDownload')
     try {
       // Get latest metadata in case title changed
       await this.getSpaceMetadata()
