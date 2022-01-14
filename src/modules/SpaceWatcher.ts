@@ -132,6 +132,9 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
     }
 
+    this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
+    this.logger.info(`Master playlist url: ${PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)}`)
+
     if (!this.accessChatData) {
       const requestId = randomUUID()
       this.logger.debug('--> getAccessChat', { requestId })
@@ -141,8 +144,6 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
       this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
     }
-
-    this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
 
     // Force download space
     if (program.getOptionValue('force')) {
