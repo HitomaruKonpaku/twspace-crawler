@@ -1,6 +1,6 @@
 {
   "name": "twspace-crawler",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "scripts": {
     "start": "node dist/index",
     "start:config": "node dist/index --config ./config.json",
