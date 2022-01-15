@@ -52,7 +52,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   public get spaceTitle(): string {
-    return this.metadata.title
+    return Util.getCleanFileName(this.metadata.title)
   }
 
   public get userScreenName(): string {

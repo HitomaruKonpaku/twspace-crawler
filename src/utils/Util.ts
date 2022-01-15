@@ -43,6 +43,13 @@ export class Util {
     return fs.mkdirSync(this.getMediaDir(subDir), { recursive: true })
   }
 
+  /**
+    * @see https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+    */
+  public static getCleanFileName(name: string) {
+    return name?.replace?.(/[/\\?*:|<>"]/g, '')
+  }
+
   public static splitArrayIntoChunk<T>(arr: T[], chunkSize: number) {
     return [...Array(Math.ceil(arr.length / chunkSize))]
       .map(() => arr.splice(0, chunkSize))
