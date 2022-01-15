@@ -31,10 +31,10 @@ class ConfigManager {
     return this.config
   }
 
-  public async getGuestToken() {
+  public async getGuestToken(forceRefresh = false) {
     const token = await twitterGuestTokenLimiter.schedule(async () => {
       const tokenDeltaTime = Date.now() - (this.guestTokenTime || 0)
-      if (!(this.guestToken && tokenDeltaTime < TWITTER_GUEST_TOKEN_DURATION)) {
+      if (forceRefresh || !(this.guestToken && tokenDeltaTime < TWITTER_GUEST_TOKEN_DURATION)) {
         this.logger.debug('--> getGuestToken')
         this.guestToken = await TwitterApi.getGuestToken()
         this.guestTokenTime = Date.now()

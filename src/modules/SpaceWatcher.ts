@@ -7,7 +7,7 @@ import path from 'path'
 import winston from 'winston'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { TwitterApi } from '../apis/TwitterApi'
-import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL } from '../constants/app.constant'
+import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP_SPACE_ERROR_RETRY_INTERVAL } from '../constants/app.constant'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { SpaceMetadataState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
@@ -79,8 +79,10 @@ export class SpaceWatcher extends EventEmitter {
     try {
       await this.initData()
     } catch (error) {
-      const ms = 5000
-      this.logger.error(`watch: ${error.message}`)
+      if (this.metadata) {
+        this.logger.error(`watch: ${error.message}`)
+      }
+      const ms = APP_SPACE_ERROR_RETRY_INTERVAL
       this.logger.info(`Retry watch in ${ms}ms`)
       setTimeout(() => this.watch(), ms)
     }
@@ -106,7 +108,24 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info('Host info', { screenName: this.userScreenName, displayName: this.userDisplayName })
       this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
     } catch (error) {
-      this.logger.debug(`getSpaceMetadata: ${error.message}`, { requestId })
+      const meta = { requestId }
+      if (error.response) {
+        Object.assign(meta, {
+          response: {
+            status: error.response.status,
+            data: error.response.data,
+          },
+        })
+      }
+      this.logger.error(`getSpaceMetadata: ${error.message}`, meta)
+
+      // Bad guest token
+      if (error.response?.data?.errors?.some?.((v) => v.code === 239)) {
+        configManager.getGuestToken(true)
+          .then(() => this.logger.debug('getSpaceMetadata: refresh guest token success'))
+          .catch(() => this.logger.error('getSpaceMetadata: refresh guest token failed'))
+      }
+
       throw error
     }
   }
