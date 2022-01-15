@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { AudioSpaceMetadata, LiveVideoStreamStatus, User as User1 } from '../interfaces/Twitter.interface'
-import { User } from '../interfaces/Twitter2.interface'
+import { BaseResponse, Space, User } from '../interfaces/Twitter2.interface'
 
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {
@@ -26,7 +26,7 @@ export class TwitterApi {
    * @see https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
    */
   public static async getUsersByUsernames(usernames: string[], headers: Record<string, string>) {
-    const { data } = await axios.get<{ data: User[] }>('https://api.twitter.com/2/users/by', {
+    const { data } = await axios.get<BaseResponse<User[]>>('https://api.twitter.com/2/users/by', {
       headers,
       params: { usernames: usernames.join(',') },
     })
@@ -37,7 +37,7 @@ export class TwitterApi {
    * @see https://developer.twitter.com/en/docs/twitter-api/spaces/lookup/api-reference/get-spaces-by-creator-ids
    */
   public static async getSpacesByCreatorIds(userIds: string[], headers: Record<string, string>) {
-    const { data } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
+    const { data } = await axios.get<BaseResponse<Space[]>>('https://api.twitter.com/2/spaces/by/creator_ids', {
       headers,
       params: { user_ids: userIds.join(',') },
     })

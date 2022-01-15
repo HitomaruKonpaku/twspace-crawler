@@ -1,5 +1,6 @@
 export enum SpaceState {
   LIVE = 'live',
+  SCHEDULED = 'scheduled',
 }
 
 export enum SpaceMetadataState {
