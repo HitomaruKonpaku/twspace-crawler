@@ -94,7 +94,7 @@ class UserManager extends EventEmitter {
           this.logger.debug(`<-- getUsersLookup ${i + 1}`, { usernames })
           return Promise.resolve(users)
         } catch (error) {
-          this.logger.error(`fetchUsersByLookup: ${error.message}`, { usernames })
+          this.logger.error(`fetchUsersByLookup: ${error.message}`, { usernames, response: { data: error.response?.data } })
           throw error
         }
       })),
