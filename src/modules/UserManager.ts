@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { EventEmitter } from 'stream'
 import winston from 'winston'
 import { TwitterApi } from '../apis/TwitterApi'
@@ -85,16 +86,17 @@ class UserManager extends EventEmitter {
     )
     const responses = await Promise.allSettled(
       chunks.map((usernames, i) => twitterApiLimiter.schedule(async () => {
-        this.logger.debug(`--> getUsersLookup ${i + 1}`, { usernames })
+        const requestId = randomUUID()
         try {
-          const users = await TwitterApi.getUsersLookup(
+          this.logger.debug(`--> getUsersByUsernames ${i + 1}`, { requestId, usernames })
+          const { data: users } = await TwitterApi.getUsersByUsernames(
             usernames,
             { authorization: Util.getTwitterAuthorization() },
           )
-          this.logger.debug(`<-- getUsersLookup ${i + 1}`, { usernames })
+          this.logger.debug(`<-- getUsersByUsernames ${i + 1}`, { requestId })
           return Promise.resolve(users)
         } catch (error) {
-          this.logger.error(`fetchUsersByLookup: ${error.message}`, { usernames, response: { data: error.response?.data } })
+          this.logger.error(`getUsersByUsernames: ${error.message}`, { requestId, response: { data: error.response?.data } })
           throw error
         }
       })),
@@ -105,8 +107,8 @@ class UserManager extends EventEmitter {
       }
       response.value.forEach((v) => {
         this.updateUser({
-          id: v.id_str,
-          username: v.screen_name,
+          id: v.id,
+          username: v.username,
         })
       })
     })

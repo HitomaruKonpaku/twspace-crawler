@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
 import axios from 'axios'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
-import { AudioSpaceMetadata, LiveVideoStreamStatus, User } from '../interfaces/Twitter.interface'
+import { AudioSpaceMetadata, LiveVideoStreamStatus, User as User1 } from '../interfaces/Twitter.interface'
+import { User } from '../interfaces/Twitter2.interface'
 
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {
@@ -14,13 +15,27 @@ export class TwitterApi {
   }
 
   public static async getUsersLookup(usernames: string[], headers: Record<string, string>) {
-    const { data } = await axios.get<User[]>('https://api.twitter.com/1.1/users/lookup.json', {
+    const { data } = await axios.get<User1[]>('https://api.twitter.com/1.1/users/lookup.json', {
       headers,
       params: { screen_name: usernames.join(',') },
     })
     return data
   }
 
+  /**
+   * @see https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
+   */
+  public static async getUsersByUsernames(usernames: string[], headers: Record<string, string>) {
+    const { data } = await axios.get<{ data: User[] }>('https://api.twitter.com/2/users/by', {
+      headers,
+      params: { usernames: usernames.join(',') },
+    })
+    return data
+  }
+
+  /**
+   * @see https://developer.twitter.com/en/docs/twitter-api/spaces/lookup/api-reference/get-spaces-by-creator-ids
+   */
   public static async getSpacesByCreatorIds(userIds: string[], headers: Record<string, string>) {
     const { data } = await axios.get('https://api.twitter.com/2/spaces/by/creator_ids', {
       headers,
