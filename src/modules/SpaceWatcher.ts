@@ -52,7 +52,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   public get spaceTitle(): string {
-    return Util.getCleanFileName(this.metadata.title)
+    return this.metadata.title
   }
 
   public get userScreenName(): string {
@@ -69,7 +69,7 @@ export class SpaceWatcher extends EventEmitter {
 
   private get filename(): string {
     const time = Util.getTimeString(this.metadata.started_at || this.metadata.created_at)
-    const name = `[${this.userScreenName}][${time}] ${this.spaceTitle || 'NA'} (${this.spaceId})`
+    const name = `[${this.userScreenName}][${time}] ${Util.getCleanFileName(this.spaceTitle) || 'NA'} (${this.spaceId})`
     return name
   }
 
