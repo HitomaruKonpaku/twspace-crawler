@@ -31,9 +31,9 @@ command
       .from<any>(eval(readFileSync(path.join(__dirname, '../../test/data/users.ts'), { encoding: 'utf8' })))
 
     filteredSpaces.forEach((space) => {
-      const user = users.find((v) => v.screen_name === space.screen_name)
+      const user = users.find((v) => v.username === space.username)
       const time = Util.getTimeString(space.started_at)
-      const name = `[${space.screen_name}][${time}] ${space.title || 'NA'} (${space.id})`
+      const name = `[${space.username}][${time}] ${space.title || 'NA'} (${space.id})`
       const metadata = {
         title: space.title,
         author: user.name,
@@ -43,7 +43,7 @@ command
       new SpaceDownloader(
         space.playlist_url,
         name,
-        space.screen_name,
+        space.username,
         metadata,
       ).download()
     })
