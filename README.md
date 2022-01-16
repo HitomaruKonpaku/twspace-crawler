@@ -2,7 +2,7 @@
 
 ## Description
 
-Script to crawl & download Twitter Spaces.
+Script to monitor & download Twitter Spaces.
 
 ## Note
 
