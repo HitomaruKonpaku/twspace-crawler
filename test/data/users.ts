@@ -345,4 +345,9 @@
     screen_name: 'vesper_yomi',
     name: 'ヨミ / VESPERBELL',
   },
+  {
+    id: '1216049692842188801',
+    screen_name: 'Ci_BGV',
+    name: 'Ci [BOOGEY VOXX]',
+  },
 ]

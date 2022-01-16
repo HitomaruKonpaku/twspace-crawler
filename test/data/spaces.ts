@@ -726,6 +726,13 @@
     title: 'ねえ、吾輩の何がいけなかったの？',
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/otaOswqQoCjULMUAQXA3aFO_yLLvS7uqmQB2OLfs_dR351ieXhQs6H0aWjDUgYEOTDIBFqzoN5MKiVKS9b8C8A/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
+  {
+    screen_name: 'LaplusDarknesss',
+    id: '1LyxBokRPDaKN',
+    started_at: 1642242767021,
+    title: '外より寒い吾輩の家から伝えるMessage',
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/yenulOtsWltjshnjilUs9lzZr_kOg0JiHrS1BEouSLNxgxVa6K2tIFJ65xUghGc0BKMho36dEzpIT9n6j57OeQ/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
   // ================================================================================
   // ================================================================================
   {
@@ -999,6 +1006,15 @@
   // ================================================================================
   // ================================================================================
   {
+    screen_name: 'Ci_BGV',
+    id: '1vOxwyzZPeqGB',
+    started_at: 1638628242325,
+    title: '#DOMINATOR_BH デジタルリリースをカウントダウンするぞ',
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/0SXJJEGv60r0Vfp3-_Scvl1vRcGmBviIwjNetpOEN3-sUOEhn7HdXuGXhc-sEJJW52_X_haflFGv4zI1Z-hpmQ/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  // ================================================================================
+  // ================================================================================
+  {
     screen_name: 'nonoo_4405',
     id: '1lDxLLqwymmxm',
     started_at: 1641979515104,
@@ -1018,6 +1034,13 @@
     started_at: 1642160222803,
     title: '相互さん！！！！大歓迎！！！！です！！！！！！！！',
     playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/eF8zyx8geuzBjQNxXfaEhOnXnLnlYBqTjav5HnZX-wq9OrEHsxjPlgNd8XZnoALbyDUmXdhRY0qj1tJctNBStQ/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
+  },
+  {
+    screen_name: 'nonoo_4405',
+    id: '1dRKZlknlNmJB',
+    started_at: 1642242767021,
+    title: 'こんばんは！',
+    playlist_url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/baR0iAU0GbB_fq4I2-zPngcsA-CyONracav6hisa6vDLQbAxoGRQ1bKDYUIdcrIOe9SmzY8-yzkIqtQvoPJ3sQ/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8',
   },
   // ================================================================================
   // ================================================================================
