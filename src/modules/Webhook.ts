@@ -89,13 +89,17 @@ export class Webhook {
             {
               type: 'rich',
               title: 'Space started!',
-              description: this.meta?.space?.title,
+              description: [this.meta?.space?.title, TwitterUtil.getSpaceUrl(this.spaceId)].filter((v) => v).join('\n'),
               url: TwitterUtil.getSpaceUrl(this.spaceId),
               color: 0x1d9bf0,
               author: {
                 name: this.meta?.author?.name,
                 url: this.meta?.author?.url,
                 icon_url: this.meta?.author?.iconUrl,
+              },
+              footer: {
+                text: 'Twitter',
+                icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico',
               },
             },
           ],
