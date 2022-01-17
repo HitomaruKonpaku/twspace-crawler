@@ -158,6 +158,7 @@ export class SpaceWatcher extends EventEmitter {
 
     this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
     this.logger.info(`Master playlist url: ${PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)}`)
+    this.logSpaceInfo()
 
     if (!this.accessChatData) {
       const requestId = randomUUID()
@@ -176,6 +177,16 @@ export class SpaceWatcher extends EventEmitter {
     }
 
     this.checkDynamicPlaylist()
+  }
+
+  private logSpaceInfo() {
+    this.logger.info('Space info', {
+      username: this.userScreenName,
+      id: this.spaceId,
+      started_at: this.metadata.started_at,
+      title: this.spaceTitle,
+      playlist_url: PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
+    })
   }
 
   private async checkDynamicPlaylist(): Promise<void> {
@@ -230,6 +241,7 @@ export class SpaceWatcher extends EventEmitter {
     try {
       // Get latest metadata in case title changed
       await this.getSpaceMetadata()
+      this.logSpaceInfo()
     } catch (error) {
       this.logger.warn(`processDownload: ${error.message}`)
     }
