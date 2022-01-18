@@ -11,8 +11,8 @@ Script to monitor & download Twitter Spaces.
 
 ## Requirements
 
-- [Node 14](https://nodejs.org/)
-- [ffmpeg](https://www.ffmpeg.org/)
+- [Node 14](https://nodejs.org/) ([Ubuntu](https://linuxize.com/post/how-to-install-node-js-on-ubuntu-20-04/))
+- [ffmpeg](https://www.ffmpeg.org/) ([Ubuntu](https://linuxize.com/post/how-to-install-ffmpeg-on-ubuntu-20-04/))
 
 ## Installation
 
