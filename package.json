@@ -1,14 +1,21 @@
 {
   "name": "twspace-crawler",
   "version": "1.8.10",
+  "bin": {
+    "twspace-crawler": "dist/index.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
   "scripts": {
     "start": "node dist/index",
     "start:config": "node dist/index --config ./config.json",
     "build": "tsc",
+    "prepare": "npm run build",
     "test": "lab --transform node_modules/lab-transform-typescript",
     "lint": "eslint src --ext .ts",
-    "lint-fix": "eslint src --ext .ts --fix",
-    "prepare": "npm run build"
+    "lint-fix": "eslint src --ext .ts --fix"
   },
   "author": "HitomaruKonpaku",
   "license": "ISC",
@@ -39,9 +46,6 @@
   },
   "engines": {
     "node": ">=14.0.0",
-    "npm": ">= 6.0.0"
-  },
-  "bin": {
-    "twspace-crawler": "dist/index.js"
+    "npm": ">=6.0.0"
   }
 }
