@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { APP_CACHE_DIR, APP_MEDIA_DIR, APP_USER_REFRESH_INTERVAL } from '../constants/app.constant'
+import { APP_CACHE_DIR, APP_DOWNLOAD_DIR, APP_USER_REFRESH_INTERVAL } from '../constants/app.constant'
 import { configManager } from '../modules/ConfigManager'
 
 export class Util {
@@ -36,7 +36,7 @@ export class Util {
   }
 
   public static getMediaDir(subDir = ''): string {
-    return path.join(process.cwd(), APP_MEDIA_DIR, subDir || '')
+    return path.join(process.cwd(), APP_DOWNLOAD_DIR, subDir || '')
   }
 
   public static createMediaDir(subDir = ''): string {

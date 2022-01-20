@@ -1,6 +1,7 @@
 node_modules/
 dist/
 logs/
+download/
 .vscode/
 .idea/
 .cache/
