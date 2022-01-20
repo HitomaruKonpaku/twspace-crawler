@@ -1,6 +1,6 @@
 {
   "name": "twspace-crawler",
-  "version": "1.8.10",
+  "version": "1.9.0",
   "bin": {
     "twspace-crawler": "dist/index.js"
   },
