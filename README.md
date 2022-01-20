@@ -1,64 +1,89 @@
 # twspace-crawler
 
-## Description
+> **Node.js script & command-line app to automatically monitor & download [Twitter Spaces](https://help.twitter.com/en/using-twitter/spaces).**
 
-Script to monitor & download Twitter Spaces.
+
 
 ## Note
 
 - Please set `TWITTER_AUTHORIZATION` or `TWITTER_AUTH_TOKEN` for better Spaces lookup
 - Without above config, script will try to fetch user tweets for live Spaces, which could result empty if user not tweet that Space
 
-## Requirements
+
+
+## Contents
+
+1. [Requirements](#requirements)
+1. [Installation](#installation)
+1. [Usage](#usage)
+1. [Options](#options)
+1. [Commands](#commands)
+1. [Advanced Usage](#advanced-usage)
+
+
+
+## <a name="requirements"/></a> Requirements
 
 - [Node 14](https://nodejs.org/) ([Ubuntu](https://linuxize.com/post/how-to-install-node-js-on-ubuntu-20-04/))
 - [ffmpeg](https://www.ffmpeg.org/) ([Ubuntu](https://linuxize.com/post/how-to-install-ffmpeg-on-ubuntu-20-04/))
 
-## Installation
 
-```
-npm install
-```
 
-```
-npm run build
-```
+## <a name="installation"/></a> Installation
 
-## Usage
+### Command-line installation
 
-Monitor user(s) indefinitely, wait for live Space and download when Space ended
-
-```
-node ./dist/index.js --user nakiriayame
+```bash
+npm install --global twspace-crawler
 ```
 
+### Module installation
+
+```bash
+npm install twspace-crawler
 ```
-node ./dist/index.js --user nakiriayame,sakamatachloe
+
+
+
+## <a name="usage"/></a> Usage
+
+
+### Monitor user(s) indefinitely, wait for live Space and download when Space ended
+
+```
+twspace-crawler --user nakiriayame
 ```
 
 ```
-node ./dist/index.js --config ./config.json
+twspace-crawler --user nakiriayame,sakamatachloe
 ```
 
-Monitor & download Space by id
+```
+twspace-crawler --config ./config.json
 
 ```
-node ./dist/index.js --id 1yoJMWvbybNKQ
-```
 
-Download Space by playlist url
+### Monitor & download Space by id
 
 ```
-node ./dist/index.js --url https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/1Nq1QFkYTQ4v1X4BTV_aJ_pFeQhYyuYXY7ykz5xB7v5NvGwFMJMKwnRBmxyi9twF4BZ90ZKks5wdGKqESVsjLw...
+twspace-crawler --id 1yoJMWvbybNKQ
 ```
 
-Download Space by playlist url with additional metadata (if Space url still available)
+### Download Space by playlist url
 
 ```
-node ./dist/index.js --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/1Nq1QFkYTQ4v1X4BTV_aJ_pFeQhYyuYXY7ykz5xB7v5NvGwFMJMKwnRBmxyi9twF4BZ90ZKks5wdGKqESVsjLw...
+twspace-crawler --url https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/1Nq1QFkYTQ4v1X4BTV_aJ_pFeQhYyuYXY7ykz5xB7v5NvGwFMJMKwnRBmxyi9twF4BZ90ZKks5wdGKqESVsjLw...
 ```
 
-## Options
+### Download Space by playlist url with additional metadata (if Space url still available)
+
+```
+twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/1Nq1QFkYTQ4v1X4BTV_aJ_pFeQhYyuYXY7ykz5xB7v5NvGwFMJMKwnRBmxyi9twF4BZ90ZKks5wdGKqESVsjLw...
+```
+
+
+
+## <a name="options"/></a> Options
 
 ```
   -h, --help                Display help
@@ -75,7 +100,9 @@ node ./dist/index.js --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1
   --force-open              Force open Space in browser
 ```
 
-## Commands
+
+
+## <a name="commands"/></a> Commands
 
 Use to manually process audio/captions
 
@@ -94,14 +121,16 @@ Use to manually process audio/captions
 ### Example
 
 ```
-node ./dist/index.js cc d 1yoJMWneoZwKQ https://prod-chatman-ancillary-ap-northeast-1.pscp.tv 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
+twspace-crawler cc d 1yoJMWneoZwKQ https://prod-chatman-ancillary-ap-northeast-1.pscp.tv 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
 ```
 
 ```
-node ./dist/index.js cc e /download/sample_cc.jsonl
+twspace-crawler cc e /download/sample_cc.jsonl
 ```
 
-## Advanced Usage
+
+
+## <a name="advanced-usage"/></a> Advanced Usage
 
 - To monitor multiple users, it is better to use [Twitter API v2](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
     1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)

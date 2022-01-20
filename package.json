@@ -7,7 +7,8 @@
     "build": "tsc",
     "test": "lab --transform node_modules/lab-transform-typescript",
     "lint": "eslint src --ext .ts",
-    "lint-fix": "eslint src --ext .ts --fix"
+    "lint-fix": "eslint src --ext .ts --fix",
+    "prepare": "npm run build"
   },
   "author": "HitomaruKonpaku",
   "license": "ISC",
@@ -35,5 +36,12 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "lab-transform-typescript": "^3.0.1",
     "typescript": "^4.4.4"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">= 6.0.0"
+  },
+  "bin": {
+    "twspace-crawler": "dist/index.js"
   }
 }

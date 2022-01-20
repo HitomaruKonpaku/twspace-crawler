@@ -28,7 +28,7 @@ export class Util {
   }
 
   public static getCacheDir(subDir = ''): string {
-    return path.join(__dirname, APP_CACHE_DIR, subDir || '')
+    return path.join(process.cwd(), APP_CACHE_DIR, subDir || '')
   }
 
   public static createCacheDir(subDir = ''): string {
@@ -36,7 +36,7 @@ export class Util {
   }
 
   public static getMediaDir(subDir = ''): string {
-    return path.join(__dirname, APP_MEDIA_DIR, subDir || '')
+    return path.join(process.cwd(), APP_MEDIA_DIR, subDir || '')
   }
 
   public static createMediaDir(subDir = ''): string {

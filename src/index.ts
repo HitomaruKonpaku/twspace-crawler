@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { program } from 'commander'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
