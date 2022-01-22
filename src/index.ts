@@ -51,7 +51,7 @@ program.action(async (args) => {
 
   ['TWITTER_AUTHORIZATION', 'TWITTER_AUTH_TOKEN'].forEach((key) => {
     const limit = 16
-    let value = process.env[key]?.substring?.(0, limit)
+    let value = (process.env[key] || '').substring(0, limit)
     if (value) {
       value += '****'
     }
