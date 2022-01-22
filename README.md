@@ -4,8 +4,9 @@
 
 ## Note
 
-- Please set `TWITTER_AUTHORIZATION` or `TWITTER_AUTH_TOKEN` for better Spaces lookup
+- Please set `TWITTER_AUTHORIZATION` or `TWITTER_AUTH_TOKEN` in and run with `--env` for better Spaces lookup
 - Without above config, script will try to fetch user tweets for live Spaces, which could result empty if user not tweet that Space
+- See [Advanced Usage](#advanced-usage) for more detail
 
 ## Contents
 
@@ -49,7 +50,7 @@ twspace-crawler --user nakiriayame,sakamatachloe
 ```
 
 ```
-twspace-crawler --config ./config.json
+twspace-crawler --env ./.env --config ./config.json
 ```
 
 ### Monitor & download Space by id
