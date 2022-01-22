@@ -5,7 +5,7 @@
     "twspace-crawler": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist/**/*.js"
   ],
   "scripts": {
     "start": "node dist/index",
