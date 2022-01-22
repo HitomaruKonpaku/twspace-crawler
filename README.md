@@ -77,7 +77,7 @@ twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.vide
   -h, --help                Display help
   -d, --debug               Show debug logs
 
-  --env <ENV_PATH>          Path to .env file, default current working folder (See .env.example)
+  --env <ENV_PATH>          Path to .env file, default to current working folder (See .env.example)
   --config <CONFIG_PATH>    Path to config file (See config.example.json)
   --user <USER>             Monitor & download live Spaces from users indefinitely,
                             separate by comma (,)

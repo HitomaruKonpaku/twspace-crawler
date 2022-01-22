@@ -17,9 +17,9 @@ const pkg = require('../package.json')
 
 program
   .version(pkg.version)
-  .description('Script to crawl & download Twitter Spaces.')
+  .description('CLI app to monitor & download Twitter Spaces.')
   .option('-d, --debug', 'Show debug logs')
-  .option('--env <ENV_PATH>', 'Path to .env file, default current working folder (See .env.example)')
+  .option('--env <ENV_PATH>', 'Path to .env file, default to current working folder (See .env.example)')
   .option('--config <CONFIG_PATH>', 'Path to config file (See config.example.json)')
   .option('--user <USER>', 'Watch & download live Spaces from users, separate by comma (,)')
   .option('--id <SPACE_ID>', 'Watch & download live Space with id')
