@@ -1,12 +1,19 @@
 {
   "name": "twspace-crawler",
   "version": "1.10.0",
+  "homepage": "https://github.com/HitomaruKonpaku/twspace-crawler#readme",
+  "license": "ISC",
+  "author": "HitomaruKonpaku",
   "bin": {
     "twspace-crawler": "dist/index.js"
   },
   "files": [
     "dist/**/*.js"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HitomaruKonpaku/twspace-crawler.git"
+  },
   "scripts": {
     "start": "node dist/index",
     "start:config": "node dist/index --config ./config.json",
@@ -16,8 +23,6 @@
     "lint": "eslint src --ext .ts",
     "lint-fix": "eslint src --ext .ts --fix"
   },
-  "author": "HitomaruKonpaku",
-  "license": "ISC",
   "dependencies": {
     "axios": "^0.25.0",
     "bottleneck": "^2.19.5",
