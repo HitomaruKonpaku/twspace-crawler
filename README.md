@@ -50,7 +50,6 @@ twspace-crawler --user nakiriayame,sakamatachloe
 
 ```
 twspace-crawler --config ./config.json
-
 ```
 
 ### Monitor & download Space by id
@@ -77,7 +76,8 @@ twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.vide
   -h, --help                Display help
   -d, --debug               Show debug logs
 
-  --config <CONFIG_PATH>    Load config file (Check config.json)
+  --env <ENV_PATH>          Path to .env file, default current working folder (See .env.example)
+  --config <CONFIG_PATH>    Path to config file (See config.example.json)
   --user <USER>             Monitor & download live Spaces from users indefinitely,
                             separate by comma (,)
   --id <SPACE_ID>           Monitor & download live Space with id
