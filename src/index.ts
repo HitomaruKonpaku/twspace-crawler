@@ -49,12 +49,11 @@ program.action(async (args) => {
     dotenv.config({ path: args.env })
   }
 
-  ['TWITTER_AUTHORIZATION', 'TWITTER_AUTH_TOKEN'].forEach((key) => {
+  const envKeys = ['TWITTER_AUTHORIZATION', 'TWITTER_AUTH_TOKEN']
+  envKeys.forEach((key) => {
     const limit = 16
     let value = (process.env[key] || '').substring(0, limit)
-    if (value) {
-      value += '****'
-    }
+    if (value) { value += '****' }
     logger.debug(`env.${key}=${value}`)
   })
 
