@@ -5,7 +5,6 @@
     "twspace-crawler": "dist/index.js"
   },
   "files": [
-    "src",
     "dist"
   ],
   "scripts": {

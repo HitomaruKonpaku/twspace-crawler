@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from 'commander'
+import dotenv from 'dotenv'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
 import { testCommand } from './commands/test.command'
@@ -18,7 +19,8 @@ program
   .version(pkg.version)
   .description('Script to crawl & download Twitter Spaces.')
   .option('-d, --debug', 'Show debug logs')
-  .option('--config <CONFIG_PATH>', 'Load config file (Check config.json)')
+  .option('--env <ENV_PATH>', 'Load env vars (See .env.example)')
+  .option('--config <CONFIG_PATH>', 'Load config file (See config.example.json)')
   .option('--user <USER>', 'Watch & download live Spaces from users, separate by comma (,)')
   .option('--id <SPACE_ID>', 'Watch & download live Space with id')
   .option('--force', 'Force download Space when using with --id')
@@ -42,6 +44,20 @@ program.action(async (args) => {
   }
 
   logger.debug('Args', args)
+
+  if (args.env) {
+    dotenv.config({ path: args.env })
+  }
+
+  ['TWITTER_AUTHORIZATION', 'TWITTER_AUTH_TOKEN'].forEach((key) => {
+    const limit = 16
+    let value = process.env[key]?.substring?.(0, limit)
+    if (value) {
+      value += '****'
+    }
+    logger.debug(`env.${key}=${value}`)
+  })
+
   configManager.load()
 
   const { url, id, user } = args
