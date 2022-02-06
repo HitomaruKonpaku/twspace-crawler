@@ -1,5 +1,8 @@
 # twspace-crawler
 
+[![npm](https://img.shields.io/npm/v/twspace-crawler)](https://www.npmjs.com/package/twspace-crawler)
+[![npm](https://img.shields.io/npm/dt/twspace-crawler)](https://www.npmjs.com/package/twspace-crawler)
+
 > **Node.js script & command-line app to automatically monitor & download [Twitter Spaces](https://help.twitter.com/en/using-twitter/spaces).**
 
 ## Note
