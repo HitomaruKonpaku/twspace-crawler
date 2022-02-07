@@ -48,7 +48,7 @@
   TWITTER_AUTH_TOKEN=
   ```
 
-  - You need to space 1 of them for better Spaces look up
+  - You need to set 1 of them for better Spaces look up
 
   - `TWITTER_AUTHORIZATION`
 
