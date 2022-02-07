@@ -5,28 +5,18 @@
 
 > **Node.js script & command-line app to automatically monitor & download [Twitter Spaces](https://help.twitter.com/en/using-twitter/spaces).**
 
-## Note
-
-- Please set `TWITTER_AUTHORIZATION` or `TWITTER_AUTH_TOKEN` in and run with `--env` for better Spaces lookup
-- Without above config, script will try to fetch user tweets for live Spaces, which could result empty if user not tweet that Space
-- See [Advanced Usage](#advanced-usage) for more detail
-
 ## Contents
 
-1. [Requirements](#requirements)
 1. [Installation](#installation)
 1. [Usage](#usage)
 1. [Options](#options)
 1. [Commands](#commands)
-1. [Advanced Usage](#advanced-usage)
 1. [Webhooks](#webhooks)
-
-## Requirements
-
-- [Node 14](https://nodejs.org/) ([Ubuntu](https://linuxize.com/post/how-to-install-node-js-on-ubuntu-20-04/))
-- [ffmpeg](https://www.ffmpeg.org/) ([Ubuntu](https://linuxize.com/post/how-to-install-ffmpeg-on-ubuntu-20-04/))
+1. [Changelog](CHANGELOG.md)
 
 ## Installation
+
+[FULL INSTALLATION](INSTALLATION.md)
 
 ### Command-line installation
 
@@ -122,32 +112,8 @@ twspace-crawler cc e /download/sample_cc.jsonl
 twspace-crawler cc e /download/sample_cc.jsonl 1633612289669
 ```
 
-## Advanced Usage
-
-- To monitor multiple users, it is better to use [Twitter API v2](https://developer.twitter.com/en/docs/twitter-api/spaces/overview)
-    1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
-    2. Navigate to [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) to create new app (or use existing app)
-    3. Clone `config.example.json` and rename to `config.json` and run app with `--config`
-    4. Clone `.env.example` and rename to `.env`
-    5. Get app `Bearer Token` in `Keys and tokens` tab
-    6. Set `TWITTER_AUTHORIZATION` value to `Bearer Token` value
-
-       ```
-       TWITTER_AUTHORIZATION = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs..."
-       ```
-
-- How to get `TWITTER_AUTH_TOKEN`
-  1. Sign in Twitter
-  2. Open new tab (Chrome)
-
-     ```
-     chrome://settings/cookies/detail?site=twitter.com&search=cookies
-     ```
-
-  3. Copy `Content` of `auth_token`
-
 ## Webhooks
 
 Currently support Discord Webooks
 
-Check `config.example.json` for more detail
+Check [config.example.json](config.example.json) for more detail
