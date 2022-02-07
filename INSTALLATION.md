@@ -79,6 +79,12 @@
 
 - Clone/Create [config.json](config.example.json) file
 
+- Start app
+
+  ```
+  twspace-crawler --env ./.env --config ./config.json --force-open
+  ```
+
 ## twspace-crawler with pm2
 
 - Install [pm2](https://pm2.keymetrics.io/)
