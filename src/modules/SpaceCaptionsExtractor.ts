@@ -4,6 +4,7 @@ import winston from 'winston'
 import { MessageKind } from '../enums/Periscope.enum'
 import { ChatMessage } from '../interfaces/Periscope.interface'
 import { logger as baseLogger } from '../logger'
+import { Util } from '../utils/Util'
 
 export class SpaceCaptionsExtractor {
   private logger: winston.Logger
@@ -11,6 +12,7 @@ export class SpaceCaptionsExtractor {
   constructor(
     private inpFile: string,
     private outFile?: string,
+    private startedAt?: number,
   ) {
     this.logger = baseLogger.child({ label: '[SpaceCaptionsExtractor]' })
 
@@ -81,7 +83,10 @@ export class SpaceCaptionsExtractor {
     if (!obj.final || !obj.body) {
       return
     }
-    const msg = `${obj.username}: ${obj.body}\n`
+    const time = this.startedAt
+      ? `${Util.getDisplayTime(Math.max(0, obj.timestamp - this.startedAt))} | `
+      : ''
+    const msg = `${time}${obj.username}: ${obj.body}\n`
     fs.appendFileSync(this.outFile, msg)
   }
 }

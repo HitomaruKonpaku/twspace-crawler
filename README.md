@@ -105,7 +105,7 @@ Use to manually process audio/captions
                                             - ENDPOINT: Chat endpoint
                                             - TOKEN: Chat access token
 
-  extract|e <FILE>                          Extract Space captions
+  extract|e <FILE> [STARTED_AT]             Extract Space captions
 ```
 
 ### Example
@@ -116,6 +116,10 @@ twspace-crawler cc d 1yoJMWneoZwKQ https://prod-chatman-ancillary-ap-northeast-1
 
 ```
 twspace-crawler cc e /download/sample_cc.jsonl
+```
+
+```
+twspace-crawler cc e /download/sample_cc.jsonl 1633612289669
 ```
 
 ## Advanced Usage

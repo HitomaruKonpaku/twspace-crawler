@@ -62,7 +62,7 @@ program.action(async (args) => {
   const { url, id, user } = args
   if (url && !id) {
     logger.info('Starting in url mode', { url })
-    new SpaceDownloader(url, Util.getTimeString()).download()
+    new SpaceDownloader(url, Util.getDateTimeString()).download()
     return
   }
 

@@ -12,7 +12,15 @@ export class Util {
     return process.env.TWITTER_AUTH_TOKEN
   }
 
-  public static getTimeString(ms?: number): string {
+  public static getDisplayTime(ms: number) {
+    const seconds = Math.floor((ms / 1000) % 60)
+    const minutes = Math.floor((ms / 1000 / 60) % 60)
+    const hours = Math.floor((ms / 1000 / 3600))
+    const s = [hours, minutes, seconds].map((v) => String(v).padStart(2, '0')).join(':')
+    return s
+  }
+
+  public static getDateTimeString(ms?: number): string {
     const date = ms
       ? new Date(ms)
       : new Date()

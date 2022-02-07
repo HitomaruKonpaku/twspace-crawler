@@ -32,7 +32,7 @@ command
 
     filteredSpaces.forEach((space) => {
       const user = users.find((v) => v.username === space.username)
-      const time = Util.getTimeString(space.started_at)
+      const time = Util.getDateTimeString(space.started_at)
       const name = `[${space.username}][${time}] ${space.title || 'NA'} (${space.id})`
       const metadata = {
         title: space.title,

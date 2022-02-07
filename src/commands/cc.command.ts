@@ -14,11 +14,11 @@ command
   })
 
 command
-  .command('extract <FILE>')
+  .command('extract <FILE> [STARTED_AT]')
   .alias('e')
   .description('Extract Space captions')
-  .action((file) => {
-    new SpaceCaptionsExtractor(file).extract()
+  .action((file, startedAt) => {
+    new SpaceCaptionsExtractor(file, null, startedAt).extract()
   })
 
 export { command as ccCommand }

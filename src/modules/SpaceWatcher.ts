@@ -68,7 +68,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private get filename(): string {
-    const time = Util.getTimeString(this.metadata.started_at || this.metadata.created_at)
+    const time = Util.getDateTimeString(this.metadata.started_at || this.metadata.created_at)
     const name = `[${this.userScreenName}][${time}] ${Util.getCleanFileName(this.spaceTitle) || 'NA'} (${this.spaceId})`
     return name
   }
@@ -293,7 +293,7 @@ export class SpaceWatcher extends EventEmitter {
         this.accessChatData.access_token,
         tmpFile,
       ).download()
-      await new SpaceCaptionsExtractor(tmpFile, outFile).extract()
+      await new SpaceCaptionsExtractor(tmpFile, outFile, this.metadata.started_at).extract()
     } catch (error) {
       this.logger.error(`downloadCaptions: ${error.message}`)
     }
