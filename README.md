@@ -7,12 +7,18 @@
 
 ## Contents
 
+1. [Requirements](#requirements)
 1. [Installation](#installation)
 1. [Usage](#usage)
 1. [Options](#options)
 1. [Commands](#commands)
 1. [Webhooks](#webhooks)
 1. [Changelog](CHANGELOG.md)
+
+## Requirements
+
+- [Node.js](https://nodejs.org) (>=14)
+- [FFMPEG](https://www.ffmpeg.org)
 
 ## Installation
 
