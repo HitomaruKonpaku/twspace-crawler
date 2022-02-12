@@ -102,7 +102,7 @@ class UserManager extends EventEmitter {
       })),
     )
     responses.forEach((response) => {
-      if (response.status !== 'fulfilled') {
+      if (response.status !== 'fulfilled' || !response.value) {
         return
       }
       response.value.forEach((v) => {
