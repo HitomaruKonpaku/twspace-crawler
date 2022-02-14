@@ -5,7 +5,7 @@ import dotenv from 'dotenv'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
 import { testCommand } from './commands/test.command'
-import { logger } from './logger'
+import { logger, toggleDebugConsole } from './logger'
 import { configManager } from './modules/ConfigManager'
 import { mainManager } from './modules/MainManager'
 import { SpaceDownloader } from './modules/SpaceDownloader'
@@ -35,12 +35,7 @@ program.action(async (args) => {
   logger.info(`Version: ${pkg.version}`)
 
   if (args.debug) {
-    // eslint-disable-next-line dot-notation
-    const transports = logger.transports.filter((v) => v['name'] === 'console')
-    transports.forEach((transport) => {
-      // eslint-disable-next-line no-param-reassign
-      transport.level = 'silly'
-    })
+    toggleDebugConsole()
   }
 
   logger.debug('Args', args)

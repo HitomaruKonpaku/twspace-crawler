@@ -12,6 +12,14 @@ function getFileName() {
   return `${process.env.NODE_ENV || 'dev'}.%DATE%`
 }
 
+const consoleTransport = new winston.transports.Console({
+  level: 'verbose',
+  format: format.combine(
+    format.colorize(),
+    getPrintFormat(),
+  ),
+})
+
 const logger = winston.createLogger({
   format: format.combine(
     format.timestamp(),
@@ -27,13 +35,7 @@ const logger = winston.createLogger({
     })(),
   ),
   transports: [
-    new winston.transports.Console({
-      level: 'verbose',
-      format: format.combine(
-        format.colorize(),
-        getPrintFormat(),
-      ),
-    }),
+    consoleTransport,
     new DailyRotateFile({
       level: 'verbose',
       format: format.combine(getPrintFormat()),
@@ -51,4 +53,11 @@ const logger = winston.createLogger({
   ],
 })
 
-export { logger }
+function toggleDebugConsole() {
+  consoleTransport.level = 'debug'
+}
+
+export {
+  logger,
+  toggleDebugConsole,
+}
