@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 
-import { program } from 'commander'
+import { Command, program } from 'commander'
 import dotenv from 'dotenv'
 import 'dotenv/config'
 import { ccCommand } from './commands/cc.command'
 import { testCommand } from './commands/test.command'
-import { logger, toggleDebugConsole } from './logger'
+import { logger } from './logger'
 import { configManager } from './modules/ConfigManager'
 import { mainManager } from './modules/MainManager'
 import { SpaceDownloader } from './modules/SpaceDownloader'
 import { userManager } from './modules/UserManager'
+import { CommandUtil } from './utils/CommandUtil'
 import { Util } from './utils/Util'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -30,13 +31,10 @@ program
   .addCommand(ccCommand)
   .addCommand(testCommand)
 
-program.action(async (args) => {
+program.action(async (args, cmd: Command) => {
   logger.info(Array(80).fill('=').join(''))
   logger.info(`Version: ${pkg.version}`)
-
-  if (args.debug) {
-    toggleDebugConsole()
-  }
+  CommandUtil.detectDebugOption(cmd)
 
   logger.debug('Args', args)
 
