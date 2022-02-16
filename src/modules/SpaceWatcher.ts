@@ -135,7 +135,6 @@ export class SpaceWatcher extends EventEmitter {
       await this.getSpaceMetadata()
       if (this.metadata.state === SpaceMetadataState.RUNNING) {
         this.showNotification()
-        this.sendWebhooks()
       }
     }
 
@@ -156,9 +155,12 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
     }
 
-    this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
-    this.logger.info(`Master playlist url: ${PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)}`)
-    this.logSpaceInfo()
+    if (!this.dynamicPlaylistUrl) {
+      this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
+      this.logger.info(`Master playlist url: ${PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)}`)
+      this.logSpaceInfo()
+      this.sendWebhooks()
+    }
 
     if (!this.accessChatData) {
       const requestId = randomUUID()
@@ -335,7 +337,11 @@ export class SpaceWatcher extends EventEmitter {
           url: TwitterUtil.getUserUrl(this.userScreenName),
           iconUrl: this.userProfileImgUrl,
         },
-        space: { title: this.spaceTitle },
+        space: {
+          title: this.spaceTitle,
+          startedAt: this.metadata.started_at,
+          masterUrl: PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
+        },
       },
     )
     webhook.send()

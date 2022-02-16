@@ -1,3 +1,4 @@
+import { codeBlock, time } from '@discordjs/builders'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
 import winston from 'winston'
@@ -14,6 +15,8 @@ interface WebhookMeta {
   }
   space?: {
     title?: string
+    startedAt?: number
+    masterUrl?: string
   }
 }
 
@@ -88,15 +91,36 @@ export class Webhook {
           embeds: [
             {
               type: 'rich',
-              title: 'Space started!',
-              description: [this.meta?.space?.title, TwitterUtil.getSpaceUrl(this.spaceId)].filter((v) => v).join('\n'),
-              url: TwitterUtil.getSpaceUrl(this.spaceId),
+              title: 'Space live',
+              description: TwitterUtil.getSpaceUrl(this.spaceId),
               color: 0x1d9bf0,
               author: {
                 name: this.meta?.author?.name,
                 url: this.meta?.author?.url,
                 icon_url: this.meta?.author?.iconUrl,
               },
+              fields: [
+                {
+                  name: 'Title',
+                  value: codeBlock(this.meta?.space?.title),
+                },
+                {
+                  name: 'Started At',
+                  value: codeBlock(String(this.meta?.space?.startedAt)),
+                  inline: true,
+                },
+                {
+                  name: 'Started At - Local',
+                  value: this.meta?.space?.startedAt
+                    ? time(Math.floor(this.meta.space.startedAt / 1000))
+                    : null,
+                  inline: true,
+                },
+                {
+                  name: 'Master Url',
+                  value: codeBlock(this.meta?.space?.masterUrl),
+                },
+              ],
               footer: {
                 text: 'Twitter',
                 icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico',
