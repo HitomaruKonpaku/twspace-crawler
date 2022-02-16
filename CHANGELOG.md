@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.11.2
+
+* Check for latest version on start up
+* Show expected audio duration base on Space metadata
+* Reduce amount of info log of captions downloader
+* Update Discord webhook data
+
 ## 1.11.1
 
 * Fix users lookup response undefined when no user found
