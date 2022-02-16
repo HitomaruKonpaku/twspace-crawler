@@ -189,6 +189,15 @@ export class SpaceWatcher extends EventEmitter {
     })
   }
 
+  private logSpaceAudioDuration() {
+    if (!this.metadata.ended_at || !this.metadata.started_at) {
+      return
+    }
+    const ms = this.metadata.ended_at - this.metadata.started_at
+    const duration = Util.getDisplayTime(ms)
+    this.logger.info(`Expected audio duration: ${duration}`)
+  }
+
   private async checkDynamicPlaylist(): Promise<void> {
     const requestId = randomUUID()
     this.logger.debug('--> checkDynamicPlaylist', { requestId })
@@ -250,6 +259,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async downloadAudio() {
+    this.logSpaceAudioDuration()
     try {
       const metadata = {
         title: this.spaceTitle,
