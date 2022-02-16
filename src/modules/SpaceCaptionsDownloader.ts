@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import winston from 'winston'
@@ -9,6 +10,7 @@ export class SpaceCaptionsDownloader {
 
   private chunkCount = 1
   private cursor = ''
+  private msgCountAll = 0
 
   constructor(
     private spaceId: string,
@@ -21,38 +23,46 @@ export class SpaceCaptionsDownloader {
   }
 
   public async download() {
-    try {
-      this.logger.info(`Downloading captions to ${this.file}`)
-      fs.mkdirSync(path.dirname(this.file), { recursive: true })
-      fs.writeFileSync(this.file, '')
-      do {
-        try {
-          this.logger.info(`Downloading chunk ${this.chunkCount}`)
-          this.logger.debug(`Current cursor: "${this.cursor}"`)
-          // eslint-disable-next-line no-await-in-loop
-          const history = await PeriscopeApi.getChatHistory(
-            this.endpoint,
-            this.spaceId,
-            this.accessToken,
-            this.cursor,
-          )
-          const { messages } = history
-          messages.forEach((message) => {
-            fs.appendFileSync(this.file, `${JSON.stringify(message)}\n`)
-          })
-          this.chunkCount += 1
-          this.cursor = history.cursor
-          this.logger.debug(`Next cursor: "${this.cursor}"`)
-        } catch (error) {
-          const msg = error.message
-          if (!['socket hang up', 'connect ETIMEDOUT'].some((v) => msg.includes(v))) {
-            throw error
-          }
-          this.logger.error(`download: ${msg}`)
+    this.logger.info(`Downloading chat to "${this.file}"`)
+    fs.mkdirSync(path.dirname(this.file), { recursive: true })
+    fs.writeFileSync(this.file, '')
+    do {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const { messages, cursor } = await this.getChatHistory()
+        messages?.forEach?.((message) => {
+          fs.appendFileSync(this.file, `${JSON.stringify(message)}\n`)
+        })
+        this.chunkCount += 1
+        this.cursor = cursor
+      } catch (error) {
+        const msg = error.message as string
+        const status = error.response?.status
+        if (status === 503) {
+          break
         }
-      } while (this.cursor || this.chunkCount <= 1)
+        if (!['socket hang up', 'connect ETIMEDOUT'].some((v) => msg.includes(v))) {
+          break
+        }
+      }
+    } while (this.cursor || this.chunkCount <= 1)
+    this.logger.info(`Chat downloaded to "${this.file}"`)
+  }
+
+  private async getChatHistory() {
+    const requestId = randomUUID()
+    this.logger.debug('--> getChatHistory', { requestId, chunkCount: this.chunkCount, cursor: this.cursor })
+    try {
+      // eslint-disable-next-line max-len
+      const history = await PeriscopeApi.getChatHistory(this.endpoint, this.spaceId, this.accessToken, this.cursor)
+      const { messages } = history
+      const msgCount = messages?.length || 0
+      this.msgCountAll += msgCount
+      this.logger.debug('<-- getChatHistory', { requestId, msgCount, msgCountAll: this.msgCountAll })
+      return history
     } catch (error) {
-      this.logger.error(`download: ${error.message}`)
+      this.logger.error(`getChatHistory: ${error.message}`, { requestId, cursor: this.cursor })
+      throw error
     }
   }
 }
