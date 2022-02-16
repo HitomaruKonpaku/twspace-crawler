@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import axios from 'axios'
 import { Command, program } from 'commander'
 import dotenv from 'dotenv'
 import 'dotenv/config'
@@ -15,6 +16,21 @@ import { Util } from './utils/Util'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json')
+
+const checkVersion = async () => {
+  const url = 'https://registry.npmjs.org/-/package/twspace-crawler/dist-tags'
+  try {
+    const { data } = await axios.get(url)
+    const latestVersion = data.latest
+    if (latestVersion === pkg.version) {
+      return
+    }
+    logger.info(`New version: ${latestVersion}`)
+    logger.info(`To update, run: npm i -g ${pkg.name}@latest`)
+  } catch (error) {
+    // Ignore
+  }
+}
 
 program
   .version(pkg.version)
@@ -35,6 +51,8 @@ program.action(async (args, cmd: Command) => {
   logger.info(Array(80).fill('=').join(''))
   logger.info(`Version: ${pkg.version}`)
   CommandUtil.detectDebugOption(cmd)
+
+  await checkVersion()
 
   logger.debug('Args', args)
 
