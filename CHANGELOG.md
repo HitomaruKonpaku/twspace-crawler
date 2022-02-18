@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.3
+
+* Fix error on final playlist response with HTTP 404
+
 ## 1.11.2
 
 * Check for latest version on start up
