@@ -83,11 +83,14 @@ program.action(async (args, cmd: Command) => {
     return
   }
 
-  const usernames = (user || '').split(',')
-    .concat((configManager.config.users || []).map((v) => v.username))
-    .filter((v) => v) as string[]
+  const usernames = [...new Set(
+    (user || '')
+      .split(',')
+      .concat((configManager.config.users || []).map((v) => v.username))
+      .filter((v) => v),
+  )] as string[]
   if (usernames.length) {
-    logger.info('Starting in user mode', { users: usernames })
+    logger.info('Starting in user mode', { userCount: usernames.length, users: usernames })
     await userManager.add(usernames)
     if (Util.getTwitterAuthorization() || Util.getTwitterAuthToken()) {
       mainManager.runUserListWatcher()
