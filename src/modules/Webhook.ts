@@ -91,7 +91,7 @@ export class Webhook {
           embeds: [
             {
               type: 'rich',
-              title: 'Space live',
+              title: `${this.meta?.author?.name || this.username} is hosting a Space`,
               description: TwitterUtil.getSpaceUrl(this.spaceId),
               color: 0x1d9bf0,
               author: {
