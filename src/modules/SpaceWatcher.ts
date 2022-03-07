@@ -333,7 +333,7 @@ export class SpaceWatcher extends EventEmitter {
       this.spaceId,
       {
         author: {
-          name: `${this.userDisplayName} (@${this.userScreenName})`.trim(),
+          name: this.userDisplayName,
           url: TwitterUtil.getUserUrl(this.userScreenName),
           iconUrl: this.userProfileImgUrl,
         },

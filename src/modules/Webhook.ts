@@ -95,7 +95,7 @@ export class Webhook {
               description: TwitterUtil.getSpaceUrl(this.spaceId),
               color: 0x1d9bf0,
               author: {
-                name: this.meta?.author?.name,
+                name: `${this.meta?.author?.name} (@${this.username})`.trim(),
                 url: this.meta?.author?.url,
                 icon_url: this.meta?.author?.iconUrl,
               },
