@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.4
+
+* Fix Space state detection when host disconnect
+* Minor change on Discord webhook
+
 ## 1.11.3
 
 * Fix error on final playlist response with HTTP 404
