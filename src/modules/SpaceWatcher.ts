@@ -214,14 +214,14 @@ export class SpaceWatcher extends EventEmitter {
     } catch (error) {
       const status = error.response?.status
       if (status === 404) {
+        // Space ended / Host disconnected
         this.logger.info(`Dynamic playlist status: ${status}`)
         this.checkMasterPlaylist()
         return
       }
       this.logger.error(`checkDynamicPlaylist: ${error.message}`, { requestId })
     }
-    const ms = APP_PLAYLIST_REFRESH_INTERVAL
-    setTimeout(() => this.checkDynamicPlaylist(), ms)
+    this.checkDynamicPlaylistWithTimer()
   }
 
   private async checkMasterPlaylist(): Promise<void> {
@@ -242,7 +242,14 @@ export class SpaceWatcher extends EventEmitter {
     } catch (error) {
       this.logger.error(`checkMasterPlaylist: ${error.message}`)
     }
-    const ms = APP_PLAYLIST_REFRESH_INTERVAL
+    this.checkMasterPlaylistWithTimer()
+  }
+
+  private checkDynamicPlaylistWithTimer(ms = APP_PLAYLIST_REFRESH_INTERVAL) {
+    setTimeout(() => this.checkDynamicPlaylist(), ms)
+  }
+
+  private checkMasterPlaylistWithTimer(ms = APP_PLAYLIST_REFRESH_INTERVAL) {
     this.logger.info(`Recheck master playlist in ${ms}ms`)
     setTimeout(() => this.checkMasterPlaylist(), ms)
   }
@@ -253,6 +260,11 @@ export class SpaceWatcher extends EventEmitter {
       // Get latest metadata in case title changed
       await this.getSpaceMetadata()
       this.logSpaceInfo()
+      if (this.metadata.state === SpaceMetadataState.RUNNING) {
+        // Recheck dynamic playlist in case host disconnect for a long time
+        this.checkDynamicPlaylistWithTimer()
+        return
+      }
     } catch (error) {
       this.logger.warn(`processDownload: ${error.message}`)
     }
