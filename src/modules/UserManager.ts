@@ -8,7 +8,7 @@ import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
 import { configManager } from './ConfigManager'
 
-interface User {
+export interface User {
   id: string
   username: string
 }

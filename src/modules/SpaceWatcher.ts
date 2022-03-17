@@ -12,7 +12,7 @@ import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { SpaceMetadataState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
-import { logger as baseLogger } from '../logger'
+import { logger as baseLogger, spaceLogger } from '../logger'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { Util } from '../utils/Util'
@@ -182,13 +182,15 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private logSpaceInfo() {
-    this.logger.info('Space info', {
+    const payload = {
       username: this.userScreenName,
       id: this.spaceId,
       started_at: this.metadata.started_at,
-      title: this.spaceTitle,
+      title: this.spaceTitle || null,
       playlist_url: PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
-    })
+    }
+    spaceLogger.info(payload)
+    this.logger.info('Space info', payload)
   }
 
   private logSpaceAudioDuration() {

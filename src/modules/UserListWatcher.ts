@@ -7,7 +7,7 @@ import { SpaceState } from '../enums/Twitter.enum'
 import { twitterApiLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
-import { userManager } from './UserManager'
+import { User, userManager } from './UserManager'
 
 export class UserListWatcher extends EventEmitter {
   private logger: winston.Logger
@@ -25,17 +25,19 @@ export class UserListWatcher extends EventEmitter {
   private async getUserSpaces() {
     const users = userManager.getUsersWithId()
     if (users.length) {
-      const idChunks = Util.splitArrayIntoChunk(users.map((v) => v.id), TWITTER_API_LIST_SIZE)
+      const userChunks = Util.splitArrayIntoChunk(users, TWITTER_API_LIST_SIZE)
       await Promise.allSettled(
-        idChunks.map((ids) => twitterApiLimiter.schedule(() => this.getSpaces(ids))),
+        userChunks.map((userChunk) => twitterApiLimiter.schedule(() => this.getSpaces(userChunk))),
       )
     }
     setTimeout(() => this.getUserSpaces(), Util.getUserRefreshInterval())
   }
 
-  private async getSpaces(userIds: string[]) {
+  private async getSpaces(users: User[]) {
     const requestId = randomUUID()
-    this.logger.debug('--> getSpaces', { requestId, userIds })
+    const usernames = users.map((v) => v.username)
+    const userIds = users.map((v) => v.id)
+    this.logger.debug('--> getSpaces', { requestId, usernames })
     try {
       const liveSpaceIds: string[] = []
       if (Util.getTwitterAuthorization()) {
