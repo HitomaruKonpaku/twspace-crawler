@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.5
+
+* Fix error on empty user result (deactive/delete)
+* Improve logger
+
 ## 1.11.4
 
 * Fix Space state detection when host disconnect
