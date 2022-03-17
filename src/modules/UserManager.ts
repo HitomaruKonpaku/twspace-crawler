@@ -118,8 +118,9 @@ class UserManager extends EventEmitter {
   private async fetchUsersByScreenName() {
     this.logger.debug('--> fetchUsersByScreenName')
     await configManager.getGuestToken()
+    const users = this.getUsersWithoutId()
     const responses = await Promise.allSettled(
-      this.getUsersWithoutId().map((v, i) => twitterApiLimiter.schedule(async () => {
+      users.map((v, i) => twitterApiLimiter.schedule(async () => {
         const { username } = v
         this.logger.debug(`--> getUserByScreenName ${i + 1}`, { username })
         try {
@@ -139,7 +140,10 @@ class UserManager extends EventEmitter {
       if (response.status !== 'fulfilled') {
         return
       }
-      const { result } = response.value.data.user
+      const result = response?.value?.data?.user?.result
+      if (!result) {
+        return
+      }
       this.updateUser({
         id: result.rest_id,
         username: result.legacy.screen_name,
