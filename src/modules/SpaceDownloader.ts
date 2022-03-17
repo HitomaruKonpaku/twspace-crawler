@@ -87,7 +87,13 @@ export class SpaceDownloader {
     this.logger.verbose(`Audio is saving to "${this.audioFile}"`)
     this.logger.verbose(`${cmd} ${args.join(' ')}`)
 
-    const spawnOptions: SpawnOptions = { detached: true, stdio: 'ignore', cwd: process.cwd() }
+    // https://github.com/nodejs/node/issues/21825
+    const spawnOptions: SpawnOptions = {
+      cwd: process.cwd(),
+      stdio: 'ignore',
+      detached: true,
+      windowsHide: true,
+    }
     const cp = process.platform === 'win32'
       ? spawn(process.env.comspec, ['/c', cmd, ...args], spawnOptions)
       : spawn(cmd, args, spawnOptions)
