@@ -103,10 +103,14 @@ export class SpaceWatcher extends EventEmitter {
     const requestId = randomUUID()
     try {
       this.logger.debug('--> getSpaceMetadata', { requestId })
-      this.metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
+      const metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
       this.logger.debug('<-- getSpaceMetadata', { requestId })
+      this.logger.info('Space metadata', metadata)
+      if (!metadata?.creator_results?.result?.rest_id) {
+        delete metadata.creator_results
+      }
+      this.metadata = Object.assign(this.metadata || {}, metadata)
       this.logger.info('Host info', { screenName: this.userScreenName, displayName: this.userDisplayName })
-      this.logger.info(`Space metadata: ${JSON.stringify(this.metadata)}`)
     } catch (error) {
       const meta = { requestId }
       if (error.response) {
