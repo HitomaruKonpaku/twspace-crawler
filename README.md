@@ -80,7 +80,8 @@ twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.vide
   --config <CONFIG_PATH>    Path to config file (See config.example.json)
   --user <USER>             Monitor & download live Spaces from users indefinitely,
                             separate by comma (,)
-  --id <SPACE_ID>           Monitor & download live Space with id
+  --id <SPACE_ID>           Watch & download live Space with its id
+  --space-url <SPACE_ID>    Watch & download live Space with its URL
   --force                   Force download Space when using with --id
   --url <PLAYLIST_URL>      Download Space using playlist url
 
