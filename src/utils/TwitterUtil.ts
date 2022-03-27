@@ -1,10 +1,10 @@
 export class TwitterUtil {
   /**
-   * Returns the URL of a Twitter user, provided their user name
-   * @param {string} username - User name
+   * Returns the URL of a Twitter user, provided their username
+   * @param {string} username - Username
    * @returns {string} User URL
    */
-  public static getUserUrl(username: string) {
+  public static getUserUrl(username: string): string {
     return `https://twitter.com/${username}`
   }
 
@@ -13,7 +13,7 @@ export class TwitterUtil {
    * @param {string} spaceId - Space identifier
    * @returns {string} Space URL
    */
-  public static getSpaceUrl(spaceId: string) {
+  public static getSpaceUrl(spaceId: string): string {
     return `https://twitter.com/i/spaces/${spaceId}`
   }
 

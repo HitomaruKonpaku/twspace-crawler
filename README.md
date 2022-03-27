@@ -72,21 +72,37 @@ twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.vide
 
 ## Options
 
+### General options
+
 ```
-  -h, --help                Display help
-  -d, --debug               Show debug logs
+  -h, --help                        Display help
+  -d, --debug                       Show debug logs
+```
 
-  --env <ENV_PATH>          Path to .env file, default to current working folder (See .env.example)
-  --config <CONFIG_PATH>    Path to config file (See config.example.json)
-  --user <USER>             Monitor & download live Spaces from users indefinitely,
-                            separate by comma (,)
-  --id <SPACE_ID>           Watch & download live Space with its id
-  --space-url <SPACE_ID>    Watch & download live Space with its URL
-  --force                   Force download Space when using with --id
-  --url <PLAYLIST_URL>      Download Space using playlist url
+### One-time download options
 
-  --notification            Show notification about new live Space
-  --force-open              Force open Space in browser
+```
+  --id <SPACE_ID>                   Monitor & download live Space with its id
+  -surl, --space-url <SPACE_URL>    Monitor & download live Space with its URL
+  --force                           Force download Space when using with --id
+  --url <PLAYLIST_URL>              Download Space using playlist url
+```
+
+### User monitoring options
+
+```
+  --env <ENV_PATH>                  Path to .env file, default to current working
+                                    folder (See .env.example)
+  --config <CONFIG_PATH>            Path to config file (See config.example.json)
+  --user <USER>                     Monitor & download live Spaces from users
+                                    indefinitely, separate by comma (,)
+```
+
+### Additional options
+
+```
+  --notification                    Show notification about new live Space
+  --force-open                      Force open Space in browser
 ```
 
 ## Commands

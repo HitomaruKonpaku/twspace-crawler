@@ -12,8 +12,8 @@ import { mainManager } from './modules/MainManager'
 import { SpaceDownloader } from './modules/SpaceDownloader'
 import { userManager } from './modules/UserManager'
 import { CommandUtil } from './utils/CommandUtil'
-import { Util } from './utils/Util'
 import { TwitterUtil } from './utils/TwitterUtil'
+import { Util } from './utils/Util'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json')
@@ -39,9 +39,9 @@ program
   .option('-d, --debug', 'Show debug logs')
   .option('--env <ENV_PATH>', 'Path to .env file, default to current working folder (See .env.example)')
   .option('--config <CONFIG_PATH>', 'Path to config file (See config.example.json)')
-  .option('--user <USER>', 'Watch & download live Spaces from users, separate by comma (,)')
-  .option('--id <SPACE_ID>', 'Watch & download live Space with its id')
-  .option('--space-url <SPACE_URL>', 'Watch & download live Space with its URL')
+  .option('--user <USER>', 'Monitor & download live Spaces from users, separate by comma (,)')
+  .option('--id <SPACE_ID>', 'Monitor & download live Space with its id')
+  .option('-surl, --space-url <SPACE_URL>', 'Monitor & download live Space with its URL')
   .option('--force', 'Force download Space when using with --id')
   .option('--url <PLAYLIST_ID>', 'Download Space using playlist url')
   .option('--notification', 'Show notification about new live Space')
@@ -75,13 +75,14 @@ program.action(async (args, cmd: Command) => {
   const {
     url, id, spaceUrl, user,
   } = args
+
   if (url && !id && !spaceUrl) {
     logger.info('Starting in playlist url mode', { url })
     new SpaceDownloader(url, Util.getDateTimeString()).download()
     return
   }
 
-  if (id && !spaceUrl) {
+  if (id) {
     logger.info('Starting in space id mode', { id })
     mainManager.addSpaceWatcher(id)
     return
@@ -89,13 +90,11 @@ program.action(async (args, cmd: Command) => {
 
   if (spaceUrl) {
     logger.info('Starting in space url mode', { spaceUrl })
-
     const spaceId = TwitterUtil.getSpaceId(spaceUrl)
     if (!spaceId) {
       logger.error(`Space URL invalid: ${spaceUrl}`)
       return
     }
-
     mainManager.addSpaceWatcher(spaceId)
     return
   }
