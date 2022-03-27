@@ -1,6 +1,14 @@
 {
   "name": "twspace-crawler",
   "version": "1.11.5",
+  "description": "Script to monitor & download Twitter Spaces 24/7",
+  "keywords": [
+    "node",
+    "nodejs",
+    "node-cli",
+    "twitter-api",
+    "twitter-spaces"
+  ],
   "homepage": "https://github.com/HitomaruKonpaku/twspace-crawler#readme",
   "license": "ISC",
   "author": "HitomaruKonpaku",
