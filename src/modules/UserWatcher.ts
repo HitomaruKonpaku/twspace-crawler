@@ -52,15 +52,15 @@ export class UserWatcher extends EventEmitter {
     this.logger.debug('--> getUserTweets')
     // eslint-disable-next-line max-len
     const data = await twitterApiLimiter.schedule(() => TwitterApi.getUserTweets(this.user.id, this.headers))
-    const { instructions } = data.data.user.result.timeline.timeline
-    const instruction = instructions.find((v) => v.type === 'TimelineAddEntries')
-    const tweets: any[] = instruction.entries
-      .filter((v) => v.content.entryType === 'TimelineTimelineItem')
-      .map((v) => v.content.itemContent.tweet_results.result)
-      .filter((v) => v.card)
+    const instructions = data?.data?.user?.result?.timeline?.timeline?.instructions || []
+    const instruction = instructions.find((v) => v?.type === 'TimelineAddEntries')
+    const tweets: any[] = instruction?.entries
+      ?.filter((v) => v?.content?.entryType === 'TimelineTimelineItem')
+      ?.map((v) => v?.content?.itemContent?.tweet_results?.result)
+      ?.filter((v) => v?.card) || []
     const spaceIds: string[] = [...new Set(
       tweets
-        .map((tweet) => tweet.card.legacy.binding_values.find((v) => v.key === 'id')?.value?.string_value)
+        .map((tweet) => tweet?.card?.legacy?.binding_values?.find?.((v) => v?.key === 'id')?.value?.string_value)
         .filter((v) => v),
     )]
     spaceIds.forEach((id) => this.getAudioSpaceById(id))
