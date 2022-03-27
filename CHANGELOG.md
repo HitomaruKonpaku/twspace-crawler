@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.6
+
+* Add new option `--space-url` (alternative to `--id`)
+* Fix user undefined when Space ended (#22)
+* Fix error when using api `UserTweets`
+
 ## 1.11.5
 
 * Fix error on empty user result (deactive/delete)
