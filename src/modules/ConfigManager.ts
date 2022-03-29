@@ -1,5 +1,6 @@
 import { program } from 'commander'
 import { readFileSync } from 'fs'
+import yaml from 'js-yaml'
 import winston from 'winston'
 import { TwitterApi } from '../apis/TwitterApi'
 import { TWITTER_GUEST_TOKEN_DURATION } from '../constants/twitter.constant'
@@ -20,13 +21,19 @@ class ConfigManager {
   }
 
   public load() {
-    const configPath = program.getOptionValue('config')
-    if (configPath) {
-      try {
-        Object.assign(this.config, JSON.parse(readFileSync(configPath, 'utf-8')))
-      } catch (error) {
-        this.logger.warn(`load: ${error.message}`)
+    const configPath = program.getOptionValue('config') as string
+    if (!configPath) {
+      return this.config
+    }
+    try {
+      const payload = readFileSync(configPath, 'utf-8')
+      if (configPath.endsWith('yaml')) {
+        this.config = yaml.load(payload)
+      } else {
+        this.config = JSON.parse(payload)
       }
+    } catch (error) {
+      this.logger.warn(`load: ${error.message}`)
     }
     return this.config
   }
