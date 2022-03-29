@@ -10,3 +10,4 @@ download/
 
 .env
 config.json
+config.yaml

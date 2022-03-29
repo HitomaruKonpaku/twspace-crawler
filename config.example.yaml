@@ -1,0 +1,85 @@
+# The time, in milliseconds, the timer should delay in between checks
+interval: 30000
+
+# List of user to check for live Spaces
+users:
+  # hololive staff
+  - achan_UGA
+  # hololive jp
+  - tokino_sora
+  - robocosan
+  - sakuramiko35
+  - suisei_hosimati
+  - AZKi_VDiVA
+  - yozoramel
+  - shirakamifubuki
+  - natsuiromatsuri
+  - 7216_2nd
+  - akirosenthal
+  - akaihaato
+  - minatoaqua
+  - murasakishionch
+  - nakiriayame
+  - yuzukichococh
+  - oozorasubaru
+  - ookamimio
+  - nekomataokayu
+  - inugamikorone
+  - usadapekora
+  - uruharushia
+  - shiranuiflare
+  - shiroganenoel
+  - houshoumarine
+  - amanekanatach
+  - kiryucoco
+  - tsunomakiwatame
+  - tokoyamitowa
+  - himemoriluna
+  - yukihanalamy
+  - momosuzunene
+  - shishirobotan
+  - manoaloe
+  - omarupolka
+  - LaplusDarknesss
+  - takanelui
+  - hakuikoyori
+  - sakamatachloe
+  - kazamairohach
+  # hololive en
+  - moricalliope
+  - takanashikiara
+  - ninomaeinanis
+  - gawrgura
+  - watsonameliaEN
+  - irys_en
+  - tsukumosana
+  - ceresfauna
+  - ourokronii
+  - nanashimumei_en
+  - hakosbaelz
+  - omegaalpha_en
+  # hololive id
+  - ayunda_risu
+  - moonahoshinova
+  - airaniiofifteen
+  - kureijiollie
+  - anyamelfissa
+  - pavoliareine
+  - vestiazeta
+  - kaelakovalskia
+  - kobokanaeru
+
+# Webhooks
+webhooks:
+  discord:
+  - _name: 'sample'
+    active: true
+    urls:
+    - https://discord.com/api/webhooks/xxx
+    usernames:
+    - <all>
+    mentions:
+      roleIds:
+      - 'xxx'
+      userIds:
+      - 'xxx'
