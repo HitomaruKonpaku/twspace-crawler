@@ -102,7 +102,7 @@ program.action(async (args, cmd: Command) => {
   const usernames = [...new Set(
     (user || '')
       .split(',')
-      .concat((configManager.config.users || []).map((v) => v.username))
+      .concat((configManager.config.users || []).map((v) => (typeof v === 'string' ? v : v?.username)))
       .filter((v) => v),
   )] as string[]
   if (usernames.length) {
