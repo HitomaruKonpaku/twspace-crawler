@@ -139,4 +139,4 @@ twspace-crawler cc e /download/sample_cc.jsonl 1633612289669
 
 Currently support Discord Webooks
 
-Check [config.example.json](config.example.json) for more detail
+Check [config.example.yaml](config.example.yaml) or [config.example.json](config.example.json) for more detail

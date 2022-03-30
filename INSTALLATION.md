@@ -77,7 +77,7 @@
         TWITTER_AUTH_TOKEN=456472d2...
         ```
 
-- Clone/Create [config.json](config.example.json) file
+- Clone/Create [config.yaml](config.example.yaml) or [config.json](config.example.json) file
 
 - Start app
 
