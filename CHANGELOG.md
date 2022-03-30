@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.7
+
+* Allow string in config `users` object
+* Accept config as YAML file (See [config.example.yaml](config.example.yaml))
+* Use different API to get user info which reduce response time (3a6abcb)
+
 ## 1.11.6
 
 * Add new option `--space-url` (alternative to `--id`)
