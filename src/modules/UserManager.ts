@@ -54,6 +54,9 @@ class UserManager extends EventEmitter {
   }
 
   private updateUser(user: User) {
+    if (!user) {
+      return
+    }
     const tmpUser = this.getUserByUsername(user.username)
     if (!tmpUser) {
       return
@@ -117,39 +120,52 @@ class UserManager extends EventEmitter {
 
   private async fetchUsersByScreenName() {
     this.logger.debug('--> fetchUsersByScreenName')
-    await configManager.getGuestToken()
     const users = this.getUsersWithoutId()
-    const responses = await Promise.allSettled(
-      users.map((v, i) => twitterApiLimiter.schedule(async () => {
-        const { username } = v
-        this.logger.debug(`--> getUserByScreenName ${i + 1}`, { username })
-        try {
-          const user = await TwitterApi.getUserByScreenName(username, {
-            authorization: TWITTER_AUTHORIZATION,
-            'x-guest-token': configManager.guestToken,
-          })
-          this.logger.debug(`<-- getUserByScreenName ${i + 1}`, { username })
-          return Promise.resolve(user)
-        } catch (error) {
-          this.logger.error(`fetchUsersByScreenName: ${error.message}`, { username })
-          throw error
-        }
-      })),
-    )
-    responses.forEach((response) => {
-      if (response.status !== 'fulfilled') {
-        return
-      }
-      const result = response?.value?.data?.user?.result
-      if (!result) {
-        return
-      }
-      this.updateUser({
-        id: result.rest_id,
-        username: result.legacy.screen_name,
-      })
-    })
+    await Promise.allSettled(users.map((curUser, index) => twitterApiLimiter.schedule(async () => {
+      const { username } = curUser
+      this.logger.debug(`--> getUserByScreenName ${index + 1}`, { username })
+      const user = await this.getUserByScreenName(username)
+      this.logger.debug(`<-- getUserByScreenName ${index + 1}`, { username })
+      this.updateUser(user)
+      return Promise.resolve(user)
+    })))
     this.logger.debug('<-- fetchUsersByScreenName')
+  }
+
+  private async getUserByScreenName(username: string): Promise<User> {
+    try {
+      const response = await TwitterApi.getUserByFollowButtonInfo(username)
+      if (response?.id) {
+        const user = {
+          username: response.screen_name,
+          id: response.id,
+        }
+        return user
+      }
+    } catch (error) {
+      this.logger.warn(`getUserByScreenName: ${error.message}`, { username })
+    }
+
+    try {
+      await configManager.getGuestToken()
+      const response = await TwitterApi.getUserByScreenName(username, {
+        authorization: TWITTER_AUTHORIZATION,
+        'x-guest-token': configManager.guestToken,
+      })
+      const result = response?.data?.user?.result
+      if (!result) {
+        return null
+      }
+      const user = {
+        username: result.legacy.screen_name,
+        id: result.rest_id,
+      }
+      return user
+    } catch (error) {
+      this.logger.error(`getUserByScreenName: ${error.message}`, { username })
+    }
+
+    return null
   }
 }
 

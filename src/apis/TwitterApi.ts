@@ -55,6 +55,13 @@ export class TwitterApi {
     return data
   }
 
+  public static async getUserByFollowButtonInfo(username: string) {
+    const { data } = await axios.get('https://cdn.syndication.twimg.com/widgets/followbutton/info.json', {
+      params: { screen_names: username },
+    })
+    return data?.[0]
+  }
+
   public static async getUserByScreenName(username: string, headers: Record<string, string>) {
     const { data } = await axios.get('https://twitter.com/i/api/graphql/7mjxD3-C6BxitPMVQ6w0-Q/UserByScreenName', {
       headers,
