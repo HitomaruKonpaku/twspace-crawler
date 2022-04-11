@@ -11,7 +11,7 @@ import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { SpaceMetadataState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
-import { AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
+import { AudioSpace, AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger, spaceLogger } from '../logger'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
@@ -27,7 +27,7 @@ export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger
   private downloader: SpaceDownloader
 
-  private metadata: AudioSpaceMetadata
+  private audioSpace: AudioSpace
   private liveStreamStatus: LiveVideoStreamStatus
   private accessChatData: AccessChat
   private dynamicPlaylistUrl: string
@@ -49,6 +49,10 @@ export class SpaceWatcher extends EventEmitter {
 
   public get spaceUrl(): string {
     return TwitterUtil.getSpaceUrl(this.spaceId)
+  }
+
+  public get metadata(): AudioSpaceMetadata {
+    return this.audioSpace?.metadata
   }
 
   public get spaceTitle(): string {
@@ -103,13 +107,17 @@ export class SpaceWatcher extends EventEmitter {
     const requestId = randomUUID()
     try {
       this.logger.debug('--> getSpaceMetadata', { requestId })
-      const metadata = await TwitterApi.getSpaceMetadata(this.spaceId, headers)
+      const response = await TwitterApi.getAudioSpaceById(this.spaceId, headers)
       this.logger.debug('<-- getSpaceMetadata', { requestId })
+      const audioSpace = response?.data?.audioSpace as AudioSpace
+      delete audioSpace.sharings
+      this.logger.debug('audioSpace', audioSpace)
+      const metadata = audioSpace?.metadata
       this.logger.info('Space metadata', metadata)
       if (!metadata?.creator_results?.result?.rest_id) {
         delete metadata.creator_results
       }
-      this.metadata = Object.assign(this.metadata || {}, metadata)
+      this.audioSpace = audioSpace
       this.logger.info('Host info', { screenName: this.userScreenName, displayName: this.userDisplayName })
     } catch (error) {
       const meta = { requestId }

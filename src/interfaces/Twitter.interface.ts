@@ -57,6 +57,12 @@ export interface AudioSpaceMetadata {
   }
 }
 
+export interface AudioSpace {
+  metadata?: AudioSpaceMetadata
+  participants?: any
+  sharings?: any
+}
+
 export interface LiveVideoStreamStatus {
   source: {
     location: string
