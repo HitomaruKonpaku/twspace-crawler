@@ -14,6 +14,7 @@ import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpace, AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger, spaceLogger } from '../logger'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
+import { SpaceUtil } from '../utils/SpaceUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { Util } from '../utils/Util'
 import { configManager } from './ConfigManager'
@@ -56,19 +57,15 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   public get spaceTitle(): string {
-    return this.metadata.title
+    return SpaceUtil.getTitle(this.audioSpace)
   }
 
   public get userScreenName(): string {
-    return this.metadata.creator_results?.result?.legacy?.screen_name
+    return SpaceUtil.getHostUsername(this.audioSpace)
   }
 
   public get userDisplayName(): string {
-    return this.metadata.creator_results?.result?.legacy?.name
-  }
-
-  public get userProfileImgUrl(): string {
-    return this.metadata.creator_results?.result?.legacy?.profile_image_url_https?.replace?.('_normal', '')
+    return SpaceUtil.getHostName(this.audioSpace)
   }
 
   private get filename(): string {
@@ -346,7 +343,7 @@ export class SpaceWatcher extends EventEmitter {
       {
         title: `${this.userDisplayName || ''} Space Live!`.trim(),
         message: `${this.spaceTitle || ''}`,
-        icon: this.userProfileImgUrl,
+        icon: SpaceUtil.getHostProfileImgUrl(this.audioSpace),
       },
       this.spaceUrl,
     )
@@ -355,20 +352,8 @@ export class SpaceWatcher extends EventEmitter {
 
   private sendWebhooks() {
     const webhook = new Webhook(
-      this.userScreenName,
-      this.spaceId,
-      {
-        author: {
-          name: this.userDisplayName,
-          url: TwitterUtil.getUserUrl(this.userScreenName),
-          iconUrl: this.userProfileImgUrl,
-        },
-        space: {
-          title: this.spaceTitle,
-          startedAt: this.metadata.started_at,
-          masterUrl: PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
-        },
-      },
+      this.audioSpace,
+      PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
     )
     webhook.send()
   }

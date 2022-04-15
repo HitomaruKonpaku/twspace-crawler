@@ -17,9 +17,9 @@ export interface AudioSpaceMetadata {
   title: string
   media_key: string
   created_at: number
-  started_at: number
-  ended_at: number
   updated_at: number
+  started_at?: number
+  ended_at?: number
   is_employee_only: boolean
   is_locked: boolean
   conversation_controls: number
@@ -49,17 +49,46 @@ export interface AudioSpaceMetadata {
         protected: boolean
         screen_name: string
         statuses_count: number
-        translator_type: string
-        url: string
+        translator_type?: string
+        url?: string
         verified: boolean
+        [key: string]: any
       }
+      [key: string]: any
     }
+    [key: string]: any
   }
+  [key: string]: any
+}
+
+export interface AudioSpaceParticipantUser {
+  rest_id: string
+  [key: string]: any
+}
+
+export interface AudioSpaceParticipant {
+  periscope_user_id: string
+  start: number
+  twitter_screen_name: string
+  display_name: string
+  avatar_url: string
+  is_verified: boolean
+  is_muted_by_admin: boolean
+  is_muted_by_guest: boolean
+  user: AudioSpaceParticipantUser
+  [key: string]: any
+}
+
+export interface AudioSpaceParticipants {
+  total: number
+  admins: AudioSpaceParticipant[]
+  speakers: AudioSpaceParticipant[]
+  listeners: AudioSpaceParticipant[]
 }
 
 export interface AudioSpace {
-  metadata?: AudioSpaceMetadata
-  participants?: any
+  metadata: AudioSpaceMetadata
+  participants: AudioSpaceParticipants
   sharings?: any
 }
 
