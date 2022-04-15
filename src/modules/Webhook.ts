@@ -136,7 +136,7 @@ export class Webhook {
     const hostUsername = SpaceUtil.getHostUsername(this.audioSpace)
     const host = inlineCode(hostUsername)
 
-    if (!usernames.some((v) => v.toLocaleLowerCase() === hostUsername.toLocaleLowerCase())
+    if (!usernames.some((v) => v.toLowerCase() === hostUsername.toLowerCase())
       && usernames.some((v) => SpaceUtil.isAdmin(this.audioSpace, v))) {
       const participants = usernames
         .map((v) => SpaceUtil.getParticipant(this.audioSpace.participants.admins, v))
