@@ -66,9 +66,6 @@ export class Webhook {
         return
       }
       try {
-        const startedAt = SpaceUtil.getStartedAt(this.audioSpace)
-        const username = SpaceUtil.getHostUsername(this.audioSpace)
-        const name = SpaceUtil.getHostName(this.audioSpace)
         // Build content with mentions
         let content = ''
         Array.from(config.mentions?.roleIds || []).map((v) => v).forEach((roleId) => {
@@ -81,48 +78,7 @@ export class Webhook {
         // Build request payload
         const payload = {
           content,
-          embeds: [
-            {
-              type: 'rich',
-              title: this.getEmbedTitle(usernames),
-              description: TwitterUtil.getSpaceUrl(SpaceUtil.getId(this.audioSpace)),
-              color: 0x1d9bf0,
-              author: {
-                name: `${name} (@${username})`,
-                url: TwitterUtil.getUserUrl(username),
-                icon_url: SpaceUtil.getHostProfileImgUrl(this.audioSpace),
-              },
-              fields: [
-                {
-                  name: 'Title',
-                  value: codeBlock(SpaceUtil.getTitle(this.audioSpace)),
-                },
-                {
-                  name: 'Started At',
-                  value: codeBlock(String(startedAt)),
-                  inline: true,
-                },
-                {
-                  name: 'Started At - Local',
-                  value: !startedAt
-                    ? null
-                    : [
-                      time(Math.floor(startedAt / 1000)),
-                      time(Math.floor(startedAt / 1000), 'R'),
-                    ].join('\n'),
-                  inline: true,
-                },
-                {
-                  name: 'Master Url',
-                  value: codeBlock(this.masterUrl),
-                },
-              ],
-              footer: {
-                text: 'Twitter',
-                icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico',
-              },
-            },
-          ],
+          embeds: [this.getEmbed(usernames)],
         }
         // Send
         urls.forEach((url) => discordWebhookLimiter.schedule(() => this.post(url, payload)))
@@ -132,7 +88,7 @@ export class Webhook {
     })
   }
 
-  private getEmbedTitle(usernames: string[]) {
+  private getEmbedTitle(usernames: string[]): string {
     const hostUsername = SpaceUtil.getHostUsername(this.audioSpace)
     const host = inlineCode(hostUsername)
 
@@ -174,5 +130,52 @@ export class Webhook {
     }
 
     return `${host} is hosting a Space`
+  }
+
+  private getEmbed(usernames: string[]) {
+    const startedAt = SpaceUtil.getStartedAt(this.audioSpace)
+    const username = SpaceUtil.getHostUsername(this.audioSpace)
+    const name = SpaceUtil.getHostName(this.audioSpace)
+    const embed = {
+      type: 'rich',
+      title: this.getEmbedTitle(usernames),
+      description: TwitterUtil.getSpaceUrl(SpaceUtil.getId(this.audioSpace)),
+      color: 0x1d9bf0,
+      author: {
+        name: `${name} (@${username})`,
+        url: TwitterUtil.getUserUrl(username),
+        icon_url: SpaceUtil.getHostProfileImgUrl(this.audioSpace),
+      },
+      fields: [
+        {
+          name: 'Title',
+          value: codeBlock(SpaceUtil.getTitle(this.audioSpace)),
+        },
+        {
+          name: 'Started At',
+          value: codeBlock(String(startedAt)),
+          inline: true,
+        },
+        {
+          name: 'Started At - Local',
+          value: !startedAt
+            ? null
+            : [
+              time(Math.floor(startedAt / 1000)),
+              time(Math.floor(startedAt / 1000), 'R'),
+            ].join('\n'),
+          inline: true,
+        },
+        {
+          name: 'Master Url',
+          value: codeBlock(this.masterUrl),
+        },
+      ],
+      footer: {
+        text: 'Twitter',
+        icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico',
+      },
+    }
+    return embed
   }
 }
