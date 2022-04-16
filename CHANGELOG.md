@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.11.8
+
+* Skip m3u8 download, feed master url directly to `ffmpeg`
+* Update Webhook payload
+  * Detect user as host/co-host/speaker/listener
+  * Add relative time (See [HammerTime](https://hammertime.cyou))
+
 ## 1.11.7
 
 * Allow string in config `users` object
