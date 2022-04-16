@@ -37,8 +37,8 @@ export class SpaceDownloader {
       this.playlistUrl = await PeriscopeApi.getFinalPlaylistUrl(this.originUrl)
       this.logger.info(`Final playlist url: ${this.playlistUrl}`)
     }
-    Util.createMediaDir(this.subDir)
-    await this.saveFinalPlaylist()
+    // Util.createMediaDir(this.subDir)
+    // await this.saveFinalPlaylist()
     Util.createMediaDir(this.subDir)
     this.spawnFfmpeg()
   }
@@ -69,7 +69,8 @@ export class SpaceDownloader {
       '-protocol_whitelist',
       'file,https,tls,tcp',
       '-i',
-      this.playlistFile,
+      // this.playlistFile,
+      this.playlistUrl,
       '-c',
       'copy',
     ]
