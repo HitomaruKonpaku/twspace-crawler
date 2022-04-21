@@ -14,19 +14,19 @@ const spaces = Array
   .filter((space) => space.playlist_url)
 
 describe('Space', () => {
-  describe('Playlist Duplication', () => {
-    const set = new Set()
-    spaces.forEach((space) => {
-      it(`@${space.screen_name} (${space.id})`, () => {
-        expect(set.has(space.playlist_url)).false()
-        set.add(space.playlist_url)
-      })
-    })
-  })
+  // describe('Playlist Duplication', () => {
+  //   const set = new Set()
+  //   spaces.forEach((space) => {
+  //     it(`@${space.username} (${space.id})`, () => {
+  //       expect(set.has(space.playlist_url)).false()
+  //       set.add(space.playlist_url)
+  //     })
+  //   })
+  // })
 
   describe('Playlist Status', () => {
     spaces.forEach((space) => {
-      it(`@${space.screen_name} (${space.id})`, async () => {
+      it(`@${space.username} (${space.id})`, async () => {
         const { status } = await axios.head(space.playlist_url)
         expect(status).equal(200)
       })
