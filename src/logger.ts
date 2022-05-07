@@ -44,6 +44,13 @@ const logger = winston.createLogger({
       filename: `${getFileName()}.log`,
     }),
     new DailyRotateFile({
+      level: 'error',
+      format: format.combine(getPrintFormat()),
+      datePattern: LOGGER_DATE_PATTERN,
+      dirname: LOGGER_DIR,
+      filename: `${getFileName()}_error.log`,
+    }),
+    new DailyRotateFile({
       level: 'silly',
       format: format.combine(getPrintFormat()),
       datePattern: LOGGER_DATE_PATTERN,
