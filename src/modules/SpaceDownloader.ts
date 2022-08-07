@@ -92,12 +92,15 @@ export class SpaceDownloader {
     const spawnOptions: SpawnOptions = {
       cwd: process.cwd(),
       stdio: 'ignore',
-      detached: true,
+      detached: false,
       windowsHide: true,
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cp = process.platform === 'win32'
       ? spawn(process.env.comspec, ['/c', cmd, ...args], spawnOptions)
       : spawn(cmd, args, spawnOptions)
-    cp.unref()
+    // cp.unref()
+
+    return cp
   }
 }
