@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.9
+
+* Fix 429 error on tracking more than 100 users with official API
+* Disable child process detached
+
 ## 1.11.8
 
 * Skip m3u8 download, feed master url directly to `ffmpeg`
