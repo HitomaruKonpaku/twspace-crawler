@@ -4,7 +4,7 @@ import winston from 'winston'
 import { TwitterApi } from '../apis/TwitterApi'
 import { TWITTER_API_LIST_SIZE, TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
 import { SpaceState } from '../enums/Twitter.enum'
-import { twitterApiLimiter } from '../Limiter'
+import { twitterSpaceApiLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
 import { User, userManager } from './UserManager'
@@ -26,9 +26,8 @@ export class UserListWatcher extends EventEmitter {
     const users = userManager.getUsersWithId()
     if (users.length) {
       const userChunks = Util.splitArrayIntoChunk(users, TWITTER_API_LIST_SIZE)
-      await Promise.allSettled(
-        userChunks.map((userChunk) => twitterApiLimiter.schedule(() => this.getSpaces(userChunk))),
-      )
+      // eslint-disable-next-line max-len
+      await Promise.allSettled(userChunks.map((userChunk) => twitterSpaceApiLimiter.schedule(() => this.getSpaces(userChunk))))
     }
     setTimeout(() => this.getUserSpaces(), Util.getUserRefreshInterval())
   }
