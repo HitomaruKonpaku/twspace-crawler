@@ -181,6 +181,11 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
     }
 
+    if (this.metadata.state === SpaceMetadataState.ENDED) {
+      this.processDownload()
+      return
+    }
+
     // Force download space
     if (program.getOptionValue('force')) {
       this.downloadAudio()
