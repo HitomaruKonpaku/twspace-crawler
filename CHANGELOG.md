@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.10
+
+* Fix download not start with `ENDED` archived Space (#30)
+
 ## 1.11.9
 
 * Fix 429 error on tracking more than 100 users with official API
