@@ -9,8 +9,12 @@ export class PeriscopeUtil {
 
   public static getMasterPlaylistUrl(url: string) {
     return url
+      // Handle live playlist
       .replace('?type=live', '')
-      .replace('dynamic', 'master')
+      .replace('dynamic_playlist', 'master_playlist')
+      // Handle replay playlist
+      .replace('?type=replay', '')
+      .replace(/playlist_\d+/g, 'master_playlist')
   }
 
   public static getChunks(data: string): number[] {
