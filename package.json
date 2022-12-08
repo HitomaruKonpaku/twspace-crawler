@@ -29,7 +29,7 @@
     "prepare": "npm run build",
     "test": "lab --transform node_modules/lab-transform-typescript",
     "lint": "eslint src --ext .ts",
-    "lint-fix": "eslint src --ext .ts --fix"
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "dependencies": {
     "@discordjs/builders": "^0.12.0",
