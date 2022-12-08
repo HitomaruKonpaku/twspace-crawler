@@ -32,6 +32,7 @@
       "always-multiline"
     ],
     "lines-between-class-members": "off",
+    "max-len": "off",
     "no-debugger": "warn",
     "no-shadow": "off",
     "no-unused-vars": "off",
