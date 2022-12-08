@@ -15,6 +15,8 @@ export interface Config {
         roleIds?: string[]
         userIds?: string[]
       }
+      startMessage?: string
+      endMessage?: string
     }[]
   }
 }

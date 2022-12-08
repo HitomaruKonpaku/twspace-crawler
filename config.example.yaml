@@ -76,10 +76,16 @@ webhooks:
     active: true
     urls:
     - https://discord.com/api/webhooks/xxx
+    # Send webhooks by filtered users
     usernames:
     - <all>
-    mentions:
-      roleIds:
-      - 'xxx'
-      userIds:
-      - 'xxx'
+    # Legacy option, use startMessage and/or endMessage instead
+    # mentions:
+    #   roleIds:
+    #   - 'xxx'
+    #   userIds:
+    #   - 'xxx'
+    # Message to send when Space start/running
+    # startMessage: ''
+    # Message to send when Space ended
+    # endMessage: ''

@@ -271,13 +271,21 @@ export class SpaceWatcher extends EventEmitter {
   private async processDownload() {
     this.logger.debug('processDownload')
     try {
+      // Save metadata before refetch
+      const prevState = this.metadata.state
+
       // Get latest metadata in case title changed
       await this.getSpaceMetadata()
       this.logSpaceInfo()
+
       if (this.metadata.state === SpaceMetadataState.RUNNING) {
         // Recheck dynamic playlist in case host disconnect for a long time
         this.checkDynamicPlaylistWithTimer()
         return
+      }
+
+      if (this.metadata.state === SpaceMetadataState.ENDED && prevState === SpaceMetadataState.RUNNING) {
+        this.sendWebhooks()
       }
     } catch (error) {
       this.logger.warn(`processDownload: ${error.message}`)

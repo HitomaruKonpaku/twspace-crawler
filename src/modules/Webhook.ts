@@ -2,6 +2,7 @@ import { codeBlock, inlineCode, time } from '@discordjs/builders'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
 import winston from 'winston'
+import { SpaceMetadataState } from '../enums/Twitter.enum'
 import { AudioSpace } from '../interfaces/Twitter.interface'
 import { discordWebhookLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
@@ -68,12 +69,18 @@ export class Webhook {
       try {
         // Build content with mentions
         let content = ''
-        Array.from(config.mentions?.roleIds || []).map((v) => v).forEach((roleId) => {
-          content += `<@&${roleId}> `
-        })
-        Array.from(config.mentions?.userIds || []).map((v) => v).forEach((userId) => {
-          content += `<@${userId}> `
-        })
+        if (this.audioSpace.metadata.state === SpaceMetadataState.RUNNING) {
+          Array.from(config.mentions?.roleIds || []).map((v) => v).forEach((roleId) => {
+            content += `<@&${roleId}> `
+          })
+          Array.from(config.mentions?.userIds || []).map((v) => v).forEach((userId) => {
+            content += `<@${userId}> `
+          })
+          content = [content, config.startMessage].filter((v) => v).map((v) => v.trim()).join(' ')
+        }
+        if (this.audioSpace.metadata.state === SpaceMetadataState.ENDED) {
+          content = [content, config.endMessage].filter((v) => v).map((v) => v.trim()).join(' ')
+        }
         content = content.trim()
         // Build request payload
         const payload = {
@@ -133,9 +140,48 @@ export class Webhook {
   }
 
   private getEmbed(usernames: string[]) {
-    const startedAt = SpaceUtil.getStartedAt(this.audioSpace)
     const username = SpaceUtil.getHostUsername(this.audioSpace)
     const name = SpaceUtil.getHostName(this.audioSpace)
+    const fields: any[] = [
+      {
+        name: 'Title',
+        value: codeBlock(SpaceUtil.getTitle(this.audioSpace)),
+      },
+    ]
+
+    if ([SpaceMetadataState.RUNNING, SpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
+      if (this.audioSpace.metadata.started_at) {
+        fields.push(
+          {
+            name: '▶️ Started at',
+            value: Webhook.getEmbedLocalTime(this.audioSpace.metadata.started_at),
+            inline: true,
+          },
+        )
+      }
+    }
+
+    if ([SpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
+      if (this.audioSpace.metadata.ended_at) {
+        fields.push(
+          {
+            name: '⏹️ Ended at',
+            value: Webhook.getEmbedLocalTime(this.audioSpace.metadata.ended_at),
+            inline: true,
+          },
+        )
+      }
+    }
+
+    if ([SpaceMetadataState.RUNNING, SpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
+      fields.push(
+        {
+          name: 'Playlist url',
+          value: codeBlock(this.masterUrl),
+        },
+      )
+    }
+
     const embed = {
       type: 'rich',
       title: this.getEmbedTitle(usernames),
@@ -146,36 +192,23 @@ export class Webhook {
         url: TwitterUtil.getUserUrl(username),
         icon_url: SpaceUtil.getHostProfileImgUrl(this.audioSpace),
       },
-      fields: [
-        {
-          name: 'Title',
-          value: codeBlock(SpaceUtil.getTitle(this.audioSpace)),
-        },
-        {
-          name: 'Started At',
-          value: codeBlock(String(startedAt)),
-          inline: true,
-        },
-        {
-          name: 'Started At - Local',
-          value: !startedAt
-            ? null
-            : [
-              time(Math.floor(startedAt / 1000)),
-              time(Math.floor(startedAt / 1000), 'R'),
-            ].join('\n'),
-          inline: true,
-        },
-        {
-          name: 'Master Url',
-          value: codeBlock(this.masterUrl),
-        },
-      ],
+      fields,
       footer: {
         text: 'Twitter',
         icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico',
       },
     }
+
     return embed
+  }
+
+  public static getEmbedLocalTime(ms: number) {
+    if (!ms) {
+      return null
+    }
+    return [
+      time(Math.floor(ms / 1000)),
+      time(Math.floor(ms / 1000), 'R'),
+    ].join('\n')
   }
 }
