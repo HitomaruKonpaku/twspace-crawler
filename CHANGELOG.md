@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.11.11
+
+* Send Space ended webhook
+* Update webhook payload
+* Add webhook config for message content (See [config.example.yaml](config.example.yaml))
+  * `startMessage`
+  * `endMessage`
+* To remove webhook `mentions` config
+
 ## 1.11.10
 
 * Fix download not start with `ENDED` archived Space (#30)
