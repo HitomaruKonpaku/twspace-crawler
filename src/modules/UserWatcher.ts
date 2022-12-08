@@ -50,7 +50,6 @@ export class UserWatcher extends EventEmitter {
 
   private async getUserTweets() {
     this.logger.debug('--> getUserTweets')
-    // eslint-disable-next-line max-len
     const data = await twitterApiLimiter.schedule(() => TwitterApi.getUserTweets(this.user.id, this.headers))
     const instructions = data?.data?.user?.result?.timeline?.timeline?.instructions || []
     const instruction = instructions.find((v) => v?.type === 'TimelineAddEntries')
@@ -78,7 +77,6 @@ export class UserWatcher extends EventEmitter {
     }
     try {
       this.logger.debug('--> getAudioSpaceById', { id })
-      // eslint-disable-next-line max-len
       const data = await twitterApiLimiter.schedule(() => TwitterApi.getAudioSpaceById(id, this.headers))
       const { state } = data.data.audioSpace.metadata
       this.logger.debug('<-- getAudioSpaceById', { id, state })

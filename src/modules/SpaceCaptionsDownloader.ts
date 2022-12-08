@@ -53,7 +53,6 @@ export class SpaceCaptionsDownloader {
     const requestId = randomUUID()
     this.logger.debug('--> getChatHistory', { requestId, chunkCount: this.chunkCount, cursor: this.cursor })
     try {
-      // eslint-disable-next-line max-len
       const history = await PeriscopeApi.getChatHistory(this.endpoint, this.spaceId, this.accessToken, this.cursor)
       const { messages } = history
       const msgCount = messages?.length || 0

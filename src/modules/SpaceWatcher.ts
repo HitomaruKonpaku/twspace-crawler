@@ -158,7 +158,6 @@ export class SpaceWatcher extends EventEmitter {
       const requestId = randomUUID()
       const headers = await this.getHeaders()
       this.logger.debug('--> getLiveVideoStreamStatus', { requestId })
-      // eslint-disable-next-line max-len
       this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.metadata.media_key, headers)
       this.logger.debug('<-- getLiveVideoStreamStatus', { requestId })
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
@@ -243,7 +242,6 @@ export class SpaceWatcher extends EventEmitter {
   private async checkMasterPlaylist(): Promise<void> {
     this.logger.debug('--> checkMasterPlaylist')
     try {
-      // eslint-disable-next-line max-len
       const masterChunkSize = PeriscopeUtil.getChunks(await PeriscopeApi.getFinalPlaylist(this.dynamicPlaylistUrl)).length
       this.logger.debug(`<-- checkMasterPlaylist: master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
       const canDownload = !this.lastChunkIndex

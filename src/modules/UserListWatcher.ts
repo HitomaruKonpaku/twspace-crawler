@@ -26,7 +26,6 @@ export class UserListWatcher extends EventEmitter {
     const users = userManager.getUsersWithId()
     if (users.length) {
       const userChunks = Util.splitArrayIntoChunk(users, TWITTER_API_LIST_SIZE)
-      // eslint-disable-next-line max-len
       await Promise.allSettled(userChunks.map((userChunk) => twitterSpaceApiLimiter.schedule(() => this.getSpaces(userChunk))))
     }
     setTimeout(() => this.getUserSpaces(), Util.getUserRefreshInterval())
