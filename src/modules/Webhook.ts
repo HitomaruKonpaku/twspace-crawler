@@ -99,6 +99,10 @@ export class Webhook {
     const hostUsername = SpaceUtil.getHostUsername(this.audioSpace)
     const host = inlineCode(hostUsername)
 
+    if (this.audioSpace.metadata.state === SpaceMetadataState.ENDED) {
+      return `${host} Space ended`
+    }
+
     if (!usernames.some((v) => v.toLowerCase() === hostUsername.toLowerCase())
       && usernames.some((v) => SpaceUtil.isAdmin(this.audioSpace, v))) {
       const participants = usernames
