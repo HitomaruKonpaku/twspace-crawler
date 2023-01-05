@@ -25,6 +25,7 @@ export class UserListWatcher extends EventEmitter {
   private async getUserSpaces() {
     const users = userManager.getUsersWithId()
     if (users.length) {
+      this.logger.debug('getUserSpaces', { userCount: users.length })
       const userChunks = Util.splitArrayIntoChunk(users, TWITTER_API_LIST_SIZE)
       await Promise.allSettled(userChunks.map((userChunk) => twitterSpaceApiLimiter.schedule(() => this.getSpaces(userChunk))))
     }
@@ -35,7 +36,7 @@ export class UserListWatcher extends EventEmitter {
     const requestId = randomUUID()
     const usernames = users.map((v) => v.username)
     const userIds = users.map((v) => v.id)
-    this.logger.debug('--> getSpaces', { requestId, usernames })
+    this.logger.debug('--> getSpaces', { requestId, userCount: usernames.length, usernames })
     try {
       const liveSpaceIds: string[] = []
       if (Util.getTwitterAuthorization()) {
