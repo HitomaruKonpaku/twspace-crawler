@@ -1,3 +1,5 @@
+import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
+
 /* eslint-disable camelcase */
 export interface User {
   id: number
@@ -13,20 +15,27 @@ export interface User {
 
 export interface AudioSpaceMetadata {
   rest_id: string
-  state: string
-  title: string
-  media_key: string
-  created_at: number
-  updated_at: number
+  state: AudioSpaceMetadataState
+  title?: string
+  media_key?: string
+  created_at?: number
+  updated_at?: number
   started_at?: number
-  ended_at?: number
-  is_employee_only: boolean
-  is_locked: boolean
-  conversation_controls: number
+  ended_at?: string
+  disallow_join?: boolean
+  narrow_cast_space_type?: number
+  is_employee_only?: boolean
+  is_locked?: boolean
+  is_space_available_for_replay?: boolean
+  is_space_available_for_clipping?: boolean
+  conversation_controls?: number
+  total_replay_watched?: number
+  total_live_listeners?: number
   creator_results: {
     result: {
       id: string
       rest_id: string
+      is_blue_verified?: boolean
       legacy: {
         created_at: string
         default_profile: boolean

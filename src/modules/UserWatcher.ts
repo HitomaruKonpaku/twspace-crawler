@@ -2,7 +2,7 @@ import EventEmitter from 'events'
 import winston from 'winston'
 import { TwitterApi } from '../apis/TwitterApi'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
-import { SpaceMetadataState } from '../enums/Twitter.enum'
+import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
 import { twitterApiLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
@@ -81,7 +81,7 @@ export class UserWatcher extends EventEmitter {
       const { state } = data.data.audioSpace.metadata
       this.logger.debug('<-- getAudioSpaceById', { id, state })
       this.cacheSpaceIds.add(id)
-      if (state !== SpaceMetadataState.RUNNING) {
+      if (state !== AudioSpaceMetadataState.RUNNING) {
         return
       }
       this.emit('data', id)

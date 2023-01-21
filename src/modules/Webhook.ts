@@ -2,7 +2,7 @@ import { codeBlock, inlineCode, time } from '@discordjs/builders'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
 import winston from 'winston'
-import { SpaceMetadataState } from '../enums/Twitter.enum'
+import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
 import { AudioSpace } from '../interfaces/Twitter.interface'
 import { discordWebhookLimiter } from '../Limiter'
 import { logger as baseLogger } from '../logger'
@@ -69,7 +69,7 @@ export class Webhook {
       try {
         // Build content with mentions
         let content = ''
-        if (this.audioSpace.metadata.state === SpaceMetadataState.RUNNING) {
+        if (this.audioSpace.metadata.state === AudioSpaceMetadataState.RUNNING) {
           Array.from(config.mentions?.roleIds || []).map((v) => v).forEach((roleId) => {
             content += `<@&${roleId}> `
           })
@@ -78,7 +78,7 @@ export class Webhook {
           })
           content = [content, config.startMessage].filter((v) => v).map((v) => v.trim()).join(' ')
         }
-        if (this.audioSpace.metadata.state === SpaceMetadataState.ENDED) {
+        if (this.audioSpace.metadata.state === AudioSpaceMetadataState.ENDED) {
           content = [content, config.endMessage].filter((v) => v).map((v) => v.trim()).join(' ')
         }
         content = content.trim()
@@ -99,7 +99,7 @@ export class Webhook {
     const hostUsername = SpaceUtil.getHostUsername(this.audioSpace)
     const host = inlineCode(hostUsername)
 
-    if (this.audioSpace.metadata.state === SpaceMetadataState.ENDED) {
+    if (this.audioSpace.metadata.state === AudioSpaceMetadataState.ENDED) {
       return `${host} Space ended`
     }
 
@@ -153,7 +153,7 @@ export class Webhook {
       },
     ]
 
-    if ([SpaceMetadataState.RUNNING, SpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
+    if ([AudioSpaceMetadataState.RUNNING, AudioSpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
       if (this.audioSpace.metadata.started_at) {
         fields.push(
           {
@@ -165,7 +165,7 @@ export class Webhook {
       }
     }
 
-    if ([SpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
+    if ([AudioSpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
       if (this.audioSpace.metadata.ended_at) {
         fields.push(
           {
@@ -177,7 +177,7 @@ export class Webhook {
       }
     }
 
-    if ([SpaceMetadataState.RUNNING, SpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
+    if ([AudioSpaceMetadataState.RUNNING, AudioSpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
       fields.push(
         {
           name: 'Playlist url',

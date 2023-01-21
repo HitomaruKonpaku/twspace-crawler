@@ -9,7 +9,7 @@ import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { TwitterApi } from '../apis/TwitterApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP_SPACE_ERROR_RETRY_INTERVAL } from '../constants/app.constant'
 import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
-import { SpaceMetadataState } from '../enums/Twitter.enum'
+import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpace, AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger, spaceLogger } from '../logger'
@@ -142,7 +142,7 @@ export class SpaceWatcher extends EventEmitter {
   private async initData() {
     if (!this.metadata) {
       await this.getSpaceMetadata()
-      if (this.metadata.state === SpaceMetadataState.RUNNING) {
+      if (this.metadata.state === AudioSpaceMetadataState.RUNNING) {
         this.showNotification()
       }
     }
@@ -180,7 +180,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
     }
 
-    if (this.metadata.state === SpaceMetadataState.ENDED) {
+    if (this.metadata.state === AudioSpaceMetadataState.ENDED) {
       this.processDownload()
       return
     }
@@ -278,13 +278,13 @@ export class SpaceWatcher extends EventEmitter {
       await this.getSpaceMetadata()
       this.logSpaceInfo()
 
-      if (this.metadata.state === SpaceMetadataState.RUNNING) {
+      if (this.metadata.state === AudioSpaceMetadataState.RUNNING) {
         // Recheck dynamic playlist in case host disconnect for a long time
         this.checkDynamicPlaylistWithTimer()
         return
       }
 
-      if (this.metadata.state === SpaceMetadataState.ENDED && prevState === SpaceMetadataState.RUNNING) {
+      if (this.metadata.state === AudioSpaceMetadataState.ENDED && prevState === AudioSpaceMetadataState.RUNNING) {
         this.sendWebhooks()
       }
     } catch (error) {
