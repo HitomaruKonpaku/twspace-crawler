@@ -170,7 +170,7 @@ export class Webhook {
         fields.push(
           {
             name: '⏹️ Ended at',
-            value: Webhook.getEmbedLocalTime(this.audioSpace.metadata.ended_at),
+            value: Webhook.getEmbedLocalTime(Number(this.audioSpace.metadata.ended_at)),
             inline: true,
           },
         )

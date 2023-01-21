@@ -210,7 +210,7 @@ export class SpaceWatcher extends EventEmitter {
     if (!this.metadata.ended_at || !this.metadata.started_at) {
       return
     }
-    const ms = this.metadata.ended_at - this.metadata.started_at
+    const ms = Number(this.metadata.ended_at) - this.metadata.started_at
     const duration = Util.getDisplayTime(ms)
     this.logger.info(`Expected audio duration: ${duration}`)
   }
