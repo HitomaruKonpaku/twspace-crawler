@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.12
+
+* Fix Space ended embed title
+* Update AudioSpace endpoint
+
 ## 1.11.11
 
 * Send Space ended webhook
