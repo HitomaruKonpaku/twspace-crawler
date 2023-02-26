@@ -148,7 +148,7 @@ export class Webhook {
     const name = SpaceUtil.getHostName(this.audioSpace)
     const fields: any[] = [
       {
-        name: 'Title',
+        name: '📄 Title',
         value: codeBlock(SpaceUtil.getTitle(this.audioSpace)),
       },
     ]
@@ -180,7 +180,7 @@ export class Webhook {
     if ([AudioSpaceMetadataState.RUNNING, AudioSpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
       fields.push(
         {
-          name: 'Playlist url',
+          name: '🔗 Playlist url',
           value: codeBlock(this.masterUrl),
         },
       )
