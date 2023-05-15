@@ -3,6 +3,8 @@ import { spawn, SpawnOptions } from 'child_process'
 import { writeFileSync } from 'fs'
 import path from 'path'
 import winston from 'winston'
+import { writeFFMetadata } from 'ffmetadata1'
+import { quote } from 'shell-quote'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { logger as baseLogger } from '../logger'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
@@ -14,6 +16,8 @@ export class SpaceDownloader {
   private playlistUrl: string
   private playlistFile: string
   private audioFile: string
+  private metadataFile: string
+  private args: string[]
 
   constructor(
     private readonly originUrl: string,
@@ -27,8 +31,10 @@ export class SpaceDownloader {
     })
     this.playlistFile = path.join(Util.getMediaDir(subDir), `${filename}.m3u8`)
     this.audioFile = path.join(Util.getMediaDir(subDir), `${filename}.m4a`)
+    this.metadataFile = path.join(Util.getMediaDir(subDir), `${filename}.ffm1`)
     this.logger.verbose(`Playlist path: "${this.playlistFile}"`)
     this.logger.verbose(`Audio path: "${this.audioFile}"`)
+    this.logger.verbose(`Metadata path: "${this.metadataFile}"`)
   }
 
   public async download() {
@@ -63,30 +69,30 @@ export class SpaceDownloader {
     }
   }
 
-  private spawnFfmpeg() {
+  private async spawnFfmpeg() {
     const cmd = 'ffmpeg'
-    const args = [
+    this.args = [
       '-protocol_whitelist',
       'file,https,tls,tcp',
+      '-f',
+      'hls',
       '-i',
       // this.playlistFile,
       this.playlistUrl,
-      '-c',
-      'copy',
     ]
+
     if (this.metadata) {
       this.logger.debug('Audio metadata', this.metadata)
-      Object.keys(this.metadata).forEach((key) => {
-        const value = this.metadata[key]
-        if (!value) {
-          return
-        }
-        args.push('-metadata', `${key}=${value}`)
-      })
+      await writeFFMetadata(this.metadata, this.metadataFile)
+      this.args.push(...['-f', 'ffmetadata', '-i', this.metadataFile])
     }
-    args.push(this.audioFile)
+
+    this.args.push(...['-c', 'copy', this.audioFile])
     this.logger.verbose(`Audio is saving to "${this.audioFile}"`)
-    this.logger.verbose(`${cmd} ${args.join(' ')}`)
+
+    // Shell quote args so user can copy and paste to debug ffmpeg.
+    const outargs = new Array([...this.args]).map((v) => quote(v)).join(' ')
+    this.logger.verbose(`${cmd} ${outargs}`)
 
     // https://github.com/nodejs/node/issues/21825
     const spawnOptions: SpawnOptions = {
@@ -97,8 +103,8 @@ export class SpaceDownloader {
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cp = process.platform === 'win32'
-      ? spawn(process.env.comspec, ['/c', cmd, ...args], spawnOptions)
-      : spawn(cmd, args, spawnOptions)
+      ? spawn(process.env.comspec, ['/c', cmd, ...this.args], spawnOptions)
+      : spawn(cmd, this.args, spawnOptions)
     // cp.unref()
 
     return cp
