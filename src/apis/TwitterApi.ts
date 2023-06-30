@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import axios from 'axios'
-import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
+import { TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
 import { AudioSpaceMetadata, LiveVideoStreamStatus, User as User1 } from '../interfaces/Twitter.interface'
 import { BaseResponse, Space, User } from '../interfaces/Twitter2.interface'
 
@@ -9,7 +9,7 @@ export class TwitterApi {
     const { data } = await axios.request({
       method: 'POST',
       url: 'https://api.twitter.com/1.1/guest/activate.json',
-      headers: { authorization: TWITTER_AUTHORIZATION },
+      headers: { authorization: TWITTER_PUBLIC_AUTHORIZATION },
     })
     return data.guest_token
   }

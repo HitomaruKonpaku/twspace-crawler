@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto'
 import EventEmitter from 'events'
 import winston from 'winston'
-import { TwitterApi } from '../apis/TwitterApi'
-import { TWITTER_API_LIST_SIZE, TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
-import { SpaceState } from '../enums/Twitter.enum'
 import { twitterSpaceApiLimiter } from '../Limiter'
+import { TwitterApi } from '../apis/TwitterApi'
+import { TWITTER_API_LIST_SIZE, TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
+import { SpaceState } from '../enums/Twitter.enum'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
 import { User, userManager } from './UserManager'
@@ -54,7 +54,7 @@ export class UserListWatcher extends EventEmitter {
         const data = await TwitterApi.getSpacesByFleetsAvatarContent(
           userIds,
           {
-            authorization: TWITTER_AUTHORIZATION,
+            authorization: TWITTER_PUBLIC_AUTHORIZATION,
             cookie: [`auth_token=${Util.getTwitterAuthToken()}`].join(';'),
           },
         )

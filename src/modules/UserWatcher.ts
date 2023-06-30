@@ -1,9 +1,9 @@
 import EventEmitter from 'events'
 import winston from 'winston'
-import { TwitterApi } from '../apis/TwitterApi'
-import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
-import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
 import { twitterApiLimiter } from '../Limiter'
+import { TwitterApi } from '../apis/TwitterApi'
+import { TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
+import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
 import { configManager } from './ConfigManager'
@@ -26,7 +26,7 @@ export class UserWatcher extends EventEmitter {
   // eslint-disable-next-line class-methods-use-this
   private get headers() {
     return {
-      authorization: TWITTER_AUTHORIZATION,
+      authorization: TWITTER_PUBLIC_AUTHORIZATION,
       'x-guest-token': configManager.guestToken,
     }
   }

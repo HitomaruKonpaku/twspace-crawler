@@ -5,10 +5,10 @@ import EventEmitter from 'events'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
+import { api } from '../api/twitter.api'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
-import { TwitterApi } from '../apis/TwitterApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP_SPACE_ERROR_RETRY_INTERVAL } from '../constants/app.constant'
-import { TWITTER_AUTHORIZATION } from '../constants/twitter.constant'
+import { TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
 import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpace, AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
@@ -93,20 +93,19 @@ export class SpaceWatcher extends EventEmitter {
   private async getHeaders() {
     const guestToken = await configManager.getGuestToken()
     const headers = {
-      authorization: TWITTER_AUTHORIZATION,
+      authorization: TWITTER_PUBLIC_AUTHORIZATION,
       'x-guest-token': guestToken,
     }
     return headers
   }
 
   private async getSpaceMetadata() {
-    const headers = await this.getHeaders()
     const requestId = randomUUID()
     try {
       this.logger.debug('--> getSpaceMetadata', { requestId })
-      const response = await TwitterApi.getAudioSpaceById(this.spaceId, headers)
+      const { data } = await api.graphql.AudioSpaceById(this.spaceId)
       this.logger.debug('<-- getSpaceMetadata', { requestId })
-      const audioSpace = response?.data?.audioSpace as AudioSpace
+      const audioSpace = data?.data?.audioSpace as AudioSpace
       delete audioSpace.sharings
       this.logger.debug('audioSpace', audioSpace)
       const metadata = audioSpace?.metadata
@@ -156,9 +155,9 @@ export class SpaceWatcher extends EventEmitter {
 
     if (!this.liveStreamStatus) {
       const requestId = randomUUID()
-      const headers = await this.getHeaders()
       this.logger.debug('--> getLiveVideoStreamStatus', { requestId })
-      this.liveStreamStatus = await TwitterApi.getLiveVideoStreamStatus(this.metadata.media_key, headers)
+      const { data } = await api.liveVideoStream.status(this.metadata.media_key)
+      this.liveStreamStatus = data
       this.logger.debug('<-- getLiveVideoStreamStatus', { requestId })
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
     }

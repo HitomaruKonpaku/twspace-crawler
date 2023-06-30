@@ -1,9 +1,11 @@
+import Bottleneck from 'bottleneck'
 import { randomUUID } from 'crypto'
 import { EventEmitter } from 'stream'
 import winston from 'winston'
-import { TwitterApi } from '../apis/TwitterApi'
-import { TWITTER_API_LIST_SIZE, TWITTER_AUTHORIZATION, TWITTER_USER_FETCH_INTERVAL } from '../constants/twitter.constant'
 import { twitterApiLimiter } from '../Limiter'
+import { api } from '../api/twitter.api'
+import { TwitterApi } from '../apis/TwitterApi'
+import { TWITTER_API_LIST_SIZE, TWITTER_USER_FETCH_INTERVAL } from '../constants/twitter.constant'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
 import { configManager } from './ConfigManager'
@@ -120,8 +122,10 @@ class UserManager extends EventEmitter {
 
   private async fetchUsersByScreenName() {
     this.logger.debug('--> fetchUsersByScreenName')
+    const limiter = new Bottleneck({ maxConcurrent: 1 })
     const users = this.getUsersWithoutId()
-    await Promise.allSettled(users.map((curUser, index) => twitterApiLimiter.schedule(async () => {
+    users.length = 5
+    await Promise.allSettled(users.map((curUser, index) => limiter.schedule(async () => {
       const { username } = curUser
       this.logger.debug(`--> getUserByScreenName ${index + 1}`, { username })
       const user = await this.getUserByScreenName(username)
@@ -134,31 +138,15 @@ class UserManager extends EventEmitter {
 
   private async getUserByScreenName(username: string): Promise<User> {
     try {
-      const response = await TwitterApi.getUserByFollowButtonInfo(username)
-      if (response?.id) {
-        const user = {
-          username: response.screen_name,
-          id: response.id,
-        }
-        return user
-      }
-    } catch (error) {
-      this.logger.warn(`getUserByScreenName: ${error.message}`, { username })
-    }
-
-    try {
       await configManager.getGuestToken()
-      const response = await TwitterApi.getUserByScreenName(username, {
-        authorization: TWITTER_AUTHORIZATION,
-        'x-guest-token': configManager.guestToken,
-      })
-      const result = response?.data?.user?.result
+      const { data } = await api.graphql.UserByScreenName(username)
+      const result = data?.data?.user?.result
       if (!result) {
         return null
       }
       const user = {
-        username: result.legacy.screen_name,
         id: result.rest_id,
+        username: result.legacy.screen_name,
       }
       return user
     } catch (error) {
