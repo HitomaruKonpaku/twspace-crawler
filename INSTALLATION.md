@@ -71,6 +71,7 @@ Using `TWITTER_AUTH_TOKEN` & `TWITTER_CSRF_TOKEN` **(REQUIRED)**
   1. Press F12 to open dev tools
   1. Select `Application` tab
   1. Select `Storage` > `Cookies` > `https://twitter.com`
+  1. Clone [.env.example](.env.example) and rename to `.env`
   1. Copy `auth_token` and set to `TWITTER_AUTH_TOKEN`
   1. Copy `ct0` and set to `TWITTER_CSRF_TOKEN`
 
