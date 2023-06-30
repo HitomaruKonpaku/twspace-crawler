@@ -50,40 +50,42 @@
 
   - You need to set 1 of them for better Spaces look up
 
-  - `TWITTER_AUTHORIZATION`
+### ~~Official API~~
 
-    1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
-    1. Navigate to [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) to create new app (or use existing app)
-    1. Get app `Bearer Token` in `Keys and tokens` tab
-    1. Set `TWITTER_AUTHORIZATION` value
+Using `TWITTER_AUTHORIZATION`
 
-        ```
-        TWITTER_AUTHORIZATION=Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs...
-        ```
+  1. [Getting access to the Twitter API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
+  1. Navigate to [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) to create new app (or use existing app)
+  1. Get app `Bearer Token` in `Keys and tokens` tab
+  1. Set `TWITTER_AUTHORIZATION` value
 
-  - `TWITTER_AUTH_TOKEN`
+      ```
+      TWITTER_AUTHORIZATION=Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs...
+      ```
 
-    1. Sign in Twitter
-    1. Open new tab (Chrome)
+### Unofficial API
 
-        ```
-        chrome://settings/cookies/detail?site=twitter.com&search=cookies
-        ```
+Using `TWITTER_AUTH_TOKEN` & `TWITTER_CSRF_TOKEN` **(REQUIRED)**
 
-    1. Copy `Content` of `auth_token`
-    1. Set `TWITTER_AUTH_TOKEN` value
+  1. Sign in Twitter
+  1. Press F12 to open dev tools
+  1. Select `Application` tab
+  1. Select `Storage` > `Cookies` > `https://twitter.com`
+  1. Copy `auth_token` and set to `TWITTER_AUTH_TOKEN`
+  1. Copy `ct0` and set to `TWITTER_CSRF_TOKEN`
 
-        ```
-        TWITTER_AUTH_TOKEN=456472d2...
-        ```
+      ```
+      TWITTER_AUTH_TOKEN=456472d2...
+      TWITTER_CSRF_TOKEN=05f85936...
+      ```
 
-- Clone/Create [config.yaml](config.example.yaml) or [config.json](config.example.json) file
+  1. Clone/Create [config.yaml](config.example.yaml) or [config.json](config.example.json) file
 
-- Start app
+  1. Start app
 
-  ```
-  twspace-crawler --env ./.env --config ./config.json --force-open
-  ```
+      ```
+      twspace-crawler --env ./.env --config ./config.json --force-open
+      ```
 
 ## twspace-crawler with pm2
 

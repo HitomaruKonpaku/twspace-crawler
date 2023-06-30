@@ -5,6 +5,8 @@
 
 > **Node.js script & command-line app to automatically monitor & download [Twitter Spaces](https://help.twitter.com/en/using-twitter/spaces).**
 
+> **UPDATE 2023-07-01: SINCE TWITTER CHANGED THEIR APIS, READ [INSTALLATION](INSTALLATION.md#unofficial-api) FIRST**
+
 ## Contents
 
 1. [Requirements](#requirements)
