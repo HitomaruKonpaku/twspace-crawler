@@ -124,7 +124,6 @@ class UserManager extends EventEmitter {
     this.logger.debug('--> fetchUsersByScreenName')
     const limiter = new Bottleneck({ maxConcurrent: 1 })
     const users = this.getUsersWithoutId()
-    users.length = 5
     await Promise.allSettled(users.map((curUser, index) => limiter.schedule(async () => {
       const { username } = curUser
       this.logger.debug(`--> getUserByScreenName ${index + 1}`, { username })
