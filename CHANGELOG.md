@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.12.2
+
+* Update webhook embed
+* Handle Space ended/canceled case
+
+## 1.12.1
+
+* Minor fix
+
+## 1.12.0
+
+* Fix APIs now remove guest token, required user auth token & csrf token
+* Update webhook embed
+* Update README
+
 ## 1.11.12
 
 * Fix Space ended embed title
