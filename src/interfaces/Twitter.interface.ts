@@ -84,7 +84,7 @@ export interface AudioSpaceParticipant {
   is_verified: boolean
   is_muted_by_admin: boolean
   is_muted_by_guest: boolean
-  user: AudioSpaceParticipantUser
+  user_results: AudioSpaceParticipantUser
   [key: string]: any
 }
 

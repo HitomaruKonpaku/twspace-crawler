@@ -1,25 +1,26 @@
-import { codeBlock, inlineCode, time } from '@discordjs/builders'
+import { inlineCode } from '@discordjs/builders'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
 import winston from 'winston'
-import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
-import { AudioSpace } from '../interfaces/Twitter.interface'
+
 import { discordWebhookLimiter } from '../Limiter'
+import { AudioSpaceMetadataState, SpaceState } from '../enums/Twitter.enum'
+import { AudioSpace } from '../interfaces/Twitter.interface'
 import { logger as baseLogger } from '../logger'
+import { TwitterSpace } from '../model/twitter-space'
 import { SpaceUtil } from '../utils/SpaceUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
+import { TwitterSpaceUtil } from '../utils/twitter-space.util'
 import { configManager } from './ConfigManager'
 
 export class Webhook {
   private logger: winston.Logger
 
   constructor(
+    private readonly space: TwitterSpace,
     private readonly audioSpace: AudioSpace,
-    private readonly masterUrl: string,
   ) {
-    const username = SpaceUtil.getHostUsername(audioSpace)
-    const spaceId = SpaceUtil.getId(audioSpace)
-    this.logger = baseLogger.child({ label: `[Webhook] [${username}] [${spaceId}]` })
+    this.logger = baseLogger.child({ label: `[Webhook] [${space.creator.username}] [${space.id}]` })
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -69,7 +70,7 @@ export class Webhook {
       try {
         // Build content with mentions
         let content = ''
-        if (this.audioSpace.metadata.state === AudioSpaceMetadataState.RUNNING) {
+        if (this.space.state === SpaceState.LIVE) {
           Array.from(config.mentions?.roleIds || []).map((v) => v).forEach((roleId) => {
             content += `<@&${roleId}> `
           })
@@ -78,7 +79,7 @@ export class Webhook {
           })
           content = [content, config.startMessage].filter((v) => v).map((v) => v.trim()).join(' ')
         }
-        if (this.audioSpace.metadata.state === AudioSpaceMetadataState.ENDED) {
+        if (this.space.state === SpaceState.ENDED) {
           content = [content, config.endMessage].filter((v) => v).map((v) => v.trim()).join(' ')
         }
         content = content.trim()
@@ -144,52 +145,12 @@ export class Webhook {
   }
 
   private getEmbed(usernames: string[]) {
-    const username = SpaceUtil.getHostUsername(this.audioSpace)
-    const name = SpaceUtil.getHostName(this.audioSpace)
-    const fields: any[] = [
-      {
-        name: '📄 Title',
-        value: codeBlock(SpaceUtil.getTitle(this.audioSpace)),
-      },
-    ]
-
-    if ([AudioSpaceMetadataState.RUNNING, AudioSpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
-      if (this.audioSpace.metadata.started_at) {
-        fields.push(
-          {
-            name: '▶️ Started at',
-            value: Webhook.getEmbedLocalTime(this.audioSpace.metadata.started_at),
-            inline: true,
-          },
-        )
-      }
-    }
-
-    if ([AudioSpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
-      if (this.audioSpace.metadata.ended_at) {
-        fields.push(
-          {
-            name: '⏹️ Ended at',
-            value: Webhook.getEmbedLocalTime(Number(this.audioSpace.metadata.ended_at)),
-            inline: true,
-          },
-        )
-      }
-    }
-
-    if ([AudioSpaceMetadataState.RUNNING, AudioSpaceMetadataState.ENDED].includes(this.audioSpace.metadata.state as any)) {
-      fields.push(
-        {
-          name: '🔗 Playlist url',
-          value: codeBlock(this.masterUrl),
-        },
-      )
-    }
-
+    const { username, name } = this.space.creator
+    const fields = TwitterSpaceUtil.getEmbedFields(this.space)
     const embed = {
       type: 'rich',
       title: this.getEmbedTitle(usernames),
-      description: TwitterUtil.getSpaceUrl(SpaceUtil.getId(this.audioSpace)),
+      description: TwitterSpaceUtil.getEmbedDescription(this.space),
       color: 0x1d9bf0,
       author: {
         name: `${name} (@${username})`,
@@ -204,15 +165,5 @@ export class Webhook {
     }
 
     return embed
-  }
-
-  public static getEmbedLocalTime(ms: number) {
-    if (!ms) {
-      return null
-    }
-    return [
-      time(Math.floor(ms / 1000)),
-      time(Math.floor(ms / 1000), 'R'),
-    ].join('\n')
   }
 }

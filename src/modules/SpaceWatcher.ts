@@ -5,18 +5,20 @@ import EventEmitter from 'events'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
+
 import { api } from '../api/twitter.api'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP_SPACE_ERROR_RETRY_INTERVAL } from '../constants/app.constant'
-import { TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
 import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpace, AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger, spaceLogger } from '../logger'
+import { TwitterSpace } from '../model/twitter-space'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 import { SpaceUtil } from '../utils/SpaceUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { Util } from '../utils/Util'
+import { TwitterEntityUtil } from '../utils/twitter-entity.util'
 import { configManager } from './ConfigManager'
 import { Notification } from './Notification'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
@@ -32,6 +34,8 @@ export class SpaceWatcher extends EventEmitter {
   private liveStreamStatus: LiveVideoStreamStatus
   private accessChatData: AccessChat
   private dynamicPlaylistUrl: string
+
+  private space: TwitterSpace
 
   private lastChunkIndex: number
   private chunkVerifyCount = 0
@@ -57,15 +61,15 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   public get spaceTitle(): string {
-    return SpaceUtil.getTitle(this.audioSpace)
+    return this.space?.title || SpaceUtil.getTitle(this.audioSpace)
   }
 
   public get userScreenName(): string {
-    return SpaceUtil.getHostUsername(this.audioSpace)
+    return this.space?.creator?.username || SpaceUtil.getHostUsername(this.audioSpace)
   }
 
   public get userDisplayName(): string {
-    return SpaceUtil.getHostName(this.audioSpace)
+    return this.space?.creator?.name || SpaceUtil.getHostName(this.audioSpace)
   }
 
   private get filename(): string {
@@ -89,14 +93,12 @@ export class SpaceWatcher extends EventEmitter {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private async getHeaders() {
-    const guestToken = await configManager.getGuestToken()
-    const headers = {
-      authorization: TWITTER_PUBLIC_AUTHORIZATION,
-      'x-guest-token': guestToken,
+  private buildSpace() {
+    const space = TwitterEntityUtil.buildSpaceByAudioSpace(this.audioSpace)
+    this.space = space
+    if (this.dynamicPlaylistUrl) {
+      this.space.playlistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
     }
-    return headers
   }
 
   private async getSpaceMetadata() {
@@ -114,6 +116,7 @@ export class SpaceWatcher extends EventEmitter {
         delete metadata.creator_results
       }
       this.audioSpace = audioSpace
+      this.buildSpace()
       this.logger.info('Host info', { screenName: this.userScreenName, displayName: this.userDisplayName })
     } catch (error) {
       const meta = { requestId }
@@ -165,6 +168,7 @@ export class SpaceWatcher extends EventEmitter {
     if (!this.dynamicPlaylistUrl) {
       this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
       this.logger.info(`Master playlist url: ${PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)}`)
+      this.buildSpace()
       this.logSpaceInfo()
       this.sendWebhooks()
     }
@@ -361,10 +365,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private sendWebhooks() {
-    const webhook = new Webhook(
-      this.audioSpace,
-      PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
-    )
+    const webhook = new Webhook(this.space, this.audioSpace)
     webhook.send()
   }
 }
