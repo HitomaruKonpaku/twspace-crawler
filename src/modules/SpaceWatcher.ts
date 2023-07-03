@@ -9,7 +9,7 @@ import winston from 'winston'
 import { api } from '../api/twitter.api'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP_SPACE_ERROR_RETRY_INTERVAL } from '../constants/app.constant'
-import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
+import { AudioSpaceMetadataState, SpaceState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { AudioSpace, AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger, spaceLogger } from '../logger'
@@ -156,6 +156,16 @@ export class SpaceWatcher extends EventEmitter {
       return
     }
 
+    if (this.space.state === SpaceState.CANCELED) {
+      this.logger.warn('Space canceled')
+      return
+    }
+
+    if (this.space.state === SpaceState.ENDED && !this.space.isAvailableForReplay) {
+      this.logger.warn('Space archive not available')
+      return
+    }
+
     if (!this.liveStreamStatus) {
       const requestId = randomUUID()
       this.logger.debug('--> getLiveVideoStreamStatus', { requestId })
@@ -183,7 +193,7 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
     }
 
-    if (this.metadata.state === AudioSpaceMetadataState.ENDED) {
+    if (this.space.state === SpaceState.ENDED) {
       this.processDownload()
       return
     }
