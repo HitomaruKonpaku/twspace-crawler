@@ -43,11 +43,7 @@ npm install twspace-crawler
 ### Monitor user(s) indefinitely, wait for live Space and download when Space ended
 
 ```
-twspace-crawler --user nakiriayame
-```
-
-```
-twspace-crawler --user nakiriayame,sakamatachloe
+twspace-crawler --user nakiriayame,LaplusDarknesss
 ```
 
 ```
@@ -141,4 +137,4 @@ twspace-crawler cc e /download/sample_cc.jsonl 1633612289669
 
 Currently support Discord Webooks
 
-Check [config.example.yaml](config.example.yaml) or [config.example.json](config.example.json) for more detail
+Check [config.example.yaml](config.example.yaml) ~~or [config.example.json](config.example.json)~~ for more detail
