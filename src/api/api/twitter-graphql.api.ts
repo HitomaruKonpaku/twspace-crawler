@@ -13,8 +13,20 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { userId, withSafetyModeUserFields: true },
-        features: { hidden_profile_likes_enabled: false, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, subscriptions_verification_info_verified_since_enabled: true, highlights_tweets_tab_ui_enabled: true, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, responsive_web_graphql_timeline_navigation_enabled: true },
+        variables: {
+          userId,
+          withSafetyModeUserFields: true,
+        },
+        features: {
+          hidden_profile_likes_enabled: false,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          subscriptions_verification_info_verified_since_enabled: true,
+          highlights_tweets_tab_ui_enabled: true,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+        },
       },
     })
     return res
@@ -28,8 +40,20 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { screen_name: username, withSafetyModeUserFields: true },
-        features: { hidden_profile_likes_enabled: false, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, subscriptions_verification_info_verified_since_enabled: true, highlights_tweets_tab_ui_enabled: true, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, responsive_web_graphql_timeline_navigation_enabled: true },
+        variables: {
+          screen_name: username,
+          withSafetyModeUserFields: true,
+        },
+        features: {
+          hidden_profile_likes_enabled: false,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          subscriptions_verification_info_verified_since_enabled: true,
+          highlights_tweets_tab_ui_enabled: true,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+        },
       },
     })
     return res
@@ -43,9 +67,39 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { userId, count, includePromotedContent: true, withQuickPromoteEligibilityTweetFields: true, withVoice: true, withV2Timeline: true },
-        features: { rweb_lists_timeline_redesign_enabled: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_timeline_navigation_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, tweetypie_unmention_optimization_enabled: true, responsive_web_edit_tweet_api_enabled: true, graphql_is_translatable_rweb_tweet_is_translatable_enabled: true, view_counts_everywhere_api_enabled: true, longform_notetweets_consumption_enabled: true, responsive_web_twitter_article_tweet_consumption_enabled: false, tweet_awards_web_tipping_enabled: false, freedom_of_speech_not_reach_fetch_enabled: true, standardized_nudges_misinfo: true, tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true, longform_notetweets_rich_text_read_enabled: true, longform_notetweets_inline_media_enabled: true, responsive_web_media_download_video_enabled: false, responsive_web_enhance_cards_enabled: false },
-        fieldToggles: { withArticleRichContentState: false },
+        variables: {
+          userId,
+          count,
+          includePromotedContent: true,
+          withQuickPromoteEligibilityTweetFields: true,
+          withVoice: true,
+          withV2Timeline: true,
+        },
+        features: {
+          rweb_lists_timeline_redesign_enabled: true,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          tweetypie_unmention_optimization_enabled: true,
+          responsive_web_edit_tweet_api_enabled: true,
+          graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+          view_counts_everywhere_api_enabled: true,
+          longform_notetweets_consumption_enabled: true,
+          responsive_web_twitter_article_tweet_consumption_enabled: false,
+          tweet_awards_web_tipping_enabled: false,
+          freedom_of_speech_not_reach_fetch_enabled: true,
+          standardized_nudges_misinfo: true,
+          tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+          longform_notetweets_rich_text_read_enabled: true,
+          longform_notetweets_inline_media_enabled: true,
+          responsive_web_media_download_video_enabled: false,
+          responsive_web_enhance_cards_enabled: false,
+        },
+        fieldToggles: {
+          withArticleRichContentState: false,
+        },
       },
     })
     return res
@@ -59,9 +113,39 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { userId, count, includePromotedContent: true, withCommunity: true, withVoice: true, withV2Timeline: true },
-        features: { rweb_lists_timeline_redesign_enabled: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_timeline_navigation_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, tweetypie_unmention_optimization_enabled: true, responsive_web_edit_tweet_api_enabled: true, graphql_is_translatable_rweb_tweet_is_translatable_enabled: true, view_counts_everywhere_api_enabled: true, longform_notetweets_consumption_enabled: true, responsive_web_twitter_article_tweet_consumption_enabled: false, tweet_awards_web_tipping_enabled: false, freedom_of_speech_not_reach_fetch_enabled: true, standardized_nudges_misinfo: true, tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true, longform_notetweets_rich_text_read_enabled: true, longform_notetweets_inline_media_enabled: true, responsive_web_media_download_video_enabled: false, responsive_web_enhance_cards_enabled: false },
-        fieldToggles: { withArticleRichContentState: false },
+        variables: {
+          userId,
+          count,
+          includePromotedContent: true,
+          withCommunity: true,
+          withVoice: true,
+          withV2Timeline: true,
+        },
+        features: {
+          rweb_lists_timeline_redesign_enabled: true,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          tweetypie_unmention_optimization_enabled: true,
+          responsive_web_edit_tweet_api_enabled: true,
+          graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+          view_counts_everywhere_api_enabled: true,
+          longform_notetweets_consumption_enabled: true,
+          responsive_web_twitter_article_tweet_consumption_enabled: false,
+          tweet_awards_web_tipping_enabled: false,
+          freedom_of_speech_not_reach_fetch_enabled: true,
+          standardized_nudges_misinfo: true,
+          tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+          longform_notetweets_rich_text_read_enabled: true,
+          longform_notetweets_inline_media_enabled: true,
+          responsive_web_media_download_video_enabled: false,
+          responsive_web_enhance_cards_enabled: false,
+        },
+        fieldToggles: {
+          withArticleRichContentState: false,
+        },
       },
     })
     return res
@@ -79,9 +163,42 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { focalTweetId: tweetId, with_rux_injections: false, includePromotedContent: true, withCommunity: true, withQuickPromoteEligibilityTweetFields: true, withArticleRichContent: false, withBirdwatchNotes: true, withVoice: true, withV2Timeline: true },
-        features: { rweb_lists_timeline_redesign_enabled: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_timeline_navigation_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, tweetypie_unmention_optimization_enabled: true, responsive_web_edit_tweet_api_enabled: true, graphql_is_translatable_rweb_tweet_is_translatable_enabled: true, view_counts_everywhere_api_enabled: true, longform_notetweets_consumption_enabled: true, responsive_web_twitter_article_tweet_consumption_enabled: false, tweet_awards_web_tipping_enabled: false, freedom_of_speech_not_reach_fetch_enabled: true, standardized_nudges_misinfo: true, tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true, longform_notetweets_rich_text_read_enabled: true, longform_notetweets_inline_media_enabled: true, responsive_web_media_download_video_enabled: false, responsive_web_enhance_cards_enabled: false },
-        fieldToggles: { withArticleRichContentState: false },
+        variables: {
+          focalTweetId: tweetId,
+          with_rux_injections: false,
+          includePromotedContent: true,
+          withCommunity: true,
+          withQuickPromoteEligibilityTweetFields: true,
+          withArticleRichContent: false,
+          withBirdwatchNotes: true,
+          withVoice: true,
+          withV2Timeline: true,
+        },
+        features: {
+          rweb_lists_timeline_redesign_enabled: true,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          tweetypie_unmention_optimization_enabled: true,
+          responsive_web_edit_tweet_api_enabled: true,
+          graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+          view_counts_everywhere_api_enabled: true,
+          longform_notetweets_consumption_enabled: true,
+          responsive_web_twitter_article_tweet_consumption_enabled: false,
+          tweet_awards_web_tipping_enabled: false,
+          freedom_of_speech_not_reach_fetch_enabled: true,
+          standardized_nudges_misinfo: true,
+          tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+          longform_notetweets_rich_text_read_enabled: true,
+          longform_notetweets_inline_media_enabled: true,
+          responsive_web_media_download_video_enabled: false,
+          responsive_web_enhance_cards_enabled: false,
+        },
+        fieldToggles: {
+          withArticleRichContentState: false,
+        },
       },
     })
     return res
@@ -99,9 +216,37 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { count, includePromotedContent: false, latestControlAvailable: true, requestContext: 'launch' },
-        features: { rweb_lists_timeline_redesign_enabled: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_timeline_navigation_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, tweetypie_unmention_optimization_enabled: true, responsive_web_edit_tweet_api_enabled: true, graphql_is_translatable_rweb_tweet_is_translatable_enabled: true, view_counts_everywhere_api_enabled: true, longform_notetweets_consumption_enabled: true, responsive_web_twitter_article_tweet_consumption_enabled: false, tweet_awards_web_tipping_enabled: false, freedom_of_speech_not_reach_fetch_enabled: true, standardized_nudges_misinfo: true, tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true, longform_notetweets_rich_text_read_enabled: true, longform_notetweets_inline_media_enabled: true, responsive_web_media_download_video_enabled: false, responsive_web_enhance_cards_enabled: false },
-        fieldToggles: { withArticleRichContentState: false },
+        variables: {
+          count,
+          includePromotedContent: false,
+          latestControlAvailable: true,
+          requestContext: 'launch',
+        },
+        features: {
+          rweb_lists_timeline_redesign_enabled: true,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          tweetypie_unmention_optimization_enabled: true,
+          responsive_web_edit_tweet_api_enabled: true,
+          graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+          view_counts_everywhere_api_enabled: true,
+          longform_notetweets_consumption_enabled: true,
+          responsive_web_twitter_article_tweet_consumption_enabled: false,
+          tweet_awards_web_tipping_enabled: false,
+          freedom_of_speech_not_reach_fetch_enabled: true,
+          standardized_nudges_misinfo: true,
+          tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+          longform_notetweets_rich_text_read_enabled: true,
+          longform_notetweets_inline_media_enabled: true,
+          responsive_web_media_download_video_enabled: false,
+          responsive_web_enhance_cards_enabled: false,
+        },
+        fieldToggles: {
+          withArticleRichContentState: false,
+        },
       },
     })
     return res
@@ -119,9 +264,38 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { id, isMetatagsQuery: true, withReplays: true, withListeners: true },
-        features: { spaces_2022_h2_clipping: true, spaces_2022_h2_spaces_communities: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, tweetypie_unmention_optimization_enabled: true, responsive_web_edit_tweet_api_enabled: true, graphql_is_translatable_rweb_tweet_is_translatable_enabled: true, view_counts_everywhere_api_enabled: true, longform_notetweets_consumption_enabled: true, responsive_web_twitter_article_tweet_consumption_enabled: false, tweet_awards_web_tipping_enabled: false, freedom_of_speech_not_reach_fetch_enabled: true, standardized_nudges_misinfo: true, tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true, responsive_web_graphql_timeline_navigation_enabled: true, longform_notetweets_rich_text_read_enabled: true, longform_notetweets_inline_media_enabled: true, responsive_web_media_download_video_enabled: false, responsive_web_enhance_cards_enabled: false },
-        fieldToggles: { withArticleRichContentState: false },
+        variables: {
+          id,
+          isMetatagsQuery: true,
+          withReplays: true,
+          withListeners: true,
+        },
+        features: {
+          spaces_2022_h2_clipping: true,
+          spaces_2022_h2_spaces_communities: true,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          tweetypie_unmention_optimization_enabled: true,
+          responsive_web_edit_tweet_api_enabled: true,
+          graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+          view_counts_everywhere_api_enabled: true,
+          longform_notetweets_consumption_enabled: true,
+          responsive_web_twitter_article_tweet_consumption_enabled: false,
+          tweet_awards_web_tipping_enabled: false,
+          freedom_of_speech_not_reach_fetch_enabled: true,
+          standardized_nudges_misinfo: true,
+          tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+          longform_notetweets_rich_text_read_enabled: true,
+          longform_notetweets_inline_media_enabled: true,
+          responsive_web_media_download_video_enabled: false,
+          responsive_web_enhance_cards_enabled: false,
+        },
+        fieldToggles: {
+          withArticleRichContentState: false,
+        },
       },
     })
     return res
@@ -135,7 +309,18 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const res = await this.client.get(url, {
       headers,
       params: {
-        variables: { id, isMetatagsQuery: false, withSuperFollowsUserFields: false, withBirdwatchPivots: false, withDownvotePerspective: false, withReactionsMetadata: false, withReactionsPerspective: false, withSuperFollowsTweetFields: false, withReplays: true, withScheduledSpaces: true },
+        variables: {
+          id,
+          isMetatagsQuery: false,
+          withSuperFollowsUserFields: false,
+          withBirdwatchPivots: false,
+          withDownvotePerspective: false,
+          withReactionsMetadata: false,
+          withReactionsPerspective: false,
+          withSuperFollowsTweetFields: false,
+          withReplays: true,
+          withScheduledSpaces: true,
+        },
       },
     })
     return res
