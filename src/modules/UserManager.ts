@@ -8,7 +8,7 @@ import { TwitterApi } from '../apis/TwitterApi'
 import { TWITTER_API_LIST_SIZE, TWITTER_USER_FETCH_INTERVAL } from '../constants/twitter.constant'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
-import { configManager } from './ConfigManager'
+import { ArrayUtil } from '../utils/array.util'
 
 export interface User {
   id: string
@@ -78,7 +78,10 @@ class UserManager extends EventEmitter {
     }
     const users = this.getUsersWithoutId()
     if (users.length) {
-      this.logger.warn(`fetchUsers: Found some users without id. Retry in ${TWITTER_USER_FETCH_INTERVAL}ms`, { usernames: users.map((v) => v.username) })
+      this.logger.warn(
+        `fetchUsers: Found some users without id. Retry in ${TWITTER_USER_FETCH_INTERVAL}ms`,
+        { count: users.length, usernames: users.map((v) => v.username) },
+      )
       setTimeout(() => this.fetchUsers(), TWITTER_USER_FETCH_INTERVAL)
     }
   }
@@ -122,22 +125,30 @@ class UserManager extends EventEmitter {
 
   private async fetchUsersByScreenName() {
     this.logger.debug('--> fetchUsersByScreenName')
-    const limiter = new Bottleneck({ maxConcurrent: 1 })
+
+    const chunkLimiter = new Bottleneck({ maxConcurrent: 1 })
+    const userLimiter = new Bottleneck({ maxConcurrent: 5 })
     const users = this.getUsersWithoutId()
-    await Promise.allSettled(users.map((curUser, index) => limiter.schedule(async () => {
-      const { username } = curUser
-      this.logger.debug(`--> getUserByScreenName ${index + 1}`, { username })
-      const user = await this.getUserByScreenName(username)
-      this.logger.debug(`<-- getUserByScreenName ${index + 1}`, { username })
-      this.updateUser(user)
-      return Promise.resolve(user)
+    const size = 50
+    const chunks = ArrayUtil.splitIntoChunk(users, size)
+
+    await Promise.allSettled(chunks.map((chunk, chunkIndex) => chunkLimiter.schedule(async () => {
+      await api.data.getGuestToken(true)
+      await Promise.allSettled(chunk.map((curUser, userIndex) => userLimiter.schedule(async () => {
+        const { username } = curUser
+        this.logger.debug(`--> getUserByScreenName ${chunkIndex * size + userIndex + 1}`, { username })
+        const user = await this.getUserByScreenName(username)
+        this.logger.debug(`<-- getUserByScreenName ${chunkIndex * size + userIndex + 1}`, { username })
+        this.updateUser(user)
+        return user
+      })))
     })))
+
     this.logger.debug('<-- fetchUsersByScreenName')
   }
 
   private async getUserByScreenName(username: string): Promise<User> {
     try {
-      await configManager.getGuestToken()
       const { data } = await api.graphql.UserByScreenName(username)
       const result = data?.data?.user?.result
       if (!result) {

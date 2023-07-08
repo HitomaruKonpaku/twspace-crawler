@@ -36,7 +36,7 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     const queryId = 'oUZZZ8Oddwxs8Cd3iW3UEA'
     const operationName = 'UserByScreenName'
     const url = this.parseUrl(queryId, operationName)
-    const headers = this.getAuthHeaders()
+    const headers = await this.getGuestHeaders()
     const res = await this.client.get(url, {
       headers,
       params: {
