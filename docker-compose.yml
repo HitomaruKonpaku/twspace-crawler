@@ -1,0 +1,15 @@
+version: "3"
+services:
+  twspace:
+    image: ghcr.io/aozaki-kuro/twspace-crawler:latest
+    container_name: twspace
+    restart: always
+    network_mode: "host"
+    user: "1000:1000"
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./twspace/.env:/app/.env
+      - ./twspace/config.yaml:/app/config.yaml
+      - ./twspace/logs:/app/logs
+      - ../raw/twspace:/app/download
