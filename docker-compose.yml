@@ -1,7 +1,7 @@
 version: "3"
 services:
   twspace:
-    image: ghcr.io/aozaki-kuro/twspace-crawler:latest
+    image: ghcr.io/hitomarukonpaku/twspace-crawler:latest
     container_name: twspace
     restart: always
     network_mode: "host"
