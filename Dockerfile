@@ -24,6 +24,4 @@ RUN apk add --no-cache ffmpeg
 
 COPY --from=base /app/twspace /app/
 
-RUN npm ci
-
 CMD ["./twspace", "--env", "/app/.env", "--config", "/app/config.yaml"]
