@@ -9,9 +9,12 @@ COPY . /app/
 RUN npm ci
 RUN npm run build
 
+RUN npm i -g pkg
+RUN pkg dist/index.js -o twspace
+
 # Production
 
-FROM node:18-alpine
+FROM alpine
 
 ENV NODE_ENV=production
 
@@ -19,10 +22,8 @@ WORKDIR /app
 
 RUN apk add --no-cache ffmpeg
 
-COPY --from=base /app/dist ./dist
-COPY --from=base /app/package.json .
-COPY --from=base /app/package-lock.json .
+COPY --from=base /app/twspace /app/
 
 RUN npm ci
 
-CMD ["node", "/app/dist/index.js", "--env", "/app/.env", "--config", "/app/config.yaml"]
+CMD ["./twspace", "--env", "/app/.env", "--config", "/app/config.yaml"]
