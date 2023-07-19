@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY . /app/
 
+RUN npm pkg delete scripts.prepare
+
 RUN npm ci
 RUN npm run build
 

@@ -26,6 +26,7 @@
     "start": "node dist/index",
     "start:config": "node dist/index --config ./config.json",
     "build": "tsc",
+    "prepare": "npm run build",
     "test": "lab --transform node_modules/lab-transform-typescript",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
