@@ -1,0 +1,14 @@
+version: "3"
+services:
+  twspace:
+    image: ghcr.io/hitomarukonpaku/twspace-crawler:latest
+    restart: always
+    network_mode: "host"
+    user: "1000:1000"
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./.env:/app/.env
+      - ./config.yaml:/app/config.yaml
+      - ./logs:/app/logs
+      - ./download:/app/download
