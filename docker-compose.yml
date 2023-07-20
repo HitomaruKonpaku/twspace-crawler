@@ -1,10 +1,12 @@
+---
 version: "3"
 services:
-  twspace:
+  twspace-crawler:
     image: ghcr.io/hitomarukonpaku/twspace-crawler:latest
+    container_name: twspace-crawler
+    user: 1000:1000
     restart: always
-    network_mode: "host"
-    user: "1000:1000"
+    network_mode: host
     environment:
       - TZ=Asia/Tokyo
     volumes:
