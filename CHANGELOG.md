@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.4
+
+* Fix AudioSpace API
+
 ## 1.12.3
 
 * Update user request queue on init to adapt new API limit (50req/15mins)
