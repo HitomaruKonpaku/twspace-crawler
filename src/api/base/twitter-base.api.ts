@@ -1,22 +1,14 @@
 /* eslint-disable class-methods-use-this */
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { TWITTER_API_URL, TWITTER_PUBLIC_AUTHORIZATION } from '../../constants/twitter.constant'
 import { logger } from '../../logger'
 import { TwitterApi } from '../twitter.api'
-
-interface RateLimit {
-  limit?: number
-  remaining?: number
-  reset?: number
-}
+import { TWITTER_API_URL, TWITTER_PUBLIC_AUTHORIZATION, TWITTER_PUBLIC_AUTHORIZATION_2 } from '../twitter.constant'
 
 export class TwitterBaseApi {
   public client: AxiosInstance
 
   protected logger = logger.child({ context: 'TwitterApi' })
-
-  private readonly rateLimits: Record<string, RateLimit> = {}
 
   constructor(
     protected readonly api: TwitterApi,
@@ -29,6 +21,14 @@ export class TwitterBaseApi {
     const headers = {
       authorization: TWITTER_PUBLIC_AUTHORIZATION,
       'x-guest-token': await this.api.data.getGuestToken(),
+    }
+    return headers
+  }
+
+  protected async getGuestV2Headers() {
+    const headers = {
+      authorization: TWITTER_PUBLIC_AUTHORIZATION_2,
+      'x-guest-token': await this.api.data.getGuestToken2(),
     }
     return headers
   }
@@ -106,9 +106,12 @@ export class TwitterBaseApi {
     try {
       const guestToken = config.headers['x-guest-token']
       if (guestToken) {
-        const rateLimit = this.rateLimits[config.url]
+        const url = this.getRateLimitRequestUrl(config)
+        const rateLimit = this.api.data.rateLimits[url]
         if (rateLimit && rateLimit.limit && rateLimit.remaining === 0) {
-          const newGuestToken = await this.api.data.getGuestToken(true)
+          const newGuestToken = config.headers.authorization === TWITTER_PUBLIC_AUTHORIZATION
+            ? await this.api.data.getGuestToken(true)
+            : await this.api.data.getGuestToken2(true)
           // eslint-disable-next-line no-param-reassign
           config.headers['x-guest-token'] = newGuestToken
         }
@@ -119,17 +122,23 @@ export class TwitterBaseApi {
   }
 
   private handleResponse(res: AxiosResponse) {
-    const { url } = res.config
+    const url = this.getRateLimitRequestUrl(res.config)
     const limit = Number(res.headers['x-rate-limit-limit'])
     const remaining = Number(res.headers['x-rate-limit-remaining'])
     const reset = Number(res.headers['x-rate-limit-reset'])
     if (limit) {
-      if (!this.rateLimits[url]) {
-        this.rateLimits[url] = {}
-      }
-      this.rateLimits[url].limit = limit
-      this.rateLimits[url].remaining = remaining
-      this.rateLimits[url].reset = reset
+      const { rateLimits } = this.api.data
+      rateLimits[url] = rateLimits[url] || {}
+      rateLimits[url].limit = limit
+      rateLimits[url].remaining = remaining
+      rateLimits[url].reset = reset * 1000
     }
+  }
+
+  private getRateLimitRequestUrl(config: AxiosRequestConfig) {
+    const url = config.baseURL?.includes?.('graphql')
+      ? config.url.substring(config.url.indexOf('/') + 1)
+      : config.url
+    return url
   }
 }
