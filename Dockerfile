@@ -23,4 +23,6 @@ RUN apk add --no-cache ffmpeg
 
 COPY --from=base /app/dist /app/dist
 
+RUN npm ci
+
 CMD ["node", "dist/index", "--env", "/app/.env", "--config", "/app/config.yaml"]
