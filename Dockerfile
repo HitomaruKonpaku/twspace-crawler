@@ -21,6 +21,7 @@ WORKDIR /app
 
 RUN apk add --no-cache ffmpeg
 
+COPY --from=base /app/package.json /app/package-lock.json /app/
 COPY --from=base /app/dist /app/dist
 
 RUN npm ci
