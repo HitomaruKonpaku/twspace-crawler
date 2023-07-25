@@ -36,7 +36,9 @@ export class SpaceUtil {
   }
 
   public static getParticipant(participants: AudioSpaceParticipant[], username: string): AudioSpaceParticipant {
-    return participants?.find?.((v) => v?.twitter_screen_name?.toLowerCase?.() === username?.toLowerCase?.())
+    // return participants?.find?.((v) => v?.twitter_screen_name?.toLowerCase?.() === username?.toLowerCase?.())
+    const result = participants?.find?.((v) => v?.user_results?.result?.legacy?.screen_name?.toLowerCase?.() === username?.toLowerCase?.())
+    return result
   }
 
   public static isUserInParticipants(participants: AudioSpaceParticipant[], username: string): boolean {

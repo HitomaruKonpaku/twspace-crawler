@@ -5,7 +5,7 @@ import winston from 'winston'
 
 import { discordWebhookLimiter } from '../Limiter'
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
-import { AudioSpaceMetadataState, SpaceState } from '../enums/Twitter.enum'
+import { SpaceState } from '../enums/Twitter.enum'
 import { logger as baseLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
 import { SpaceUtil } from '../utils/SpaceUtil'
@@ -97,10 +97,14 @@ export class Webhook {
   }
 
   private getEmbedTitle(usernames: string[]): string {
-    const hostUsername = SpaceUtil.getHostUsername(this.audioSpace)
+    const hostUsername = this.space?.creator?.username
     const host = inlineCode(hostUsername)
 
-    if (this.audioSpace.metadata.state === AudioSpaceMetadataState.ENDED) {
+    if (this.space.state === SpaceState.CANCELED) {
+      return `${host} Space canceled`
+    }
+
+    if (this.space.state === SpaceState.ENDED) {
       return `${host} Space ended`
     }
 
@@ -111,7 +115,7 @@ export class Webhook {
         .filter((v) => v)
       if (participants.length) {
         const guests = participants
-          .map((v) => inlineCode(v.twitter_screen_name))
+          .map((v) => inlineCode(v.user_results.result.legacy.screen_name))
           .join(', ')
         return `${guests} is co-hosting ${host}'s Space`
       }
@@ -123,7 +127,7 @@ export class Webhook {
         .filter((v) => v)
       if (participants.length) {
         const guests = participants
-          .map((v) => inlineCode(v.twitter_screen_name))
+          .map((v) => inlineCode(v.user_results.result.legacy.screen_name))
           .join(', ')
         return `${guests} is speaking in ${host}'s Space`
       }
@@ -135,7 +139,7 @@ export class Webhook {
         .filter((v) => v)
       if (participants.length) {
         const guests = participants
-          .map((v) => inlineCode(v.twitter_screen_name))
+          .map((v) => inlineCode(v.user_results.result.legacy.screen_name))
           .join(', ')
         return `${guests} is listening in ${host}'s Space`
       }
@@ -147,7 +151,7 @@ export class Webhook {
   private getEmbed(usernames: string[]) {
     const { username, name } = this.space.creator
     const fields = TwitterSpaceUtil.getEmbedFields(this.space)
-    const embed = {
+    const embed: any = {
       type: 'rich',
       title: this.getEmbedTitle(usernames),
       description: TwitterSpaceUtil.getEmbedDescription(this.space),
@@ -155,13 +159,16 @@ export class Webhook {
       author: {
         name: `${name} (@${username})`,
         url: TwitterUtil.getUserUrl(username),
-        // icon_url: SpaceUtil.getHostProfileImgUrl(this.audioSpace),
       },
       fields,
       footer: {
         text: 'Twitter',
         icon_url: 'https://abs.twimg.com/favicons/twitter.2.ico',
       },
+    }
+
+    if (this.space?.creator?.profileImageUrl) {
+      embed.author.icon_url = this.space.creator.profileImageUrl
     }
 
     return embed

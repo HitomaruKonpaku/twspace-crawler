@@ -88,6 +88,7 @@ export interface AudioSpaceParticipantUserResults extends AudioSpaceParticipantU
     rest_id?: string
     has_nft_avatar?: boolean
     is_blue_verified?: boolean
+    legacy?: any
   }
 }
 
