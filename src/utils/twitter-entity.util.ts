@@ -5,13 +5,19 @@ import { TwitterSpaceUtil } from './twitter-space.util'
 
 export class TwitterEntityUtil {
   public static buildUserByParticipant(participant: AudioSpaceParticipant): TwitterUser {
-    const { result } = participant.user_results as any
-    const obj: TwitterUser = {
-      id: result.rest_id,
-      username: result.legacy.screen_name,
-      name: result.legacy.name,
+    try {
+      const { result } = participant.user_results as any
+      const obj: TwitterUser = {
+        id: result.rest_id,
+        username: result.legacy.screen_name,
+        name: result.legacy.name,
+        profileImageUrl: result.legacy.profile_image_url_https?.replace?.('_normal', ''),
+      }
+      return obj
+    } catch (error) {
+      // ignore
     }
-    return obj
+    return null
   }
 
   public static buildSpaceByAudioSpace(audioSpace: AudioSpace): TwitterSpace {
@@ -28,8 +34,12 @@ export class TwitterEntityUtil {
       endedAt: Number(metadata.ended_at) || undefined,
       lang: metadata.language,
       title: metadata.title,
-      hostIds: participants.admins.map((v) => v.user_results.result.rest_id || v.user_results.rest_id),
-      speakerIds: participants.speakers.map((v) => v.user_results.result.rest_id || v.user_results.rest_id),
+      hostIds: participants.admins
+        .map((v) => v.user_results.result.rest_id || v.user_results.rest_id)
+        .filter((v) => v),
+      speakerIds: participants.speakers
+        .map((v) => v.user_results.result.rest_id || v.user_results.rest_id)
+        .filter((v) => v),
       participantCount: metadata.total_participated,
       totalLiveListeners: metadata.total_live_listeners,
       totalReplayWatched: metadata.total_replay_watched,
@@ -41,8 +51,12 @@ export class TwitterEntityUtil {
       // ticketsTotal: metadata.tickets_total,
     }
     obj.creator = TwitterEntityUtil.buildUserByParticipant(participants.admins[0])
-    obj.hosts = participants.admins.map((v) => TwitterEntityUtil.buildUserByParticipant(v))
-    obj.speakers = participants.speakers.map((v) => TwitterEntityUtil.buildUserByParticipant(v))
+    obj.hosts = participants.admins
+      .map((v) => TwitterEntityUtil.buildUserByParticipant(v))
+      .filter((v) => v)
+    obj.speakers = participants.speakers
+      .map((v) => TwitterEntityUtil.buildUserByParticipant(v))
+      .filter((v) => v)
     return obj
   }
 }
