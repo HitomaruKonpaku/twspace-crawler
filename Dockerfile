@@ -11,12 +11,9 @@ RUN npm pkg delete scripts.prepare
 RUN npm ci
 RUN npm run build
 
-RUN npm i -g pkg
-RUN pkg dist/index.js -o twspace
-
 # Production
 
-FROM alpine
+FROM node:18-alpine AS runner
 
 ENV NODE_ENV=production
 
@@ -24,6 +21,9 @@ WORKDIR /app
 
 RUN apk add --no-cache ffmpeg
 
-COPY --from=base /app/twspace /app/
+COPY --from=base /app/package.json /app/package-lock.json /app/
+COPY --from=base /app/dist /app/dist
 
-CMD ["./twspace", "--env", "/app/.env", "--config", "/app/config.yaml"]
+RUN npm ci
+
+CMD ["node", "dist/index", "--env", "/app/.env", "--config", "/app/config.yaml"]
