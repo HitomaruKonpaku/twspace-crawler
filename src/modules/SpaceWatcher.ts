@@ -6,12 +6,13 @@ import open from 'open'
 import path from 'path'
 import winston from 'winston'
 
+import { AudioSpace, AudioSpaceMetadata } from '../api/interface/twitter-graphql.interface'
 import { api } from '../api/twitter.api'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP_SPACE_ERROR_RETRY_INTERVAL } from '../constants/app.constant'
 import { AudioSpaceMetadataState, SpaceState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
-import { AudioSpace, AudioSpaceMetadata, LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
+import { LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
 import { logger as baseLogger, spaceLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
@@ -105,9 +106,9 @@ export class SpaceWatcher extends EventEmitter {
     const requestId = randomUUID()
     try {
       this.logger.debug('--> getSpaceMetadata', { requestId })
-      const { data } = await api.graphql.AudioSpaceById(this.spaceId)
+      const { data } = await api.graphql.AudioSpaceByRestId(this.spaceId)
       this.logger.debug('<-- getSpaceMetadata', { requestId })
-      const audioSpace = data?.data?.audioSpace as AudioSpace
+      const audioSpace = data?.data?.audio_space_by_rest_id as AudioSpace
       delete audioSpace.sharings
       this.logger.debug('audioSpace', audioSpace)
       const metadata = audioSpace?.metadata
@@ -376,6 +377,6 @@ export class SpaceWatcher extends EventEmitter {
 
   private sendWebhooks() {
     const webhook = new Webhook(this.space, this.audioSpace)
-    webhook.send()
+    // webhook.send()
   }
 }

@@ -4,8 +4,8 @@ import { randomUUID } from 'crypto'
 import winston from 'winston'
 
 import { discordWebhookLimiter } from '../Limiter'
+import { AudioSpace } from '../api/interface/twitter-graphql.interface'
 import { AudioSpaceMetadataState, SpaceState } from '../enums/Twitter.enum'
-import { AudioSpace } from '../interfaces/Twitter.interface'
 import { logger as baseLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
 import { SpaceUtil } from '../utils/SpaceUtil'
@@ -155,7 +155,7 @@ export class Webhook {
       author: {
         name: `${name} (@${username})`,
         url: TwitterUtil.getUserUrl(username),
-        icon_url: SpaceUtil.getHostProfileImgUrl(this.audioSpace),
+        // icon_url: SpaceUtil.getHostProfileImgUrl(this.audioSpace),
       },
       fields,
       footer: {

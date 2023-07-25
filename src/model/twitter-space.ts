@@ -25,6 +25,8 @@ export class TwitterSpace {
   isAvailableForReplay?: boolean
   isAvailableForClipping?: boolean
 
+  narrowCastSpaceType?: number
+
   playlistUrl?: string
   playlistActive?: boolean
 
