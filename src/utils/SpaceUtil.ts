@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
-import { AudioSpace, AudioSpaceParticipant } from '../interfaces/Twitter.interface'
+
+import { AudioSpace, AudioSpaceParticipant } from '../api/interface/twitter-graphql.interface'
 
 export class SpaceUtil {
   public static getId(audioSpace: AudioSpace): string {
