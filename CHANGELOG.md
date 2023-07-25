@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.12.6
+
+* Fix error related to Space of suspended user
+* Enable webhook
+* Update Dockerfile
+
+## 1.12.5
+
+* Use new AudioSpace API
+* Disable webhook
+
 ## 1.12.4
 
 * Fix AudioSpace API
