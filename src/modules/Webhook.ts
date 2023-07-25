@@ -20,7 +20,7 @@ export class Webhook {
     private readonly space: TwitterSpace,
     private readonly audioSpace: AudioSpace,
   ) {
-    this.logger = baseLogger.child({ label: `[Webhook] [${space.creator.username}] [${space.id}]` })
+    this.logger = baseLogger.child({ label: `[Webhook] [${space?.creator?.username}] [${space.id}]` })
   }
 
   // eslint-disable-next-line class-methods-use-this
