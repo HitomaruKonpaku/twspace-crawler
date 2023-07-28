@@ -1,7 +1,7 @@
 import Bottleneck from 'bottleneck'
 
 export const twitterGuestTokenLimiter = new Bottleneck({ maxConcurrent: 1 })
-export const twitterApiLimiter = new Bottleneck({ maxConcurrent: 2 })
+export const twitterApiLimiter = new Bottleneck({ maxConcurrent: 1 })
 
 export const twitterSpaceApiLimiter = new Bottleneck({
   maxConcurrent: 1,
