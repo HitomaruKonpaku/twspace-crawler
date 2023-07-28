@@ -17,6 +17,7 @@ export class TwitterSpace {
 
   hostIds?: string[]
   speakerIds?: string[]
+  listenerIds?: string[]
 
   participantCount?: number
   totalLiveListeners?: number
@@ -33,4 +34,5 @@ export class TwitterSpace {
   creator?: TwitterUser
   hosts?: TwitterUser[]
   speakers?: TwitterUser[]
+  listeners?: TwitterUser[]
 }

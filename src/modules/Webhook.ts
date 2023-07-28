@@ -97,27 +97,27 @@ export class Webhook {
   }
 
   private getEmbedTitle(usernames: string[]): string {
-    const hostUsername = this.space?.creator?.username
-    const host = inlineCode(hostUsername)
+    const creator = this.space?.creator?.username
+    const creatorCode = inlineCode(creator)
 
     if (this.space.state === SpaceState.CANCELED) {
-      return `${host} Space canceled`
+      return `${creatorCode} Space canceled`
     }
 
     if (this.space.state === SpaceState.ENDED) {
-      return `${host} Space ended`
+      return `${creatorCode} Space ended`
     }
 
-    if (!usernames.some((v) => v.toLowerCase() === hostUsername.toLowerCase())
+    if (!usernames.some((v) => v.toLowerCase() === creator.toLowerCase())
       && usernames.some((v) => SpaceUtil.isAdmin(this.audioSpace, v))) {
       const participants = usernames
         .map((v) => SpaceUtil.getParticipant(this.audioSpace.participants.admins, v))
         .filter((v) => v)
       if (participants.length) {
         const guests = participants
-          .map((v) => inlineCode(v.user_results.result.legacy.screen_name))
+          .map((v) => inlineCode(v.user_results.result.legacy.screen_name || v.twitter_screen_name))
           .join(', ')
-        return `${guests} is co-hosting ${host}'s Space`
+        return `${guests} is co-hosting ${creatorCode}'s Space`
       }
     }
 
@@ -127,9 +127,9 @@ export class Webhook {
         .filter((v) => v)
       if (participants.length) {
         const guests = participants
-          .map((v) => inlineCode(v.user_results.result.legacy.screen_name))
+          .map((v) => inlineCode(v.user_results.result.legacy.screen_name || v.twitter_screen_name))
           .join(', ')
-        return `${guests} is speaking in ${host}'s Space`
+        return `${guests} is speaking in ${creatorCode}'s Space`
       }
     }
 
@@ -139,13 +139,13 @@ export class Webhook {
         .filter((v) => v)
       if (participants.length) {
         const guests = participants
-          .map((v) => inlineCode(v.user_results.result.legacy.screen_name))
+          .map((v) => inlineCode(v.user_results.result.legacy.screen_name || v.twitter_screen_name))
           .join(', ')
-        return `${guests} is listening in ${host}'s Space`
+        return `${guests} is listening in ${creatorCode}'s Space`
       }
     }
 
-    return `${host} is hosting a Space`
+    return `${creatorCode} is hosting a Space`
   }
 
   private getEmbed(usernames: string[]) {

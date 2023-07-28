@@ -20,7 +20,6 @@ import { SpaceUtil } from '../utils/SpaceUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { Util } from '../utils/Util'
 import { TwitterEntityUtil } from '../utils/twitter-entity.util'
-import { configManager } from './ConfigManager'
 import { Notification } from './Notification'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
@@ -78,57 +77,95 @@ export class SpaceWatcher extends EventEmitter {
     }
   }
 
-  private buildSpace() {
-    const space = TwitterEntityUtil.buildSpaceByAudioSpace(this.audioSpace)
-    this.space = space
-    if (this.dynamicPlaylistUrl) {
-      this.space.playlistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
+  // #region log
+
+  private logSpaceInfo() {
+    const payload = {
+      username: this.space?.creator?.username,
+      id: this.spaceId,
+      scheduled_start: this.space?.scheduledStart,
+      started_at: this.space?.startedAt,
+      ended_at: this.space?.endedAt,
+      title: this.space?.title || null,
+      playlist_url: PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
     }
+    spaceLogger.info(payload)
+    this.logger.info('Space info', payload)
   }
 
-  private async getSpaceMetadata() {
+  private logSpaceAudioDuration() {
+    if (!this.space?.endedAt || !this.space?.startedAt) {
+      return
+    }
+    const ms = Number(this.space.endedAt) - this.space.startedAt
+    const duration = Util.getDisplayTime(ms)
+    this.logger.info(`Expected audio duration: ${duration}`)
+  }
+
+  // #endregion
+
+  // #region check
+
+  private async checkDynamicPlaylist(): Promise<void> {
     const requestId = randomUUID()
+    this.logger.debug('--> checkDynamicPlaylist', { requestId })
     try {
-      this.logger.debug('--> getSpaceMetadata', { requestId })
-      const { data } = await api.graphql.AudioSpaceByRestId(this.spaceId)
-      this.logger.debug('<-- getSpaceMetadata', { requestId })
-      const audioSpace = data?.data?.audio_space_by_rest_id as AudioSpace
-      delete audioSpace.sharings
-      this.logger.debug('audioSpace', audioSpace)
-      const metadata = audioSpace?.metadata
-      this.logger.info('Space metadata', metadata)
-      if (!metadata?.creator_results?.result?.rest_id) {
-        delete metadata.creator_results
+      const { data } = await axios.get<string>(this.dynamicPlaylistUrl)
+      this.logger.debug('<-- checkDynamicPlaylist', { requestId })
+      const chunkIndexes = PeriscopeUtil.getChunks(data)
+      if (chunkIndexes.length) {
+        this.logger.debug(`Found chunks: ${chunkIndexes.join(',')}`)
+        this.lastChunkIndex = Math.max(...chunkIndexes)
       }
-      this.audioSpace = audioSpace
-      this.buildSpace()
-      this.logger.info('Host info', { username: this.space?.creator?.username, name: this.space?.creator?.name })
     } catch (error) {
-      const meta = { requestId }
-      if (error.response) {
-        Object.assign(meta, {
-          response: {
-            status: error.response.status,
-            data: error.response.data,
-          },
-        })
+      const status = error.response?.status
+      if (status === 404) {
+        // Space ended / Host disconnected
+        this.logger.info(`Dynamic playlist status: ${status}`)
+        this.checkMasterPlaylist()
+        return
       }
-      this.logger.error(`getSpaceMetadata: ${error.message}`, meta)
-
-      // Bad guest token
-      if (error.response?.data?.errors?.some?.((v) => v.code === 239)) {
-        configManager.getGuestToken(true)
-          .then(() => this.logger.debug('getSpaceMetadata: refresh guest token success'))
-          .catch(() => this.logger.error('getSpaceMetadata: refresh guest token failed'))
-      }
-
-      throw error
+      this.logger.error(`checkDynamicPlaylist: ${error.message}`, { requestId })
     }
+    this.checkDynamicPlaylistWithTimer()
   }
+
+  private async checkMasterPlaylist(): Promise<void> {
+    this.logger.debug('--> checkMasterPlaylist')
+    try {
+      const masterChunkSize = PeriscopeUtil.getChunks(await PeriscopeApi.getFinalPlaylist(this.dynamicPlaylistUrl)).length
+      this.logger.debug(`<-- checkMasterPlaylist: master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
+      const canDownload = !this.lastChunkIndex
+        || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
+        || masterChunkSize >= this.lastChunkIndex
+      if (canDownload) {
+        await this.processDownload()
+        return
+      }
+      this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
+      this.chunkVerifyCount += 1
+    } catch (error) {
+      this.logger.error(`checkMasterPlaylist: ${error.message}`)
+    }
+    this.checkMasterPlaylistWithTimer()
+  }
+
+  private checkDynamicPlaylistWithTimer(ms = APP_PLAYLIST_REFRESH_INTERVAL) {
+    setTimeout(() => this.checkDynamicPlaylist(), ms)
+  }
+
+  private checkMasterPlaylistWithTimer(ms = APP_PLAYLIST_REFRESH_INTERVAL) {
+    this.logger.info(`Recheck master playlist in ${ms}ms`)
+    setTimeout(() => this.checkMasterPlaylist(), ms)
+  }
+
+  // #endregion
+
+  // #region space
 
   private async initData() {
     if (!this.audioSpace?.metadata) {
-      await this.getSpaceMetadata()
+      await this.getSpaceData()
       if (this.space?.state === SpaceState.LIVE) {
         this.showNotification()
       }
@@ -195,79 +232,64 @@ export class SpaceWatcher extends EventEmitter {
     this.checkDynamicPlaylist()
   }
 
-  private logSpaceInfo() {
-    const payload = {
-      username: this.space?.creator?.username,
-      id: this.spaceId,
-      started_at: this.space?.startedAt,
-      title: this.space?.title || null,
-      playlist_url: PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
+  private buildSpace() {
+    const space = TwitterEntityUtil.buildSpaceByAudioSpace(this.audioSpace)
+    this.space = space
+    if (this.dynamicPlaylistUrl) {
+      this.space.playlistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
     }
-    spaceLogger.info(payload)
-    this.logger.info('Space info', payload)
+  }
+  // #endregion
+
+  // #region audio space
+
+  public async getAudioSpaceById() {
+    try {
+      const { data } = await api.graphql.AudioSpaceById(this.spaceId)
+      const audioSpace = data?.data?.audioSpace as AudioSpace
+      delete audioSpace.sharings
+      this.logger.info('getAudioSpaceById', { audioSpace })
+      return audioSpace
+    } catch (error) {
+      this.logger.error(`getAudioSpaceById: ${error.message}`)
+      return null
+    }
   }
 
-  private logSpaceAudioDuration() {
-    if (!this.space?.endedAt || !this.space?.startedAt) {
+  public async getAudioSpaceByRestId() {
+    try {
+      const { data } = await api.graphql.AudioSpaceByRestId(this.spaceId)
+      const audioSpace = data?.data?.audio_space_by_rest_id as AudioSpace
+      delete audioSpace.sharings
+      this.logger.info('getAudioSpaceByRestId', { audioSpace })
+      return audioSpace
+    } catch (error) {
+      this.logger.error(`getAudioSpaceByRestId: ${error.message}`)
+      return null
+    }
+  }
+
+  private async getSpaceData() {
+    this.logger.debug('--> getSpaceData')
+    const audioSpaces = await Promise.all([
+      this.getAudioSpaceById(),
+      this.getAudioSpaceByRestId(),
+    ])
+
+    const hasMetadata = audioSpaces.some((v) => v?.metadata)
+    if (!hasMetadata) {
+      this.logger.error('AudioSpace metadata not found')
       return
     }
-    const ms = Number(this.space.endedAt) - this.space.startedAt
-    const duration = Util.getDisplayTime(ms)
-    this.logger.info(`Expected audio duration: ${duration}`)
+
+    this.audioSpace = audioSpaces.find((v) => v?.metadata)
+    this.buildSpace()
+    this.logger.debug('<-- getSpaceData')
   }
 
-  private async checkDynamicPlaylist(): Promise<void> {
-    const requestId = randomUUID()
-    this.logger.debug('--> checkDynamicPlaylist', { requestId })
-    try {
-      const { data } = await axios.get<string>(this.dynamicPlaylistUrl)
-      this.logger.debug('<-- checkDynamicPlaylist', { requestId })
-      const chunkIndexes = PeriscopeUtil.getChunks(data)
-      if (chunkIndexes.length) {
-        this.logger.debug(`Found chunks: ${chunkIndexes.join(',')}`)
-        this.lastChunkIndex = Math.max(...chunkIndexes)
-      }
-    } catch (error) {
-      const status = error.response?.status
-      if (status === 404) {
-        // Space ended / Host disconnected
-        this.logger.info(`Dynamic playlist status: ${status}`)
-        this.checkMasterPlaylist()
-        return
-      }
-      this.logger.error(`checkDynamicPlaylist: ${error.message}`, { requestId })
-    }
-    this.checkDynamicPlaylistWithTimer()
-  }
+  // #endregion
 
-  private async checkMasterPlaylist(): Promise<void> {
-    this.logger.debug('--> checkMasterPlaylist')
-    try {
-      const masterChunkSize = PeriscopeUtil.getChunks(await PeriscopeApi.getFinalPlaylist(this.dynamicPlaylistUrl)).length
-      this.logger.debug(`<-- checkMasterPlaylist: master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
-      const canDownload = !this.lastChunkIndex
-        || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
-        || masterChunkSize >= this.lastChunkIndex
-      if (canDownload) {
-        await this.processDownload()
-        return
-      }
-      this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
-      this.chunkVerifyCount += 1
-    } catch (error) {
-      this.logger.error(`checkMasterPlaylist: ${error.message}`)
-    }
-    this.checkMasterPlaylistWithTimer()
-  }
-
-  private checkDynamicPlaylistWithTimer(ms = APP_PLAYLIST_REFRESH_INTERVAL) {
-    setTimeout(() => this.checkDynamicPlaylist(), ms)
-  }
-
-  private checkMasterPlaylistWithTimer(ms = APP_PLAYLIST_REFRESH_INTERVAL) {
-    this.logger.info(`Recheck master playlist in ${ms}ms`)
-    setTimeout(() => this.checkMasterPlaylist(), ms)
-  }
+  // #region download
 
   private async processDownload() {
     this.logger.debug('processDownload')
@@ -276,7 +298,7 @@ export class SpaceWatcher extends EventEmitter {
       const prevState = this.space?.state
 
       // Get latest metadata in case title changed
-      await this.getSpaceMetadata()
+      await this.getSpaceData()
       this.logSpaceInfo()
 
       if (this.space?.state === SpaceState.LIVE) {
@@ -346,6 +368,10 @@ export class SpaceWatcher extends EventEmitter {
     }
   }
 
+  // #endregion
+
+  // #region notification
+
   private async showNotification() {
     if (!program.getOptionValue('notification') || this.isNotificationNotified) {
       return
@@ -362,8 +388,14 @@ export class SpaceWatcher extends EventEmitter {
     notification.notify()
   }
 
+  // #endregion
+
+  // #region webhook
+
   private sendWebhooks() {
     const webhook = new Webhook(this.space, this.audioSpace)
     webhook.send()
   }
+
+  // #endregion
 }
