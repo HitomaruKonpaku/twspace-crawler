@@ -27,7 +27,7 @@ export class TwitterEntityUtil {
       createdAt: metadata.created_at,
       updatedAt: metadata.updated_at,
 
-      creatorId: creator.user_results.result.rest_id || creator.user_results.rest_id,
+      creatorId: creator?.user_results?.result?.rest_id || creator?.user_results?.rest_id,
       state: TwitterSpaceUtil.parseState(metadata.state),
       scheduledStart: metadata.scheduled_start,
       startedAt: metadata.start || metadata.started_at,
