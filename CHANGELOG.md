@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.7
+
+* Allow audio space from multiple source
+* Fix mapping error
+
 ## 1.12.6
 
 * Fix error related to Space of suspended user
