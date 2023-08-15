@@ -121,7 +121,7 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
 
   public async AudioSpaceById(id: string) {
     const url = this.toUrl(twitterGraphqlEndpoints.AudioSpaceById)
-    const headers = await this.getGuestV2Headers()
+    const headers = this.getAuthHeaders()
     const params = this.cloneParams(
       twitterGraphqlParams.AudioSpaceById,
       { variables: { id } },
@@ -132,7 +132,7 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
 
   public async AudioSpaceById_Legacy(id: string) {
     const url = this.toUrl(twitterGraphqlEndpoints.AudioSpaceById_Legacy)
-    const headers = await this.getGuestV2Headers()
+    const headers = this.getAuthHeaders()
     const params = this.cloneParams(
       twitterGraphqlParams.AudioSpaceById_Legacy,
       { variables: { id } },
