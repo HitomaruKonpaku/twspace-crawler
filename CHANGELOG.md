@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.8
+
+* Allow passing extra ffmpeg args from config file (#66) (9b07325)
+
 ## 1.12.7
 
 * Allow audio space from multiple source
