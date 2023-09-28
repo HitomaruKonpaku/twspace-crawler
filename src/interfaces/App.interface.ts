@@ -1,6 +1,8 @@
 export interface Config {
   interval?: number
 
+  ffmpegArgs?: string[]
+
   users?: (string | {
     username: string
     [key: string]: any

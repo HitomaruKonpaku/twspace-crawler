@@ -7,6 +7,7 @@ import { PeriscopeApi } from '../apis/PeriscopeApi'
 import { logger as baseLogger } from '../logger'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 import { Util } from '../utils/Util'
+import { configManager } from './ConfigManager'
 
 export class SpaceDownloader {
   private logger: winston.Logger
@@ -74,6 +75,7 @@ export class SpaceDownloader {
       '-c',
       'copy',
     ]
+
     if (this.metadata) {
       this.logger.debug('Audio metadata', this.metadata)
       Object.keys(this.metadata).forEach((key) => {
@@ -84,7 +86,14 @@ export class SpaceDownloader {
         args.push('-metadata', `${key}=${value}`)
       })
     }
+
+    const { config } = configManager
+    if (config?.ffmpegArgs?.length) {
+      args.push(...config.ffmpegArgs)
+    }
+
     args.push(this.audioFile)
+
     this.logger.verbose(`Audio is saving to "${this.audioFile}"`)
     this.logger.verbose(`${cmd} ${args.join(' ')}`)
 

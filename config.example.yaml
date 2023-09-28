@@ -1,6 +1,10 @@
 # The time, in milliseconds, the timer should delay in between checks
 interval: 30000
 
+# ffmpeg extra args
+# ffmpegArgs:
+#   - -y
+
 # List of user to check for live Spaces
 users:
   # hololive staff
