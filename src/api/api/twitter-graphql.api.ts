@@ -143,7 +143,7 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
 
   public async AudioSpaceByRestId(id: string) {
     const url = this.toUrl(twitterGraphqlEndpoints.AudioSpaceByRestId)
-    const headers = await this.getGuestV2Headers()
+    const headers = this.getAuthHeaders()
     const params = this.cloneParams(
       twitterGraphqlParams.AudioSpaceByRestId,
       { variables: { audio_space_id: id } },
