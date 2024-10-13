@@ -13,7 +13,7 @@ function getFileName() {
 }
 
 const consoleTransport = new winston.transports.Console({
-  level: 'verbose',
+  level: process.env.LOG_LEVEL || 'verbose',
   format: format.combine(
     format.colorize(),
     getPrintFormat(),
@@ -65,6 +65,11 @@ const spaceLogger = winston.createLogger({
   transports: [new winston.transports.File({ dirname: LOGGER_DIR, filename: 'spaces.jsonl' })],
 })
 
+const spaceRawLogger = winston.createLogger({
+  format: format.printf((info) => (typeof info.message === 'string' ? info.message : JSON.stringify(info.message))),
+  transports: [new winston.transports.File({ dirname: LOGGER_DIR, filename: 'spaces.raw.jsonl' })],
+})
+
 function toggleDebugConsole() {
   consoleTransport.level = 'debug'
 }
@@ -72,5 +77,6 @@ function toggleDebugConsole() {
 export {
   logger,
   spaceLogger,
+  spaceRawLogger,
   toggleDebugConsole,
 }

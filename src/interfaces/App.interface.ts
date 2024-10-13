@@ -1,3 +1,18 @@
+export interface WebhookConfig {
+  active?: boolean
+
+  urls?: string[]
+  mentions?: {
+    userIds?: string
+    roleIds?: string
+  }
+
+  startMessage?: string
+  endMessage?: string
+
+  usernames?: ('<all>' | string)[]
+}
+
 export interface Config {
   interval?: number
 
@@ -9,16 +24,6 @@ export interface Config {
   })[]
 
   webhooks?: {
-    discord?: {
-      active: boolean
-      urls: string[]
-      usernames: ('<all>' | string)[]
-      mentions?: {
-        roleIds?: string[]
-        userIds?: string[]
-      }
-      startMessage?: string
-      endMessage?: string
-    }[]
+    discord?: WebhookConfig[]
   }
 }

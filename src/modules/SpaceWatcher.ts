@@ -13,7 +13,7 @@ import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP
 import { SpaceState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
-import { logger as baseLogger, spaceLogger } from '../logger'
+import { logger as baseLogger, spaceLogger, spaceRawLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 import { SpaceUtil } from '../utils/SpaceUtil'
@@ -249,6 +249,7 @@ export class SpaceWatcher extends EventEmitter {
       const audioSpace = data?.data?.audioSpace as AudioSpace
       delete audioSpace.sharings
       this.logger.info('getAudioSpaceById', { audioSpace })
+      spaceRawLogger.info({ type: 'AudioSpaceById', data: audioSpace })
       return audioSpace
     } catch (error) {
       this.logger.error(`getAudioSpaceById: ${error.message}`)
@@ -262,6 +263,7 @@ export class SpaceWatcher extends EventEmitter {
       const audioSpace = data?.data?.audio_space_by_rest_id as AudioSpace
       delete audioSpace.sharings
       this.logger.info('getAudioSpaceByRestId', { audioSpace })
+      spaceRawLogger.info({ type: 'AudiospaceByRestId', data: audioSpace })
       return audioSpace
     } catch (error) {
       this.logger.error(`getAudioSpaceByRestId: ${error.message}`)

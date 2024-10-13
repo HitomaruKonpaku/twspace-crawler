@@ -6,6 +6,7 @@ import winston from 'winston'
 import { discordWebhookLimiter } from '../Limiter'
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
 import { SpaceState } from '../enums/Twitter.enum'
+import { WebhookConfig } from '../interfaces/App.interface'
 import { logger as baseLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
 import { SpaceUtil } from '../utils/SpaceUtil'
@@ -52,10 +53,11 @@ export class Webhook {
   private sendDiscord() {
     this.logger.debug('sendDiscord')
     const configs = Array.from(this.config?.discord || [])
-    configs.forEach((config) => {
+    configs.forEach((config: WebhookConfig) => {
       if (!config.active) {
         return
       }
+
       const urls = Array.from(config.urls || [])
         .filter((v) => v)
       const usernames = Array.from(config.usernames || [])
@@ -64,9 +66,11 @@ export class Webhook {
       if (!urls.length || !usernames.length) {
         return
       }
+
       if (!usernames.find((v) => v === '<all>') && usernames.every((v) => !SpaceUtil.isParticipant(this.audioSpace, v))) {
         return
       }
+
       try {
         // Build content with mentions
         let content = ''
@@ -82,12 +86,15 @@ export class Webhook {
         if (this.space.state === SpaceState.ENDED) {
           content = [content, config.endMessage].filter((v) => v).map((v) => v.trim()).join(' ')
         }
+
         content = content.trim()
+
         // Build request payload
         const payload = {
           content,
           embeds: [this.getEmbed(usernames)],
         }
+
         // Send
         urls.forEach((url) => discordWebhookLimiter.schedule(() => this.post(url, payload)))
       } catch (error) {
