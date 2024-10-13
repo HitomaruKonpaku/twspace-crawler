@@ -1,6 +1,6 @@
 {
   "name": "twspace-crawler",
-  "version": "1.12.9",
+  "version": "1.13.0",
   "description": "Script to monitor & download Twitter Spaces 24/7",
   "keywords": [
     "node",
