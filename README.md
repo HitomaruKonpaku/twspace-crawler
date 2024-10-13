@@ -25,6 +25,8 @@
 
 ## Docker
 
+### Monitor users
+
 - See [example](./example/)
 - Download [docker-compose.yaml](./example/docker-compose.yaml) & [config.yaml](./example/config.yaml)
 - Sign in Twitter
@@ -37,6 +39,18 @@
     ```sh
     docker compose up -d
     ```
+
+### Download Space
+
+```sh
+docker run --rm \
+  -e TWITTER_AUTH_TOKEN=<auth_token> \
+  -e TWITTER_CSRF_TOKEN=<csrf_token> \
+  -v ./logs:/app/logs \
+  -v ./download:/app/download \
+  ghcr.io/hitomarukonpaku/twspace-crawler \
+  --id 1mnGeRRRwkrJX
+```
 
 ## Installation
 
