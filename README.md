@@ -10,6 +10,7 @@
 ## Contents
 
 1. [Requirements](#requirements)
+1. [Docker](#docker)
 1. [Installation](#installation)
 1. [Usage](#usage)
 1. [Options](#options)
@@ -21,6 +22,21 @@
 
 - [Node.js](https://nodejs.org) (>=14)
 - [FFMPEG](https://www.ffmpeg.org)
+
+## Docker
+
+- See [example](./example/)
+- Download [docker-compose.yaml](./example/docker-compose.yaml) & [config.yaml](./example/config.yaml)
+- Sign in Twitter
+- `Open DevTools (F12)` > `Application` > `Storage` > `Cookies`
+- Update docker compose environment
+  - `TWITTER_AUTH_TOKEN`: Value of `auth_token`
+  - `TWITTER_CSRF_TOKEN`: Value of `ct0`
+- Run
+
+    ```sh
+    docker compose up -d
+    ```
 
 ## Installation
 
