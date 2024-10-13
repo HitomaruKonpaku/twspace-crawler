@@ -1,8 +1,21 @@
 # Changelog
 
-## 1.12.8
+## 1.13.0
+
+* Update docker build
+* Fix API auth
+* Add log to save raw space metadata
+* Update webhook embed
+* Add [example](./example/)
+* Update [README](./README.md)
+
+## 1.12.9
 
 * Allow passing extra ffmpeg args from config file (#66) (9b07325)
+
+## 1.12.8
+
+* Fix API auth
 
 ## 1.12.7
 
