@@ -20,7 +20,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/HitomaruKonpaku/twspace-crawler.git"
+    "url": "git+https://github.com/HitomaruKonpaku/twspace-crawler.git"
   },
   "scripts": {
     "start": "node dist/index",
