@@ -1,0 +1,15 @@
+---
+services:
+  twspace-crawler:
+    container_name: twspace-crawler
+    image: ghcr.io/hitomarukonpaku/twspace-crawler
+    restart: always
+    environment:
+      NO_COLOR: 1
+      LOG_LEVEL: debug # debug/verbose/info
+      TWITTER_AUTH_TOKEN:
+      TWITTER_CSRF_TOKEN:
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./logs:/app/logs
+      - ./download:/app/download

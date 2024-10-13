@@ -1,0 +1,19 @@
+# The time, in milliseconds, the timer should delay in between checks
+interval: 60000
+
+# List of user to check for live Spaces
+users:
+  - nakiriayame
+
+# Webhooks
+webhooks:
+  discord:
+    - active: true
+      urls:
+        # - https://discord.com/api/webhooks/<token>
+      # Message to send when Space start/running
+      startMessage: "<@153363129915539457>"
+      # Message to send when Space ended
+      endMessage: ""
+      usernames:
+        - <all>
