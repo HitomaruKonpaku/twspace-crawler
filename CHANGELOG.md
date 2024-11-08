@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.14.0
+
+* Add env/config to skip download (audio and/or caption) (#82)
+
 ## 1.13.0
 
 * Update docker build
