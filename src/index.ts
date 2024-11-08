@@ -44,6 +44,9 @@ program
   .option('-surl, --space-url <SPACE_URL>', 'Monitor & download live Space with its URL')
   .option('--force', 'Force download Space when using with --id')
   .option('--url <PLAYLIST_ID>', 'Download Space using playlist url')
+  .option('--skip-download', 'Do not download anything')
+  .option('--skip-download-audio', 'Do not download audio')
+  .option('--skip-download-caption', 'Do not download caption')
   .option('--notification', 'Show notification about new live Space')
   .option('--force-open', 'Force open Space in browser')
   .addCommand(ccCommand)
@@ -70,7 +73,13 @@ program.action(async (args, cmd: Command) => {
     logger.debug(`env.${key}=${value}`)
   })
 
+  // config
   configManager.load()
+  configManager.update({
+    skipDownload: args.skipDownload ?? configManager.config.skipDownload,
+    skipDownloadAudio: args.skipDownloadAudio ?? configManager.config.skipDownloadAudio,
+    skipDownloadCaption: args.skipDownloadCaption ?? configManager.config.skipDownloadCaption,
+  })
 
   const {
     url, id, spaceUrl, user,

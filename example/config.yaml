@@ -1,6 +1,10 @@
 # The time, in milliseconds, the timer should delay in between checks
 interval: 60000
 
+# skipDownload: true
+# skipDownloadAudio: true
+# skipDownloadCaption: true
+
 # List of user to check for live Spaces
 users:
   - nakiriayame

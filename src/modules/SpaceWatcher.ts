@@ -20,6 +20,7 @@ import { SpaceUtil } from '../utils/SpaceUtil'
 import { TwitterUtil } from '../utils/TwitterUtil'
 import { Util } from '../utils/Util'
 import { TwitterEntityUtil } from '../utils/twitter-entity.util'
+import { configManager } from './ConfigManager'
 import { Notification } from './Notification'
 import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
 import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
@@ -321,6 +322,11 @@ export class SpaceWatcher extends EventEmitter {
 
   private async downloadAudio() {
     this.logSpaceAudioDuration()
+
+    if (configManager.skipDownload || configManager.skipDownloadAudio) {
+      return
+    }
+
     try {
       const metadata = {
         title: this.space?.title,
@@ -350,9 +356,14 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private async downloadCaptions() {
+    if (configManager.skipDownload || configManager.skipDownloadCaption) {
+      return
+    }
+
     if (!this.accessChatData) {
       return
     }
+
     try {
       const username = this.space?.creator?.username
       const tmpFile = path.join(Util.getMediaDir(username), `${this.filename} CC.jsonl`)

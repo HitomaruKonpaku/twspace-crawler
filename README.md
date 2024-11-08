@@ -10,6 +10,7 @@
 ## Contents
 
 1. [Requirements](#requirements)
+1. [Env](#env)
 1. [Docker](#docker)
 1. [Installation](#installation)
 1. [Usage](#usage)
@@ -23,7 +24,20 @@
 - [Node.js](https://nodejs.org) (>=14)
 - [FFMPEG](https://www.ffmpeg.org)
 
+## Env
+
+| Name | Desc
+| - | -
+| LOG_LEVEL | -
+| TWITTER_AUTH_TOKEN | -
+| TWITTER_CSRF_TOKEN | -
+| SKIP_DOWNLOAD | -
+| SKIP_DOWNLOAD_AUDIO | -
+| SKIP_DOWNLOAD_CAPTION | -
+
 ## Docker
+
+> Recommended
 
 ### Monitor users
 
@@ -129,6 +143,10 @@ twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.vide
 ### Additional options
 
 ```
+  --skip-download                   Do not download anything
+  --skip-download-audio             Do not download audio
+  --skip-download-caption           Do not download caption
+
   --notification                    Show notification about new live Space
   --force-open                      Force open Space in browser
 ```

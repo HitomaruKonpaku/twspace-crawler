@@ -16,6 +16,10 @@ export interface WebhookConfig {
 export interface Config {
   interval?: number
 
+  skipDownload?: boolean
+  skipDownloadAudio?: boolean
+  skipDownloadCaption?: boolean
+
   ffmpegArgs?: string[]
 
   users?: (string | {
