@@ -2,7 +2,7 @@ import fs from 'fs'
 import readline from 'readline'
 import winston from 'winston'
 import { MessageKind } from '../enums/Periscope.enum'
-import { ChatMessage } from '../interfaces/Periscope.interface'
+import { ChatHistoryMessage, ChatMessage, ChatMessageData } from '../interfaces/Periscope.interface'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/Util'
 
@@ -63,7 +63,7 @@ export class SpaceCaptionsExtractor {
   }
 
   private processLine(payload: string) {
-    const obj = JSON.parse(payload) as ChatMessage
+    const obj = JSON.parse(payload) as ChatHistoryMessage
     if (obj.kind !== MessageKind.CHAT) {
       return
     }
@@ -71,7 +71,7 @@ export class SpaceCaptionsExtractor {
   }
 
   private processChat(payload: string) {
-    const obj = JSON.parse(payload)
+    const obj = JSON.parse(payload) as ChatMessage
     if (!obj.uuid) {
       return
     }
@@ -79,14 +79,14 @@ export class SpaceCaptionsExtractor {
   }
 
   private processChatData(payload: string) {
-    const obj = JSON.parse(payload)
+    const obj = JSON.parse(payload) as ChatMessageData
     if (!obj.final || !obj.body) {
       return
     }
     const time = this.startedAt
       ? `${Util.getDisplayTime(Math.max(0, obj.timestamp - this.startedAt))} | `
       : ''
-    const msg = `${time}${obj.username}: ${obj.body}\n`
+    const msg = `${time}${obj.username}: ${obj.body.trim()}\n`
     fs.appendFileSync(this.outFile, msg)
   }
 }
