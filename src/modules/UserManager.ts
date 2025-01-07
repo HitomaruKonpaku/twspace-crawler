@@ -150,10 +150,13 @@ class UserManager extends EventEmitter {
   private async getUserByScreenName(username: string): Promise<User> {
     try {
       const { data } = await api.graphql.UserByScreenName(username)
+      this.logger.debug('getUserByScreenName#data', { username, data })
+
       const result = data?.data?.user?.result
-      if (!result) {
+      if (!result || !result.legacy) {
         return null
       }
+
       const user = {
         id: result.rest_id,
         username: result.legacy.screen_name,
