@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import winston from 'winston'
@@ -50,17 +49,16 @@ export class SpaceCaptionsDownloader {
   }
 
   private async getChatHistory() {
-    const requestId = randomUUID()
-    this.logger.debug('--> getChatHistory', { requestId, chunkCount: this.chunkCount, cursor: this.cursor })
+    this.logger.debug('--> getChatHistory', { chunkCount: this.chunkCount, cursor: this.cursor })
     try {
       const history = await PeriscopeApi.getChatHistory(this.endpoint, this.spaceId, this.accessToken, this.cursor)
       const { messages } = history
       const msgCount = messages?.length || 0
       this.msgCountAll += msgCount
-      this.logger.debug('<-- getChatHistory', { requestId, msgCount, msgCountAll: this.msgCountAll })
+      this.logger.debug('<-- getChatHistory', { msgCount, msgCountAll: this.msgCountAll })
       return history
     } catch (error) {
-      this.logger.error(`getChatHistory: ${error.message}`, { requestId, cursor: this.cursor })
+      this.logger.error(`getChatHistory: ${error.message}`, { cursor: this.cursor })
       throw error
     }
   }

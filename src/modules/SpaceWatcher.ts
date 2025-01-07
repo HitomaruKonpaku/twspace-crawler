@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { program } from 'commander'
-import { randomUUID } from 'crypto'
 import EventEmitter from 'events'
 import open from 'open'
 import path from 'path'
@@ -108,11 +107,10 @@ export class SpaceWatcher extends EventEmitter {
   // #region check
 
   private async checkDynamicPlaylist(): Promise<void> {
-    const requestId = randomUUID()
-    this.logger.debug('--> checkDynamicPlaylist', { requestId })
+    this.logger.debug('--> checkDynamicPlaylist')
     try {
       const { data } = await axios.get<string>(this.dynamicPlaylistUrl)
-      this.logger.debug('<-- checkDynamicPlaylist', { requestId })
+      this.logger.debug('<-- checkDynamicPlaylist')
       const chunkIndexes = PeriscopeUtil.getChunks(data)
       if (chunkIndexes.length) {
         this.logger.debug(`Found chunks: ${chunkIndexes.join(',')}`)
@@ -126,7 +124,7 @@ export class SpaceWatcher extends EventEmitter {
         this.checkMasterPlaylist()
         return
       }
-      this.logger.error(`checkDynamicPlaylist: ${error.message}`, { requestId })
+      this.logger.error(`checkDynamicPlaylist: ${error.message}`)
     }
     this.checkDynamicPlaylistWithTimer()
   }
@@ -190,11 +188,10 @@ export class SpaceWatcher extends EventEmitter {
     }
 
     if (!this.liveStreamStatus) {
-      const requestId = randomUUID()
-      this.logger.debug('--> getLiveVideoStreamStatus', { requestId })
+      this.logger.debug('--> getLiveVideoStreamStatus')
       const { data } = await api.liveVideoStream.status(this.audioSpace.metadata.media_key)
       this.liveStreamStatus = data
-      this.logger.debug('<-- getLiveVideoStreamStatus', { requestId })
+      this.logger.debug('<-- getLiveVideoStreamStatus')
       this.logger.debug('liveStreamStatus', this.liveStreamStatus)
     }
 
@@ -210,10 +207,9 @@ export class SpaceWatcher extends EventEmitter {
     }
 
     if (!this.accessChatData) {
-      const requestId = randomUUID()
-      this.logger.debug('--> getAccessChat', { requestId })
+      this.logger.debug('--> getAccessChat')
       this.accessChatData = await PeriscopeApi.getAccessChat(this.liveStreamStatus.chatToken)
-      this.logger.debug('<-- getAccessChat', { requestId })
+      this.logger.debug('<-- getAccessChat')
       this.logger.debug('accessChat data', this.accessChatData)
       this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
       this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)

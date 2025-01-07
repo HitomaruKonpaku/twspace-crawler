@@ -1,5 +1,4 @@
 import Bottleneck from 'bottleneck'
-import { randomUUID } from 'crypto'
 import { EventEmitter } from 'stream'
 import winston from 'winston'
 import { twitterApiLimiter } from '../Limiter'
@@ -94,17 +93,16 @@ class UserManager extends EventEmitter {
     )
     const responses = await Promise.allSettled(
       chunks.map((usernames, i) => twitterApiLimiter.schedule(async () => {
-        const requestId = randomUUID()
         try {
-          this.logger.debug(`--> getUsersByUsernames ${i + 1}`, { requestId, usernames })
+          this.logger.debug(`--> getUsersByUsernames ${i + 1}`, { usernames })
           const { data: users } = await TwitterApi.getUsersByUsernames(
             usernames,
             { authorization: Util.getTwitterAuthorization() },
           )
-          this.logger.debug(`<-- getUsersByUsernames ${i + 1}`, { requestId })
+          this.logger.debug(`<-- getUsersByUsernames ${i + 1}`)
           return Promise.resolve(users)
         } catch (error) {
-          this.logger.error(`getUsersByUsernames: ${error.message}`, { requestId, response: { data: error.response?.data } })
+          this.logger.error(`getUsersByUsernames: ${error.message}`, { usernames, response: { data: error.response?.data } })
           throw error
         }
       })),
