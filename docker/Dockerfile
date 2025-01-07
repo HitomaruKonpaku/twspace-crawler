@@ -31,6 +31,7 @@ ENV NODE_ENV=production
 VOLUME /app/logs
 VOLUME /app/download
 
+RUN apk add --no-cache bash
 RUN apk add --no-cache ffmpeg
 
 COPY --from=dependencies /app/node_modules ./node_modules
