@@ -81,8 +81,9 @@ export class SpaceWatcher extends EventEmitter {
 
   private logSpaceInfo() {
     const payload = {
-      username: this.space?.creator?.username,
       id: this.spaceId,
+      creatorId: this.space.creatorId,
+      username: this.space?.creator?.username,
       scheduled_start: this.space?.scheduledStart,
       started_at: this.space?.startedAt,
       ended_at: this.space?.endedAt,
@@ -246,7 +247,9 @@ export class SpaceWatcher extends EventEmitter {
       const audioSpace = data?.data?.audioSpace as AudioSpace
       delete audioSpace.sharings
       this.logger.info('getAudioSpaceById', { audioSpace })
-      spaceRawLogger.info({ type: 'AudioSpaceById', data: audioSpace })
+      if (audioSpace.metadata?.rest_id || audioSpace.rest_id) {
+        spaceRawLogger.info({ type: 'AudioSpaceById', data: audioSpace })
+      }
       return audioSpace
     } catch (error) {
       this.logger.error(`getAudioSpaceById: ${error.message}`)
@@ -260,7 +263,9 @@ export class SpaceWatcher extends EventEmitter {
       const audioSpace = data?.data?.audio_space_by_rest_id as AudioSpace
       delete audioSpace.sharings
       this.logger.info('getAudioSpaceByRestId', { audioSpace })
-      spaceRawLogger.info({ type: 'AudiospaceByRestId', data: audioSpace })
+      if (audioSpace.metadata?.rest_id || audioSpace.rest_id) {
+        spaceRawLogger.info({ type: 'AudiospaceByRestId', data: audioSpace })
+      }
       return audioSpace
     } catch (error) {
       this.logger.error(`getAudioSpaceByRestId: ${error.message}`)
@@ -338,6 +343,7 @@ export class SpaceWatcher extends EventEmitter {
           this.filename,
           this.space?.creator?.username,
           metadata,
+          this.spaceId,
         )
       }
       await this.downloader.download()

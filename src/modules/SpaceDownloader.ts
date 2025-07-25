@@ -1,6 +1,13 @@
 import axios from 'axios'
+import Bottleneck from 'bottleneck'
 import { spawn, SpawnOptions } from 'child_process'
-import { writeFileSync } from 'fs'
+import { randomUUID } from 'crypto'
+import {
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'fs'
 import path from 'path'
 import winston from 'winston'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
@@ -16,13 +23,25 @@ export class SpaceDownloader {
   private playlistFile: string
   private audioFile: string
 
+  private readonly tmpDir = path.join('.tmp', this.id || randomUUID())
+  private readonly tmpPlaylistFile = 'playlist.m3u8'
+
+  private readonly chunkLimiter = new Bottleneck({ maxConcurrent: 5 })
+
+  /**
+   * @see https://github.com/HoloArchivists/tslazer/commit/56ba5e11cc4c1a6bab1845e835f7fc4de4babb99
+   */
+  private readonly ignoreBuffer = Buffer.from([0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0x50, 0x52, 0x49, 0x56])
+
   constructor(
     private readonly originUrl: string,
     private readonly filename: string,
     private readonly subDir = '',
     private readonly metadata?: Record<string, any>,
+    private readonly id?: string,
   ) {
-    this.logger = baseLogger.child({ label: '[SpaceDownloader]' })
+    this.id = this.id || randomUUID()
+    this.logger = baseLogger.child({ label: `[SpaceDownloader@${this.id}]` })
     this.logger.debug('constructor', {
       originUrl, filename, subDir, metadata,
     })
@@ -34,44 +53,29 @@ export class SpaceDownloader {
 
   public async download() {
     this.logger.debug('download', { playlistUrl: this.playlistUrl, originUrl: this.originUrl })
+
     if (!this.playlistUrl) {
       this.playlistUrl = await PeriscopeApi.getFinalPlaylistUrl(this.originUrl)
       this.logger.info(`Final playlist url: ${this.playlistUrl}`)
     }
-    // Util.createMediaDir(this.subDir)
-    // await this.saveFinalPlaylist()
+
+    mkdirSync(this.tmpDir, { recursive: true })
+    await this.downloadPlaylist()
+    await this.downloadChunks()
+
     Util.createMediaDir(this.subDir)
-    this.spawnFfmpeg()
+    await this.spawnFfmpeg()
+
+    rmSync(this.tmpDir, { recursive: true, force: true })
   }
 
-  private async saveFinalPlaylist() {
-    try {
-      this.logger.debug(`--> saveFinalPlaylist: ${this.playlistUrl}`)
-      const { data } = await axios.get<string>(this.playlistUrl)
-      this.logger.debug(`<-- saveFinalPlaylist: ${this.playlistUrl}`)
-      const prefix = PeriscopeUtil.getChunkPrefix(this.playlistUrl)
-      this.logger.debug(`Chunk prefix: ${prefix}`)
-      const newData = data.replace(/^chunk/gm, `${prefix}chunk`)
-      writeFileSync(this.playlistFile, newData)
-      this.logger.verbose(`Playlist saved to "${this.playlistFile}"`)
-    } catch (error) {
-      this.logger.debug(`saveFinalPlaylist: ${error.message}`)
-      const status = error.response?.status
-      if (status === 404 && this.originUrl !== this.playlistUrl) {
-        this.playlistUrl = null
-      }
-      throw error
-    }
-  }
-
-  private spawnFfmpeg() {
+  private async spawnFfmpeg() {
     const cmd = 'ffmpeg'
     const args = [
-      '-protocol_whitelist',
-      'file,https,tls,tcp',
+      // '-protocol_whitelist',
+      // 'file,https,tls,tcp',
       '-i',
-      // this.playlistFile,
-      this.playlistUrl,
+      this.tmpPlaylistFile,
       '-c',
       'copy',
     ]
@@ -97,19 +101,54 @@ export class SpaceDownloader {
     this.logger.verbose(`Audio is saving to "${this.audioFile}"`)
     this.logger.verbose(`${cmd} ${args.join(' ')}`)
 
+    const cwd = path.join(process.cwd(), this.tmpDir)
     // https://github.com/nodejs/node/issues/21825
     const spawnOptions: SpawnOptions = {
-      cwd: process.cwd(),
+      cwd,
       stdio: 'ignore',
       detached: false,
       windowsHide: true,
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cp = process.platform === 'win32'
       ? spawn(process.env.comspec, ['/c', cmd, ...args], spawnOptions)
       : spawn(cmd, args, spawnOptions)
     // cp.unref()
 
-    return cp
+    return new Promise((resolve, reject) => {
+      cp.once('error', (error) => {
+        reject(error)
+      })
+
+      cp.once('close', (code) => {
+        resolve(code)
+      })
+    })
+  }
+
+  private async downloadPlaylist() {
+    const { data } = await axios.get<string>(this.playlistUrl)
+    writeFileSync(path.join(this.tmpDir, this.tmpPlaylistFile), data)
+  }
+
+  private async downloadChunks() {
+    const m3u8 = readFileSync(path.join(this.tmpDir, this.tmpPlaylistFile), 'utf8')
+    const chunks = m3u8.match(/chunk_[\w.]*/g)
+    if (!chunks.length) {
+      throw new Error('CHUNK_NOT_FOUND')
+    }
+    const chunkBaseUrl = PeriscopeUtil.getChunkPrefix(this.playlistUrl)
+    await Promise.all(chunks.map((v) => this.chunkLimiter.schedule(() => this.downloadChunk(chunkBaseUrl, v))))
+  }
+
+  private async downloadChunk(chunkBaseUrl: string, chunkName: string) {
+    const url = chunkBaseUrl + chunkName
+    this.logger.debug(`downloadChunk: ${chunkName}`)
+    const { data } = await axios.get(url, { responseType: 'arraybuffer' })
+    let buffer = Buffer.from(data)
+    const index = buffer.indexOf(this.ignoreBuffer)
+    if (index !== -1) {
+      buffer = buffer.slice(index)
+    }
+    writeFileSync(path.join(this.tmpDir, chunkName), buffer)
   }
 }
