@@ -120,6 +120,10 @@ export class TwitterSpaceUtil {
   public static getEmbedFields(space: TwitterSpace) {
     const fields: any[] = [
       {
+        name: 'ID',
+        value: codeBlock(space.id),
+      },
+      {
         name: '📄 Title',
         value: codeBlock(space.title),
       },
