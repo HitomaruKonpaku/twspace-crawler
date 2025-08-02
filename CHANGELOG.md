@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.15.1
+
+* Add `ID` to space embed
+
+## 1.15.0
+
+* [Remove Partial MEPG-TS Headers](https://github.com/HoloArchivists/tslazer/commit/56ba5e11cc4c1a6bab1845e835f7fc4de4babb99)
+* Clean up some logs
+
 ## 1.14.1
 
 * Trim caption body
