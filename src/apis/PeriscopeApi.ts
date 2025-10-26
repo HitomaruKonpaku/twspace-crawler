@@ -4,7 +4,10 @@ import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 
 export class PeriscopeApi {
   public static async getMasterPlaylist(originUrl: string) {
-    const url = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
+    // Don't convert dynamic_playlist if it has ?type=live (it's a live space)
+    const url = originUrl.includes('?type=live')
+      ? originUrl
+      : PeriscopeUtil.getMasterPlaylistUrl(originUrl)
     const { data } = await axios.get<string>(url)
     return data
   }
@@ -14,16 +17,15 @@ export class PeriscopeApi {
       return originUrl
     }
 
-    // Handle dynamic_playlist for live spaces - try to use it directly
-    if (originUrl.includes('dynamic_playlist')) {
+    // Handle live spaces - check for ?type=live or dynamic_playlist
+    if (originUrl.includes('?type=live') || originUrl.includes('dynamic_playlist')) {
       try {
-        // Try to fetch the dynamic playlist directly
+        // Try to fetch the dynamic/live playlist directly
         const { data } = await axios.get<string>(originUrl)
-        // If successful, this is a live space and we can use the dynamic playlist directly
+        // If successful, this is a live space - return the URL as-is
         return originUrl
       } catch (error) {
-        // If 404, the space has ended and we need to use master_playlist instead
-        // Continue to the master_playlist logic below
+        // If 404, the space has ended - continue to master_playlist logic
       }
     }
 
