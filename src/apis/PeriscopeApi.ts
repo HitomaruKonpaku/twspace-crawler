@@ -14,6 +14,19 @@ export class PeriscopeApi {
       return originUrl
     }
 
+    // Handle dynamic_playlist for live spaces - try to use it directly
+    if (originUrl.includes('dynamic_playlist')) {
+      try {
+        // Try to fetch the dynamic playlist directly
+        const { data } = await axios.get<string>(originUrl)
+        // If successful, this is a live space and we can use the dynamic playlist directly
+        return originUrl
+      } catch (error) {
+        // If 404, the space has ended and we need to use master_playlist instead
+        // Continue to the master_playlist logic below
+      }
+    }
+
     // Handle master_master_playlist case (video spaces)
     // First convert to master_playlist URL
     let masterUrl = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
