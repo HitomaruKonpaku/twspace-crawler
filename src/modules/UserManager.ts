@@ -82,6 +82,11 @@ class UserManager extends EventEmitter {
         { count: users.length, usernames: users.map((v) => v.username) },
       )
       setTimeout(() => this.fetchUsers(), TWITTER_USER_FETCH_INTERVAL)
+    } else {
+      this.logger.info(
+        'fetchUsers: OK',
+        { count: users.length },
+      )
     }
   }
 

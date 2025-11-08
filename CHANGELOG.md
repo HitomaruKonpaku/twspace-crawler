@@ -1,9 +1,13 @@
 # Changelog
 
+## 1.16.2
+
+- Add some logs
+
 ## 1.16.1
 
 - Slower api call to avoid bot detection / error
-- Start user list watcher as soon as able to get 100 user ids as init phase is really slow fomr now on
+- Start user list watcher as soon as able to get 100 user ids as init phase is really slow from now on
 
 ## 1.16.0
 
