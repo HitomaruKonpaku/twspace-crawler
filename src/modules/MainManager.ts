@@ -8,6 +8,7 @@ class MainManager {
   private logger: winston.Logger
   private userWatchers: Record<string, UserWatcher> = {}
   private spaceWatchers: Record<string, SpaceWatcher> = {}
+  private userListWatcher: UserListWatcher
 
   constructor() {
     this.logger = baseLogger.child({ label: '[MainManager]' })
@@ -45,11 +46,17 @@ class MainManager {
   }
 
   public runUserListWatcher() {
+    if (this.userListWatcher) {
+      return
+    }
+
     const watcher = new UserListWatcher()
     watcher.watch()
     watcher.on('data', (id) => {
       this.addSpaceWatcher(id)
     })
+
+    this.userListWatcher = watcher
   }
 }
 

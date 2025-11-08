@@ -138,6 +138,7 @@ class UserManager extends EventEmitter {
         const user = await this.getUserByScreenName(username)
         this.logger.debug(`<-- getUserByScreenName ${chunkIndex * size + userIndex + 1}`, { username })
         this.updateUser(user)
+        this.emitListReady()
         return user
       })))
     })))
@@ -165,6 +166,13 @@ class UserManager extends EventEmitter {
     }
 
     return null
+  }
+
+  private emitListReady() {
+    const users = this.getUsersWithId()
+    if (users.length === 100) {
+      this.emit('list_ready')
+    }
   }
 }
 

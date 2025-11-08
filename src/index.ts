@@ -116,7 +116,14 @@ program.action(async (args, cmd: Command) => {
   )] as string[]
   if (usernames.length) {
     logger.info('Starting in user mode', { userCount: usernames.length, users: usernames })
+
+    userManager.once('list_ready', () => {
+      logger.warn('list_ready')
+      mainManager.runUserListWatcher()
+    })
+
     await userManager.add(usernames)
+
     if (Util.getTwitterAuthorization() || Util.getTwitterAuthToken()) {
       mainManager.runUserListWatcher()
     } else {
