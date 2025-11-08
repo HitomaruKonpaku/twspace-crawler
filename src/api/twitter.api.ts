@@ -2,6 +2,7 @@ import { TwitterFleetApi } from './api/twitter-fleet.api'
 import { TwitterGraphqlApi } from './api/twitter-graphql.api'
 import { TwitterGuestApi } from './api/twitter-guest.api'
 import { TwitterLiveVideoStreamApi } from './api/twitter-live-video-stream.api'
+import { TwitterTransaction } from './twitter-transaction'
 import { TwitterApiData } from './twitter.api.data'
 
 export class TwitterApi {
@@ -11,6 +12,8 @@ export class TwitterApi {
   public fleet: TwitterFleetApi
   public guest: TwitterGuestApi
   public liveVideoStream: TwitterLiveVideoStreamApi
+
+  public transaction = new TwitterTransaction()
 
   constructor() {
     this.createData()

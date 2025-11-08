@@ -21,7 +21,10 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
 
   public async UserByScreenName(username: string) {
     const url = this.toUrl(twitterGraphqlEndpoints.UserByScreenName)
-    const headers = await this.getGuestV2Headers()
+    const transactionId = await this.api.transaction.generateTransactionId('GET', this.toTransactionUrl(url))
+    const headers = await this.getGuestV2Headers({
+      'x-client-transaction-id': transactionId,
+    })
     const params = this.cloneParams(
       twitterGraphqlParams.UserByScreenName,
       { variables: { screen_name: username } },
@@ -121,7 +124,10 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
 
   public async AudioSpaceById(id: string) {
     const url = this.toUrl(twitterGraphqlEndpoints.AudioSpaceById)
-    const headers = this.getAuthHeaders()
+    const transactionId = await this.api.transaction.generateTransactionId('GET', this.toTransactionUrl(url))
+    const headers = this.getAuthHeaders({
+      'x-client-transaction-id': transactionId,
+    })
     const params = this.cloneParams(
       twitterGraphqlParams.AudioSpaceById,
       { variables: { id } },
@@ -143,7 +149,10 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
 
   public async AudioSpaceByRestId(id: string) {
     const url = this.toUrl(twitterGraphqlEndpoints.AudioSpaceByRestId)
-    const headers = this.getAuthHeaders()
+    const transactionId = await this.api.transaction.generateTransactionId('GET', this.toTransactionUrl(url))
+    const headers = this.getAuthHeaders({
+      'x-client-transaction-id': transactionId,
+    })
     const params = this.cloneParams(
       twitterGraphqlParams.AudioSpaceByRestId,
       { variables: { audio_space_id: id } },
@@ -170,6 +179,9 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
         Object.assign(obj, { [key]: { ...obj[key], ...value[key] } })
       })
     }
+    Object.keys(obj).forEach((key) => {
+      obj[key] = JSON.stringify(obj[key])
+    })
     return obj
   }
 

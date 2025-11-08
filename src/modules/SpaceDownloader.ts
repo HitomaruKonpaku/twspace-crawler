@@ -23,7 +23,7 @@ export class SpaceDownloader {
   private playlistFile: string
   private audioFile: string
 
-  private readonly tmpDir = path.join('.tmp', this.id || randomUUID())
+  private readonly tmpDir = path.join('.tmp', [this.id, randomUUID()].filter((v) => v).join('_'))
   private readonly tmpPlaylistFile = 'playlist.m3u8'
 
   private readonly chunkLimiter = new Bottleneck({ maxConcurrent: 5 })

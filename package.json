@@ -32,17 +32,18 @@
     "lint:fix": "eslint src --ext .ts --fix"
   },
   "dependencies": {
-    "@discordjs/builders": "^0.12.0",
-    "axios": "^0.25.0",
+    "@discordjs/builders": "^1.13.0",
+    "axios": "^1.13.2",
     "bottleneck": "^2.19.5",
     "commander": "^8.3.0",
-    "dotenv": "^14.3.2",
+    "dotenv": "^17.2.3",
     "js-yaml": "^4.1.0",
     "node-notifier": "^10.0.0",
     "open": "^8.4.0",
     "tslib": "^2.3.1",
     "winston": "^3.4.0",
-    "winston-daily-rotate-file": "^4.5.5"
+    "winston-daily-rotate-file": "^4.5.5",
+    "x-client-transaction-id": "^0.1.9"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.5",

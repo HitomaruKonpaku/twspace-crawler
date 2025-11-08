@@ -12,28 +12,39 @@ export class TwitterBaseApi {
 
   constructor(
     protected readonly api: TwitterApi,
-    path: string,
+    protected readonly path: string,
   ) {
     this.createClient(path)
   }
 
-  protected async getGuestHeaders() {
+  /**
+   * @param path
+   * @returns /graphql/ZHSN3WlvahPKVvUxVQbg1A/UserByScreenName
+   */
+  protected toTransactionUrl(path: string) {
+    const url = ['', this.path, path].join('/')
+    return url
+  }
+
+  protected async getGuestHeaders(extraHeaders?: Record<string, any>) {
     const headers = {
       authorization: TWITTER_PUBLIC_AUTHORIZATION,
       'x-guest-token': await this.api.data.getGuestToken(),
+      ...(extraHeaders || {}),
     }
     return headers
   }
 
-  protected async getGuestV2Headers() {
+  protected async getGuestV2Headers(extraHeaders?: Record<string, any>) {
     const headers = {
       authorization: TWITTER_PUBLIC_AUTHORIZATION_2,
       'x-guest-token': await this.api.data.getGuestToken2(),
+      ...(extraHeaders || {}),
     }
     return headers
   }
 
-  protected getAuthHeaders() {
+  protected getAuthHeaders(extraHeaders?: Record<string, any>) {
     const cookies = {
       auth_token: process.env.TWITTER_AUTH_TOKEN,
       ct0: process.env.TWITTER_CSRF_TOKEN,
@@ -46,6 +57,7 @@ export class TwitterBaseApi {
       authorization: TWITTER_PUBLIC_AUTHORIZATION,
       cookie,
       'x-csrf-token': process.env.TWITTER_CSRF_TOKEN,
+      ...(extraHeaders || {}),
     }
     return headers
   }

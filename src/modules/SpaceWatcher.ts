@@ -302,8 +302,10 @@ export class SpaceWatcher extends EventEmitter {
       const prevState = this.space?.state
 
       // Get latest metadata in case title changed
-      await this.getSpaceData()
-      this.logSpaceInfo()
+      if (this.space?.state !== SpaceState.ENDED) {
+        await this.getSpaceData()
+        this.logSpaceInfo()
+      }
 
       if (this.space?.state === SpaceState.LIVE) {
         // Recheck dynamic playlist in case host disconnect for a long time
