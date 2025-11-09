@@ -19,7 +19,7 @@ export class TwitterTransaction {
   private readonly transactionCollections: Record<string, Record<string, TransactionItem>> = {}
 
   private readonly clientLimiter = new Bottleneck({ maxConcurrent: 1 })
-  private readonly transactionLimiter = new Bottleneck({
+  private readonly transactionLimiter = new Bottleneck.Group({
     maxConcurrent: 1,
     minTime: this.ttl,
   })
@@ -30,7 +30,7 @@ export class TwitterTransaction {
     // eslint-disable-next-line no-param-reassign
     method = method.toUpperCase()
 
-    const res = await this.transactionLimiter.schedule(async () => {
+    const res = await this.transactionLimiter.key(path).schedule(async () => {
       let transactionItem = this.transactionCollections[path]?.[method]
       if (transactionItem && Date.now() - transactionItem.at < this.ttl) {
         return transactionItem.value
