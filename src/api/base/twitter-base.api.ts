@@ -1,14 +1,24 @@
 /* eslint-disable class-methods-use-this */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, {
+  AxiosHeaders,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from 'axios'
 import { logger } from '../../logger'
 import { TwitterApi } from '../twitter.api'
-import { TWITTER_API_URL, TWITTER_PUBLIC_AUTHORIZATION, TWITTER_PUBLIC_AUTHORIZATION_2 } from '../twitter.constant'
+import {
+  TWITTER_API_URL,
+  TWITTER_PUBLIC_AUTHORIZATION,
+  TWITTER_PUBLIC_AUTHORIZATION_2,
+  UA,
+} from '../twitter.constant'
 
 export class TwitterBaseApi {
   public client: AxiosInstance
 
-  protected logger = logger.child({ context: 'TwitterApi' })
+  protected logger = logger.child({ label: '[TwitterApi]' })
 
   constructor(
     protected readonly api: TwitterApi,
@@ -115,21 +125,44 @@ export class TwitterBaseApi {
   }
 
   private async handleRequest(config: AxiosRequestConfig) {
+    const headers = config.headers as AxiosHeaders
+    headers.setUserAgent(UA)
+    headers.set('x-twitter-active-user', 'yes')
+    // headers.set('x-twitter-auth-type', 'OAuth2Session')
+    headers.set('x-twitter-client-language', 'en')
+    await this.handleRequestXClientTransactionId(config)
+    await this.handleRequestXGuestToken(config)
+  }
+
+  private async handleRequestXClientTransactionId(config: AxiosRequestConfig) {
+    const headers = config.headers as AxiosHeaders
+    const url = this.toTransactionUrl(config.url)
     try {
-      const guestToken = config.headers['x-guest-token']
-      if (guestToken) {
-        const url = this.getRateLimitRequestUrl(config)
-        const rateLimit = this.api.data.rateLimits[url]
-        if (rateLimit && rateLimit.limit && rateLimit.remaining === 0) {
-          const newGuestToken = config.headers.authorization === TWITTER_PUBLIC_AUTHORIZATION
-            ? await this.api.data.getGuestToken(true)
-            : await this.api.data.getGuestToken2(true)
-          // eslint-disable-next-line no-param-reassign
-          config.headers['x-guest-token'] = newGuestToken
-        }
+      const transactionId = await this.api.transaction.generateTransactionId(config.method, url)
+      headers.set('x-client-transaction-id', transactionId)
+    } catch (error) {
+      this.logger.error(`handleRequestXClientTransactionId: ${error.message} | ${JSON.stringify({ url })}`)
+    }
+  }
+
+  private async handleRequestXGuestToken(config: AxiosRequestConfig) {
+    const headers = config.headers as AxiosHeaders
+    const guestToken = headers.get('x-guest-token')
+    if (!guestToken) {
+      return
+    }
+
+    try {
+      const url = this.getRateLimitRequestUrl(config)
+      const rateLimit = this.api.data.rateLimits[url]
+      if (rateLimit && rateLimit.limit && rateLimit.remaining === 0) {
+        const newGuestToken = config.headers.authorization === TWITTER_PUBLIC_AUTHORIZATION
+          ? await this.api.data.getGuestToken(true)
+          : await this.api.data.getGuestToken2(true)
+        headers.set('x-guest-token', newGuestToken)
       }
     } catch (error) {
-      this.logger.error(`handleRequest: ${error.message}`)
+      this.logger.error(`handleRequestXGuestToken: ${error.message}`)
     }
   }
 

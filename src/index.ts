@@ -54,7 +54,7 @@ program
 
 program.action(async (args, cmd: Command) => {
   logger.info(Array(80).fill('=').join(''))
-  logger.info(`Version: ${pkg.version}`)
+  logger.warn(`Version: ${pkg.version}`)
   CommandUtil.detectDebugOption(cmd)
 
   await checkVersion()
@@ -65,9 +65,13 @@ program.action(async (args, cmd: Command) => {
     dotenv.config({ path: args.env })
   }
 
-  const envKeys = ['TWITTER_AUTHORIZATION', 'TWITTER_AUTH_TOKEN']
+  const envKeys = [
+    // 'TWITTER_AUTHORIZATION',
+    'TWITTER_AUTH_TOKEN',
+    'TWITTER_CSRF_TOKEN',
+  ]
   envKeys.forEach((key) => {
-    const limit = 16
+    const limit = 4
     let value = (process.env[key] || '').substring(0, limit)
     if (value) { value += '****' }
     logger.debug(`env.${key}=${value}`)

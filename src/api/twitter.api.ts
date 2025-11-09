@@ -6,30 +6,14 @@ import { TwitterTransaction } from './twitter-transaction'
 import { TwitterApiData } from './twitter.api.data'
 
 export class TwitterApi {
-  public data: TwitterApiData
+  public readonly transaction = new TwitterTransaction()
 
-  public graphql: TwitterGraphqlApi
-  public fleet: TwitterFleetApi
-  public guest: TwitterGuestApi
-  public liveVideoStream: TwitterLiveVideoStreamApi
+  public readonly data: TwitterApiData = new TwitterApiData(this)
 
-  public transaction = new TwitterTransaction()
-
-  constructor() {
-    this.createData()
-    this.createApis()
-  }
-
-  private createData() {
-    this.data = new TwitterApiData(this)
-  }
-
-  private createApis() {
-    this.graphql = new TwitterGraphqlApi(this, 'graphql')
-    this.fleet = new TwitterFleetApi(this, 'fleets/v1')
-    this.guest = new TwitterGuestApi(this, '1.1/guest')
-    this.liveVideoStream = new TwitterLiveVideoStreamApi(this, '1.1/live_video_stream')
-  }
+  public readonly graphql = new TwitterGraphqlApi(this, 'graphql')
+  public readonly fleet = new TwitterFleetApi(this, 'fleets/v1')
+  public readonly guest = new TwitterGuestApi(this, '1.1/guest')
+  public readonly liveVideoStream = new TwitterLiveVideoStreamApi(this, '1.1/live_video_stream')
 }
 
 export const api = new TwitterApi()

@@ -75,19 +75,21 @@ class UserManager extends EventEmitter {
     } catch (error) {
       this.logger.error(`fetchUsers: ${error.message}`)
     }
+
     const users = this.getUsersWithoutId()
-    if (users.length) {
+    if (!users.length) {
       this.logger.warn(
-        `fetchUsers: Found some users without id. Retry in ${TWITTER_USER_FETCH_INTERVAL}ms`,
-        { count: users.length, usernames: users.map((v) => v.username) },
-      )
-      setTimeout(() => this.fetchUsers(), TWITTER_USER_FETCH_INTERVAL)
-    } else {
-      this.logger.info(
         'fetchUsers: OK',
-        { count: users.length },
+        { count: this.users.length - users.length },
       )
+      return
     }
+
+    this.logger.warn(
+      `fetchUsers: Found some users without id. Retry in ${TWITTER_USER_FETCH_INTERVAL}ms`,
+      { count: users.length, usernames: users.map((v) => v.username) },
+    )
+    setTimeout(() => this.fetchUsers(), TWITTER_USER_FETCH_INTERVAL)
   }
 
   private async fetchUsersByLookup() {

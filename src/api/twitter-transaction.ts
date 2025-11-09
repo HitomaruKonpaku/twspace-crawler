@@ -39,10 +39,10 @@ export class TwitterTransaction {
       const transaction = await this.initClient()
       const transactionId = await transaction.generateTransactionId(method, path)
       transactionItem = {
-        value: transactionId,
         at: Date.now(),
+        value: transactionId,
       }
-      this.logger.debug(`generateTransactionId | ${JSON.stringify({ method, path, transactionItem })}`)
+      this.logger.debug(`generateTransactionId | ${JSON.stringify({ method, path, data: transactionItem })}`)
       this.transactionCollections[path] = { [method]: transactionItem }
       return transactionItem.value
     })

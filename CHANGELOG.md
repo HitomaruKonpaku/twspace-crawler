@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.16.3
+
+- Update Node 22
+- Add some more headers to API call
+- Update some log
+
 ## 1.16.2
 
 - Add some logs
