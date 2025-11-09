@@ -12,6 +12,8 @@ export class PeriscopeUtil {
       // Handle live playlist
       .replace('?type=live', '')
       .replace('dynamic_playlist', 'master_playlist')
+      // Handle video playlist (master_master_playlist -> master_playlist)
+      .replace('master_master_playlist', 'master_playlist')
       // Handle replay playlist
       .replace('?type=replay', '')
       .replace(/playlist_\d+/g, 'master_playlist')
