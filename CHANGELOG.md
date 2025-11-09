@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.16.4
+
+- Update transaction limiter per path/url
+
 ## 1.16.3
 
 - Update Node 22

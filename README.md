@@ -21,7 +21,7 @@
 
 ## Requirements
 
-- [Node.js](https://nodejs.org) (>=14)
+- [Node.js](https://nodejs.org) (>=22)
 - [FFMPEG](https://www.ffmpeg.org)
 
 ## Env
