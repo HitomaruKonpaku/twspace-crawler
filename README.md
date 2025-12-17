@@ -125,7 +125,7 @@ twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.vide
 
 ```
   --id <SPACE_ID>                   Monitor & download live Space with its id
-  -surl, --space-url <SPACE_URL>    Monitor & download live Space with its URL
+  --space-url <SPACE_URL>    Monitor & download live Space with its URL
   --force                           Force download Space when using with --id
   --url <PLAYLIST_URL>              Download Space using playlist url
 ```

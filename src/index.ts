@@ -41,7 +41,7 @@ program
   .option('--config <CONFIG_PATH>', 'Path to config file (See config.example.json)')
   .option('--user <USER>', 'Monitor & download live Spaces from users, separate by comma (,)')
   .option('--id <SPACE_ID>', 'Monitor & download live Space with its id')
-  .option('-surl, --space-url <SPACE_URL>', 'Monitor & download live Space with its URL')
+  .option('--space-url <SPACE_URL>', 'Monitor & download live Space with its URL')
   .option('--force', 'Force download Space when using with --id')
   .option('--url <PLAYLIST_ID>', 'Download Space using playlist url')
   .option('--skip-download', 'Do not download anything')

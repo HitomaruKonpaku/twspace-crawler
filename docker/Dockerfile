@@ -1,8 +1,6 @@
 # BASE
 FROM node:lts-alpine AS base
 
-RUN apk add --no-cache tini
-
 WORKDIR /app
 
 COPY package*.json ./
@@ -31,8 +29,8 @@ ENV NODE_ENV=production
 VOLUME /app/logs
 VOLUME /app/download
 
-RUN apk add --no-cache bash
-RUN apk add --no-cache ffmpeg
+RUN apk update && \
+  apk add --no-cache tini bash ffmpeg
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=builder      /app/dist ./dist
