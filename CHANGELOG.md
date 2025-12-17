@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.17.0
+
+- Allow to download Video Spaces (<https://github.com/yt-dlp/yt-dlp/pull/10789>)
+- Add retries on download audio chunk error
+
 ## 1.16.4
 
 - Update transaction limiter per path/url

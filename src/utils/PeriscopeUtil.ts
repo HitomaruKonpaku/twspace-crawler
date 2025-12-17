@@ -1,6 +1,7 @@
 export class PeriscopeUtil {
   public static isFinalPlaylistUrl(url: string) {
     return /playlist_\d+\.m3u8/g.test(url)
+      || /master_dynamic_\d+\.m3u8/g.test(url) // video space
   }
 
   public static getFinalPlaylistName(data: string) {
@@ -15,6 +16,8 @@ export class PeriscopeUtil {
       // Handle replay playlist
       .replace('?type=replay', '')
       .replace(/playlist_\d+/g, 'master_playlist')
+      // Handle video space playlist
+      .replace(/master_dynamic_\d+/g, 'master_master_playlist')
   }
 
   public static getChunks(data: string): number[] {

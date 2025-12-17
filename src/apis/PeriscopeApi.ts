@@ -13,9 +13,10 @@ export class PeriscopeApi {
     if (PeriscopeUtil.isFinalPlaylistUrl(originUrl)) {
       return originUrl
     }
+
     const data = await this.getMasterPlaylist(originUrl)
-    const url = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
-      .replace('master_playlist', PeriscopeUtil.getFinalPlaylistName(data))
+    const masterUrl = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
+    const url = masterUrl.replace('master_playlist', PeriscopeUtil.getFinalPlaylistName(data))
     return url
   }
 
