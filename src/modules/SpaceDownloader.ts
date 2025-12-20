@@ -69,7 +69,21 @@ export class SpaceDownloader {
   }
 
   private initResultFile() {
-    const ext = this.isVideo ? 'mp4' : 'm4a'
+    const { config } = configManager
+    const mediaKey = this.isVideo ? 'video' : 'audio'
+    let extConfig = config?.ffmpeg?.[mediaKey]?.extension
+    
+    if (extConfig && extConfig.startsWith('.')) {
+      extConfig = extConfig.slice(1)
+    }
+
+    let ext
+    if (extConfig) {
+      ext = extConfig
+    } else {
+      ext = this.isVideo ? 'mp4' : 'm4a'
+    }
+
     this.resultFile = path.join(Util.getMediaDir(this.subDir), `${this.filename}.${ext}`)
     this.logger.verbose(`Result path: "${this.resultFile}"`)
   }
@@ -168,8 +182,6 @@ export class SpaceDownloader {
       inp,
       '-seg_max_retry',
       '3',
-      '-c',
-      'copy',
     ]
 
     if (this.metadata) {
@@ -184,8 +196,15 @@ export class SpaceDownloader {
     }
 
     const { config } = configManager
-    if (config?.ffmpegArgs?.length) {
+
+    const mediaKey = this.isVideo ? 'video' : 'audio'
+    const mediaArgs = (config?.ffmpeg?.[mediaKey]?.args || [])
+    if (mediaArgs.length > 0) {
+      args.push(...mediaArgs)
+    } else if (config?.ffmpegArgs?.length) {
       args.push(...config.ffmpegArgs)
+    } else {
+      args.push('-c', 'copy')
     }
 
     args.push(this.resultFile)

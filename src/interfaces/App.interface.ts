@@ -22,6 +22,17 @@ export interface Config {
 
   ffmpegArgs?: string[]
 
+  ffmpeg?: {
+    audio?: {
+      extension?: string
+      args?: string[]
+    }
+    video?: {
+      extension?: string
+      args?: string[]
+    }
+  }
+
   users?: (string | {
     username: string
     [key: string]: any
