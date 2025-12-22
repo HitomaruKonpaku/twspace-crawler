@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.18.0
+
+- Add per-media ffmpeg settings (#94)
+
+```yaml
+# ffmpeg config by Space type, override ffmpegArgs config
+ffmpeg:
+  audio:
+    extension: m4a
+    args: []
+  video:
+    extension: mp4
+    args: []
+```
+
+- `ffmpegArgs` & `ffmpeg` config will **NOT** have `-c copy` by default
+
 ## 1.17.0
 
 - Allow to download Video Spaces (<https://github.com/yt-dlp/yt-dlp/pull/10789>)

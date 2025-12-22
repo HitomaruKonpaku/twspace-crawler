@@ -70,19 +70,10 @@ export class SpaceDownloader {
 
   private initResultFile() {
     const { config } = configManager
-    const mediaKey = this.isVideo ? 'video' : 'audio'
-    let extConfig = config?.ffmpeg?.[mediaKey]?.extension
-    
-    if (extConfig && extConfig.startsWith('.')) {
-      extConfig = extConfig.slice(1)
-    }
-
-    let ext
-    if (extConfig) {
-      ext = extConfig
-    } else {
-      ext = this.isVideo ? 'mp4' : 'm4a'
-    }
+    let ext = this.isVideo
+      ? config?.ffmpeg?.video?.extension || 'mp4'
+      : config?.ffmpeg?.audio?.extension || 'm4a'
+    ext = ext.replace(/^\./, '')
 
     this.resultFile = path.join(Util.getMediaDir(this.subDir), `${this.filename}.${ext}`)
     this.logger.verbose(`Result path: "${this.resultFile}"`)
@@ -196,10 +187,9 @@ export class SpaceDownloader {
     }
 
     const { config } = configManager
-
-    const mediaKey = this.isVideo ? 'video' : 'audio'
-    const mediaArgs = (config?.ffmpeg?.[mediaKey]?.args || [])
-    if (mediaArgs.length > 0) {
+    const mediaType = this.isVideo ? 'video' : 'audio'
+    const mediaArgs = config?.ffmpeg?.[mediaType]?.args
+    if (mediaArgs?.length > 0) {
       args.push(...mediaArgs)
     } else if (config?.ffmpegArgs?.length) {
       args.push(...config.ffmpegArgs)

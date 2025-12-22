@@ -5,6 +5,15 @@ interval: 30000
 # ffmpegArgs:
 #   - -y
 
+# ffmpeg config by Space type, override ffmpegArgs config
+# ffmpeg:
+#   audio:
+#     extension: m4a
+#     args: []
+#   video:
+#     extension: mp4
+#     args: []
+
 # List of user to check for live Spaces
 users:
   # hololive staff
@@ -76,20 +85,20 @@ users:
 # Webhooks
 webhooks:
   discord:
-  - _name: 'sample'
-    active: true
-    urls:
-    - https://discord.com/api/webhooks/xxx
-    # Send webhooks by filtered users
-    usernames:
-    - <all>
-    # Legacy option, use startMessage and/or endMessage instead
-    # mentions:
-    #   roleIds:
-    #   - 'xxx'
-    #   userIds:
-    #   - 'xxx'
-    # Message to send when Space start/running
-    # startMessage: ''
-    # Message to send when Space ended
-    # endMessage: ''
+    - _name: "sample"
+      active: true
+      urls:
+        - https://discord.com/api/webhooks/xxx
+      # Send webhooks by filtered users
+      usernames:
+        - <all>
+      # Legacy option, use startMessage and/or endMessage instead
+      # mentions:
+      #   roleIds:
+      #   - 'xxx'
+      #   userIds:
+      #   - 'xxx'
+      # Message to send when Space start/running
+      # startMessage: ''
+      # Message to send when Space ended
+      # endMessage: ''
