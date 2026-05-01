@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.18.2
+
+- Update `x-client-transaction-id`
+
 ## 1.18.1
 
 - Update `x-client-transaction-id`
