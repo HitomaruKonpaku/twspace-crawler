@@ -14,7 +14,7 @@ export class TwitterEntityUtil {
         profileImageUrl: (result.legacy.profile_image_url_https || participant.avatar_url)?.replace?.('_normal', ''),
       }
       return obj
-    } catch (error) {
+    } catch {
       return null
     }
   }

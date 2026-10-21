@@ -15,7 +15,7 @@ import { CommandUtil } from './utils/CommandUtil'
 import { TwitterUtil } from './utils/TwitterUtil'
 import { Util } from './utils/Util'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const pkg = require('../package.json')
 
 const checkVersion = async () => {
@@ -28,7 +28,7 @@ const checkVersion = async () => {
     }
     logger.info(`New version: ${latestVersion}`)
     logger.info(`To update, run: npm i -g ${pkg.name}@latest`)
-  } catch (error) {
+  } catch {
     // Ignore
   }
 }
