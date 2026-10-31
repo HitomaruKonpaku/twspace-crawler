@@ -1,8 +1,8 @@
 import { Command } from 'commander'
 import { readFileSync } from 'fs'
 import path from 'path'
-import { SpaceDownloader } from '../modules/SpaceDownloader'
-import { Util } from '../utils/Util'
+import { SpaceDownloader } from '../modules/space-downloader'
+import { Util } from '../utils/util'
 
 const command = new Command('test')
   .description('Test!')

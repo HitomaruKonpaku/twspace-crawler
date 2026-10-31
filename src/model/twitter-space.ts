@@ -1,4 +1,4 @@
-import { SpaceState } from '../enums/Twitter.enum'
+import { SpaceState } from '../enums/twitter.enum'
 import { TwitterUser } from './twitter-user'
 
 export class TwitterSpace {

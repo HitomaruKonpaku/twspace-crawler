@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import axios from 'axios'
 import { TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
-import { AudioSpaceMetadata, LiveVideoStreamStatus, User as User1 } from '../interfaces/Twitter.interface'
-import { BaseResponse, Space, User } from '../interfaces/Twitter2.interface'
+import { AudioSpaceMetadata, LiveVideoStreamStatus, User as User1 } from '../interfaces/twitter.interface'
+import { BaseResponse, Space, User } from '../interfaces/twitter2.interface'
 
 export class TwitterApi {
   public static async getGuestToken(): Promise<string> {

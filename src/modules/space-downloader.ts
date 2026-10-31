@@ -10,12 +10,12 @@ import {
 } from 'fs'
 import path from 'path'
 import winston from 'winston'
-import { PeriscopeApi } from '../apis/PeriscopeApi'
+import { PeriscopeApi } from '../apis/periscope-api'
 import { logger as baseLogger } from '../logger'
 import { M3u8Util } from '../utils/m3u8.util'
-import { PeriscopeUtil } from '../utils/PeriscopeUtil'
-import { Util } from '../utils/Util'
-import { configManager } from './ConfigManager'
+import { PeriscopeUtil } from '../utils/periscope-util'
+import { Util } from '../utils/util'
+import { configManager } from './config-manager'
 
 /**
  * Download audio OR video

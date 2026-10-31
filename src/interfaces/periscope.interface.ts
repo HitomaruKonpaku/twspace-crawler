@@ -1,4 +1,4 @@
-import { MessageKind } from '../enums/Periscope.enum'
+import { MessageKind } from '../enums/periscope.enum'
 
 /* eslint-disable camelcase */
 export interface AccessChat {

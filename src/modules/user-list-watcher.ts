@@ -1,12 +1,12 @@
 import EventEmitter from 'events'
 import winston from 'winston'
-import { twitterSpaceApiLimiter } from '../Limiter'
-import { TwitterApi } from '../apis/TwitterApi'
+import { twitterSpaceApiLimiter } from '../limiter'
+import { TwitterApi } from '../apis/twitter-api'
 import { TWITTER_API_LIST_SIZE, TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
-import { SpaceState } from '../enums/Twitter.enum'
+import { SpaceState } from '../enums/twitter.enum'
 import { logger as baseLogger } from '../logger'
-import { Util } from '../utils/Util'
-import { User, userManager } from './UserManager'
+import { Util } from '../utils/util'
+import { User, userManager } from './user-manager'
 
 export class UserListWatcher extends EventEmitter {
   private logger: winston.Logger

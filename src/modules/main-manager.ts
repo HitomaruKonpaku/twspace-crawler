@@ -1,8 +1,8 @@
 import winston from 'winston'
 import { logger as baseLogger } from '../logger'
-import { SpaceWatcher } from './SpaceWatcher'
-import { UserListWatcher } from './UserListWatcher'
-import { UserWatcher } from './UserWatcher'
+import { SpaceWatcher } from './space-watcher'
+import { UserListWatcher } from './user-list-watcher'
+import { UserWatcher } from './user-watcher'
 
 class MainManager {
   private logger: winston.Logger

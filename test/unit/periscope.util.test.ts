@@ -1,6 +1,6 @@
 import { expect } from '@hapi/code'
 import * as Lab from '@hapi/lab'
-import { PeriscopeUtil } from '../../src/utils/PeriscopeUtil'
+import { PeriscopeUtil } from '../../src/utils/periscope-util'
 
 const lab = Lab.script()
 const { describe, it } = lab

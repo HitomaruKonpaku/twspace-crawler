@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import winston from 'winston'
-import { PeriscopeApi } from '../apis/PeriscopeApi'
+import { PeriscopeApi } from '../apis/periscope-api'
 import { logger as baseLogger } from '../logger'
 
 export class SpaceCaptionsDownloader {

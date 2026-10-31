@@ -1,13 +1,13 @@
 import EventEmitter from 'events'
 import winston from 'winston'
-import { twitterApiLimiter } from '../Limiter'
-import { TwitterApi } from '../apis/TwitterApi'
+import { twitterApiLimiter } from '../limiter'
+import { TwitterApi } from '../apis/twitter-api'
 import { TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
-import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
+import { AudioSpaceMetadataState } from '../enums/twitter.enum'
 import { logger as baseLogger } from '../logger'
-import { Util } from '../utils/Util'
-import { configManager } from './ConfigManager'
-import { userManager } from './UserManager'
+import { Util } from '../utils/util'
+import { configManager } from './config-manager'
+import { userManager } from './user-manager'
 
 export class UserWatcher extends EventEmitter {
   private logger: winston.Logger

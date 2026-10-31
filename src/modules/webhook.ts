@@ -3,16 +3,16 @@ import axios from 'axios'
 import { randomUUID } from 'crypto'
 import winston from 'winston'
 
-import { discordWebhookLimiter } from '../Limiter'
+import { discordWebhookLimiter } from '../limiter'
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
-import { SpaceState } from '../enums/Twitter.enum'
-import { WebhookConfig } from '../interfaces/App.interface'
+import { SpaceState } from '../enums/twitter.enum'
+import { WebhookConfig } from '../interfaces/app.interface'
 import { logger as baseLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
-import { SpaceUtil } from '../utils/SpaceUtil'
-import { TwitterUtil } from '../utils/TwitterUtil'
+import { SpaceUtil } from '../utils/space-util'
+import { TwitterUtil } from '../utils/twitter-util'
 import { TwitterSpaceUtil } from '../utils/twitter-space.util'
-import { configManager } from './ConfigManager'
+import { configManager } from './config-manager'
 
 export class Webhook {
   private logger: winston.Logger

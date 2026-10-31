@@ -1,12 +1,12 @@
 import Bottleneck from 'bottleneck'
 import { EventEmitter } from 'stream'
 import winston from 'winston'
-import { twitterApiLimiter } from '../Limiter'
+import { twitterApiLimiter } from '../limiter'
 import { api } from '../api/twitter.api'
-import { TwitterApi } from '../apis/TwitterApi'
+import { TwitterApi } from '../apis/twitter-api'
 import { TWITTER_API_LIST_SIZE, TWITTER_USER_FETCH_INTERVAL } from '../constants/twitter.constant'
 import { logger as baseLogger } from '../logger'
-import { Util } from '../utils/Util'
+import { Util } from '../utils/util'
 import { ArrayUtil } from '../utils/array.util'
 
 export interface User {

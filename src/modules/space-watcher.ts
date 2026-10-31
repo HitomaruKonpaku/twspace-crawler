@@ -7,29 +7,29 @@ import winston from 'winston'
 
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
 import { api } from '../api/twitter.api'
-import { PeriscopeApi } from '../apis/PeriscopeApi'
+import { PeriscopeApi } from '../apis/periscope-api'
 import {
   APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY,
   APP_PLAYLIST_MASTER_RETRY_MAX,
   APP_PLAYLIST_REFRESH_INTERVAL,
   APP_SPACE_ERROR_RETRY_INTERVAL,
 } from '../constants/app.constant'
-import { SpaceState } from '../enums/Twitter.enum'
-import { AccessChat } from '../interfaces/Periscope.interface'
-import { LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
+import { SpaceState } from '../enums/twitter.enum'
+import { AccessChat } from '../interfaces/periscope.interface'
+import { LiveVideoStreamStatus } from '../interfaces/twitter.interface'
 import { logger as baseLogger, spaceLogger, spaceRawLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
-import { PeriscopeUtil } from '../utils/PeriscopeUtil'
-import { SpaceUtil } from '../utils/SpaceUtil'
-import { TwitterUtil } from '../utils/TwitterUtil'
-import { Util } from '../utils/Util'
+import { PeriscopeUtil } from '../utils/periscope-util'
+import { SpaceUtil } from '../utils/space-util'
+import { TwitterUtil } from '../utils/twitter-util'
+import { Util } from '../utils/util'
 import { TwitterEntityUtil } from '../utils/twitter-entity.util'
-import { configManager } from './ConfigManager'
-import { Notification } from './Notification'
-import { SpaceCaptionsDownloader } from './SpaceCaptionsDownloader'
-import { SpaceCaptionsExtractor } from './SpaceCaptionsExtractor'
-import { SpaceDownloader } from './SpaceDownloader'
-import { Webhook } from './Webhook'
+import { configManager } from './config-manager'
+import { Notification } from './notification'
+import { SpaceCaptionsDownloader } from './space-captions-downloader'
+import { SpaceCaptionsExtractor } from './space-captions-extractor'
+import { SpaceDownloader } from './space-downloader'
+import { Webhook } from './webhook'
 
 export class SpaceWatcher extends EventEmitter {
   private logger: winston.Logger

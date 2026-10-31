@@ -1,10 +1,10 @@
 import fs from 'fs'
 import readline from 'readline'
 import winston from 'winston'
-import { MessageKind } from '../enums/Periscope.enum'
-import { ChatHistoryMessage, ChatMessage, ChatMessageData } from '../interfaces/Periscope.interface'
+import { MessageKind } from '../enums/periscope.enum'
+import { ChatHistoryMessage, ChatMessage, ChatMessageData } from '../interfaces/periscope.interface'
 import { logger as baseLogger } from '../logger'
-import { Util } from '../utils/Util'
+import { Util } from '../utils/util'
 
 export class SpaceCaptionsExtractor {
   private logger: winston.Logger

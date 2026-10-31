@@ -4,9 +4,9 @@ import nodeNotifier from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
-import { Downloader } from '../Downloader'
+import { Downloader } from '../downloader'
 import { logger as baseLogger } from '../logger'
-import { Util } from '../utils/Util'
+import { Util } from '../utils/util'
 
 export class Notification {
   private logger: winston.Logger

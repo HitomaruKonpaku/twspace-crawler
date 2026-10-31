@@ -1,4 +1,4 @@
-import { AudioSpaceMetadataState } from '../enums/Twitter.enum'
+import { AudioSpaceMetadataState } from '../enums/twitter.enum'
 
 /* eslint-disable camelcase */
 export interface User {

@@ -1,7 +1,7 @@
 import { Command } from 'commander'
-import { SpaceCaptionsDownloader } from '../modules/SpaceCaptionsDownloader'
-import { SpaceCaptionsExtractor } from '../modules/SpaceCaptionsExtractor'
-import { CommandUtil } from '../utils/CommandUtil'
+import { SpaceCaptionsDownloader } from '../modules/space-captions-downloader'
+import { SpaceCaptionsExtractor } from '../modules/space-captions-extractor'
+import { CommandUtil } from '../utils/command-util'
 
 const command = new Command('cc')
   .description('Process captions')

@@ -1,7 +1,7 @@
 import { codeBlock, inlineCode, time } from '@discordjs/builders'
-import { AudioSpaceMetadataState, SpaceState } from '../enums/Twitter.enum'
+import { AudioSpaceMetadataState, SpaceState } from '../enums/twitter.enum'
 import { TwitterSpace } from '../model/twitter-space'
-import { TwitterUtil } from './TwitterUtil'
+import { TwitterUtil } from './twitter-util'
 
 export class TwitterSpaceUtil {
   public static parseId(s: string): string {
