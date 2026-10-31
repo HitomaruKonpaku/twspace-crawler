@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.19.1
+
+- Fall back to the `prod-fastly-p` CDN host
+- Do not crash in playlist URL mode when a download fails
+
 ## 1.19.0
 
 - Download Space archives after the live CDN URL format changes (#104)
