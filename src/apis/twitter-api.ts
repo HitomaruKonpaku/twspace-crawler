@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import axios from 'axios'
 import { TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
 import { AudioSpaceMetadata, LiveVideoStreamStatus, User as User1 } from '../interfaces/twitter.interface'

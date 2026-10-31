@@ -27,7 +27,6 @@ export class TwitterTransaction {
   private transaction: ClientTransaction
 
   public async generateTransactionId(method: string, path: string): Promise<string> {
-    // eslint-disable-next-line no-param-reassign
     method = method.toUpperCase()
 
     const res = await this.transactionLimiter.key(path).schedule(async () => {

@@ -143,10 +143,8 @@ export class SpaceDownloader {
     const url = chunkBaseUrl + chunkName
     this.logger.debug(`downloadChunk: ${chunkName}`)
 
-    // eslint-disable-next-line no-plusplus
     for (let retries = 0; retries <= this.MAX_RETRIES; retries++) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         const { data } = await axios.get(url, { responseType: 'arraybuffer' })
         let buffer = Buffer.from(data)
         const index = buffer.indexOf(this.ignoreBuffer)

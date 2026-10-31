@@ -24,7 +24,6 @@ export class Webhook {
     this.logger = baseLogger.child({ label: `[Webhook] [${space?.creator?.username}] [${space.id}]` })
   }
 
-  // eslint-disable-next-line class-methods-use-this
   private get config() {
     return configManager.config?.webhooks
   }

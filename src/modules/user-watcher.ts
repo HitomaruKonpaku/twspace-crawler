@@ -23,7 +23,6 @@ export class UserWatcher extends EventEmitter {
     return userManager.getUserByUsername(this.username)
   }
 
-  // eslint-disable-next-line class-methods-use-this
   private get headers() {
     return {
       authorization: TWITTER_PUBLIC_AUTHORIZATION,

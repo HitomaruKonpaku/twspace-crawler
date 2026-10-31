@@ -1,9 +1,8 @@
-/* eslint-disable class-methods-use-this */
-
-import axios, {
-  AxiosHeaders,
+import axios from 'axios'
+import type {
   AxiosInstance,
   AxiosRequestConfig,
+  AxiosRequestHeaders,
   AxiosResponse,
 } from 'axios'
 import { logger } from '../../logger'
@@ -125,7 +124,7 @@ export class TwitterBaseApi {
   }
 
   private async handleRequest(config: AxiosRequestConfig) {
-    const headers = config.headers as AxiosHeaders
+    const headers = config.headers as AxiosRequestHeaders
     headers.setUserAgent(UA)
     headers.set('x-twitter-active-user', 'yes')
     // headers.set('x-twitter-auth-type', 'OAuth2Session')
@@ -135,7 +134,7 @@ export class TwitterBaseApi {
   }
 
   private async handleRequestXClientTransactionId(config: AxiosRequestConfig) {
-    const headers = config.headers as AxiosHeaders
+    const headers = config.headers as AxiosRequestHeaders
     const url = this.toTransactionUrl(config.url)
     try {
       const transactionId = await this.api.transaction.generateTransactionId(config.method, url)
@@ -146,7 +145,7 @@ export class TwitterBaseApi {
   }
 
   private async handleRequestXGuestToken(config: AxiosRequestConfig) {
-    const headers = config.headers as AxiosHeaders
+    const headers = config.headers as AxiosRequestHeaders
     const guestToken = headers.get('x-guest-token')
     if (!guestToken) {
       return

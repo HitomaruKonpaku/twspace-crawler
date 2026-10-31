@@ -1,6 +1,5 @@
 import { MessageKind } from '../enums/periscope.enum'
 
-/* eslint-disable camelcase */
 export interface AccessChat {
   subscriber: string
   publisher: string

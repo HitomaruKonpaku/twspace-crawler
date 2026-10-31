@@ -27,7 +27,6 @@ export class SpaceCaptionsDownloader {
     fs.writeFileSync(this.file, '')
     do {
       try {
-        // eslint-disable-next-line no-await-in-loop
         const { messages, cursor } = await this.getChatHistory()
         messages?.forEach?.((message) => {
           fs.appendFileSync(this.file, `${JSON.stringify(message)}\n`)

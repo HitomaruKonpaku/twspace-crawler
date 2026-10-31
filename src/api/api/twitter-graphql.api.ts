@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 import { TwitterBaseApi } from '../base/twitter-base.api'
 import { twitterGraphqlEndpoints } from '../constant/twitter-graphql-endpoint.constant'
 import { twitterGraphqlParams } from '../constant/twitter-graphql-param.constant'
@@ -156,13 +154,11 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
 
   // #region Helper
 
-  // eslint-disable-next-line class-methods-use-this
   private toUrl(endpoint: TwitterGraphqlEndpoint) {
     const url = [endpoint.queryId, endpoint.operationName].join('/')
     return url
   }
 
-  // eslint-disable-next-line class-methods-use-this
   private cloneParams<T>(src: T, value?: any) {
     const obj = JSON.parse(JSON.stringify(src)) as T
     if (value) {

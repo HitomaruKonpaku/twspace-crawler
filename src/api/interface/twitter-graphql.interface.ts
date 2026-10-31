@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 import { AudioSpaceMetadataState } from '../enum/twitter-graphql.enum'
 
 export interface AudioSpaceMetadata {

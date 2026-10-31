@@ -8,10 +8,8 @@ export class PeriscopeApi {
     fn: (url: string) => Promise<T>,
   ): Promise<{ url: string, result: T }> {
     let lastError: Error
-    // eslint-disable-next-line no-restricted-syntax
     for (const url of urls) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         return { url, result: await fn(url) }
       } catch (error) {
         lastError = error

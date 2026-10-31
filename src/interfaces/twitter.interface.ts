@@ -1,6 +1,5 @@
 import { AudioSpaceMetadataState } from '../enums/twitter.enum'
 
-/* eslint-disable camelcase */
 export interface User {
   id: number
   id_str: string

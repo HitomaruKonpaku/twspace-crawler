@@ -13,7 +13,6 @@ command
   .description('Test download space by id(s)')
   .action((ids: string) => {
     const spaces = Array
-      // eslint-disable-next-line no-eval
       .from<any>(eval(readFileSync(path.join(__dirname, '../../test/data/spaces.ts'), { encoding: 'utf8' })))
       .filter((space) => space.playlist_url)
 
@@ -21,13 +20,11 @@ command
     const filteredSpaces = spaces.filter((v) => spaceIds.some((id) => id === v.id))
 
     if (!filteredSpaces.length) {
-      // eslint-disable-next-line no-console
       console.debug('No space(s) found')
       return
     }
 
     const users = Array
-      // eslint-disable-next-line no-eval
       .from<any>(eval(readFileSync(path.join(__dirname, '../../test/data/users.ts'), { encoding: 'utf8' })))
 
     filteredSpaces.forEach((space) => {

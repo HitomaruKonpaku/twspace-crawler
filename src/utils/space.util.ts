@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-
 import { AudioSpace, AudioSpaceParticipant } from '../api/interface/twitter-graphql.interface'
 
 export class SpaceUtil {

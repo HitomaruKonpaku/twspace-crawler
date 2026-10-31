@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 import { TwitterBaseApi } from '../base/twitter-base.api'
 
 export class TwitterFleetApi extends TwitterBaseApi {
