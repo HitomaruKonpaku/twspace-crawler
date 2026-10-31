@@ -27,7 +27,7 @@
     "start:config": "node dist/index --config ./config.json",
     "build": "tsc",
     "prepare": "npm run build",
-    "test": "lab --transform node_modules/lab-transform-typescript",
+    "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "lab --transform node_modules/lab-transform-typescript test/unit",
     "test:e2e": "lab --transform node_modules/lab-transform-typescript test/e2e",
     "lint": "eslint src --ext .ts",

@@ -24,8 +24,7 @@ RUN npm run build
 # TESTER
 FROM builder AS tester
 
-RUN npm run test:unit && \
-  npm run test:e2e
+RUN npm test
 
 # RELEASE
 FROM base AS release

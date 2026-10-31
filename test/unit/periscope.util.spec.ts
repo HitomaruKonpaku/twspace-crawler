@@ -16,6 +16,56 @@ const pOldLiveUrl = `${pBase}/periscope-replay-direct-prod-ap-northeast-1-public
 const pGenericArchiveUrl = `${pBase}/periscope-replays-public/audio-space/master_playlist.m3u8`
 
 describe('PeriscopeUtil', () => {
+  describe('isFinalPlaylistUrl', () => {
+    it('returns true for a final replay playlist', () => {
+      const url = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/playlist_16752359708553501999.m3u8`
+      expect(PeriscopeUtil.isFinalPlaylistUrl(url)).true()
+    })
+
+    it('returns true for a video space playlist', () => {
+      const url = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/video-space/master_dynamic_123.m3u8`
+      expect(PeriscopeUtil.isFinalPlaylistUrl(url)).true()
+    })
+
+    it('returns false for a master playlist', () => {
+      expect(PeriscopeUtil.isFinalPlaylistUrl(newLiveUrl)).false()
+    })
+  })
+
+  describe('getFinalPlaylistName', () => {
+    it('returns the playlist name from a playlist body', () => {
+      const data = [
+        '#EXTM3U',
+        '#EXT-X-STREAM-INF:BANDWIDTH=64000',
+        'playlist_16752359708553501999.m3u8?type=replay',
+      ].join('\n')
+      expect(PeriscopeUtil.getFinalPlaylistName(data)).equal('playlist_16752359708553501999')
+    })
+
+    it('throws when the playlist body has no playlist name', () => {
+      expect(() => PeriscopeUtil.getFinalPlaylistName('#EXTM3U')).throw()
+    })
+  })
+
+  describe('getMasterPlaylistUrl', () => {
+    it('converts a live dynamic playlist URL', () => {
+      const url = `${base}/x-media-live-stream-ap-northeast-1/audio-space/dynamic_playlist.m3u8?type=live`
+      expect(PeriscopeUtil.getMasterPlaylistUrl(url)).equal(newLiveUrl)
+    })
+
+    it('converts a final replay playlist URL', () => {
+      const url = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/playlist_16752359708553501999.m3u8?type=replay`
+      expect(PeriscopeUtil.getMasterPlaylistUrl(url)).equal(oldLiveUrl)
+    })
+
+    it('converts a video space playlist URL', () => {
+      const url = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/video-space/master_dynamic_123.m3u8`
+      expect(PeriscopeUtil.getMasterPlaylistUrl(url)).equal(
+        `${base}/periscope-replay-direct-prod-ap-northeast-1-public/video-space/master_master_playlist.m3u8`,
+      )
+    })
+  })
+
   describe('getPlaylistUrlCandidates', () => {
     it('returns the live, generic archive, and regional archive URLs for the new live path', () => {
       expect(PeriscopeUtil.getPlaylistUrlCandidates(newLiveUrl)).equal([
