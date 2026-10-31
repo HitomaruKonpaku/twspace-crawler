@@ -21,22 +21,36 @@ export class PeriscopeUtil {
   }
 
   public static getPlaylistUrlCandidates(url: string): string[] {
+    return [...new Set([
+      ...this.getPathCandidates(url),
+      ...this.getPathCandidates(this.getFallbackHostUrl(url)),
+    ])]
+  }
+
+  private static getFallbackHostUrl(url: string) {
+    return url.replace(
+      /^(https?:\/\/)prod-fastly-[^/]+\.video\.pscp\.tv\//,
+      '$1prod-fastly-p.video.pscp.tv/',
+    )
+  }
+
+  private static getPathCandidates(url: string): string[] {
     const liveMatch = /\/x-media-live-stream-([^/]+)\//.exec(url)
     if (liveMatch) {
       const cluster = liveMatch[1]
-      return [...new Set([
+      return [
         url,
         url.replace(liveMatch[0], '/periscope-replays-public/'),
         url.replace(liveMatch[0], `/periscope-replay-direct-prod-${cluster}-public/`),
-      ])]
+      ]
     }
 
     const replayMatch = /\/periscope-replay-direct-prod-[^/]+\//.exec(url)
     if (replayMatch) {
-      return [...new Set([
+      return [
         url,
         url.replace(replayMatch[0], '/periscope-replays-public/'),
-      ])]
+      ]
     }
 
     return [url]

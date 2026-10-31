@@ -7,9 +7,13 @@ const { describe, it } = lab
 export { lab }
 
 const base = 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
+const pBase = 'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
 const newLiveUrl = `${base}/x-media-live-stream-ap-northeast-1/audio-space/master_playlist.m3u8`
 const oldLiveUrl = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
 const genericArchiveUrl = `${base}/periscope-replays-public/audio-space/master_playlist.m3u8`
+const pNewLiveUrl = `${pBase}/x-media-live-stream-ap-northeast-1/audio-space/master_playlist.m3u8`
+const pOldLiveUrl = `${pBase}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
+const pGenericArchiveUrl = `${pBase}/periscope-replays-public/audio-space/master_playlist.m3u8`
 
 describe('PeriscopeUtil', () => {
   describe('getPlaylistUrlCandidates', () => {
@@ -18,6 +22,9 @@ describe('PeriscopeUtil', () => {
         newLiveUrl,
         genericArchiveUrl,
         oldLiveUrl,
+        pNewLiveUrl,
+        pGenericArchiveUrl,
+        pOldLiveUrl,
       ])
     })
 
@@ -25,12 +32,23 @@ describe('PeriscopeUtil', () => {
       expect(PeriscopeUtil.getPlaylistUrlCandidates(oldLiveUrl)).equal([
         oldLiveUrl,
         genericArchiveUrl,
+        pOldLiveUrl,
+        pGenericArchiveUrl,
       ])
     })
 
     it('returns the input URL for an unrelated path', () => {
       const url = `${base}/audio-space/master_playlist.m3u8`
-      expect(PeriscopeUtil.getPlaylistUrlCandidates(url)).equal([url])
+      const pUrl = `${pBase}/audio-space/master_playlist.m3u8`
+      expect(PeriscopeUtil.getPlaylistUrlCandidates(url)).equal([url, pUrl])
+    })
+
+    it('returns the path candidates for a prod-fastly-p URL', () => {
+      expect(PeriscopeUtil.getPlaylistUrlCandidates(pNewLiveUrl)).equal([
+        pNewLiveUrl,
+        pGenericArchiveUrl,
+        pOldLiveUrl,
+      ])
     })
 
     it('copies the cluster to the regional archive path', () => {

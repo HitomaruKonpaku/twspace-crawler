@@ -92,6 +92,10 @@ program.action(async (args, cmd: Command) => {
   if (url && !id && !spaceUrl) {
     logger.info('Starting in playlist url mode', { url })
     new SpaceDownloader(url, Util.getDateTimeString()).download()
+      .catch((error) => {
+        logger.error(`Download failed: ${error.message}`)
+        process.exitCode = 1
+      })
     return
   }
 

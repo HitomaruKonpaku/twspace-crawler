@@ -199,6 +199,7 @@ export class SpaceWatcher extends EventEmitter {
 
     if (this.space?.state === SpaceState.ENDED && !this.space?.isAvailableForReplay) {
       this.logger.warn('Space archive not available')
+      this.emit('failed')
       return
     }
 
@@ -211,7 +212,12 @@ export class SpaceWatcher extends EventEmitter {
     }
 
     if (!this.dynamicPlaylistUrl) {
-      this.dynamicPlaylistUrl = this.liveStreamStatus.source.location
+      this.dynamicPlaylistUrl = this.liveStreamStatus.source?.location
+      if (!this.dynamicPlaylistUrl) {
+        this.logger.error('Playlist url not found')
+        this.emit('failed')
+        return
+      }
       this.logger.info(`Master playlist url: ${PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)}`)
       this.buildSpace()
       this.logSpaceInfo()
