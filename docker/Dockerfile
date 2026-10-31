@@ -21,6 +21,12 @@ COPY . .
 
 RUN npm run build
 
+# TESTER
+FROM builder AS tester
+
+RUN npm run test:unit && \
+  npm run test:e2e
+
 # RELEASE
 FROM base AS release
 
@@ -33,7 +39,7 @@ RUN apk update && \
   apk add --no-cache tini bash ffmpeg
 
 COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=builder      /app/dist ./dist
+COPY --from=tester       /app/dist ./dist
 
 RUN npm link
 

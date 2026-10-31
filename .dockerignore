@@ -1,6 +1,8 @@
 *
 !docker/
 !src/
+!test/
 !nest-cli.json
+!.labrc.js
 !package*.json
 !tsconfig*.json

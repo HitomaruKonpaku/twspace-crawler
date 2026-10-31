@@ -29,6 +29,7 @@
     "prepare": "npm run build",
     "test": "lab --transform node_modules/lab-transform-typescript",
     "test:unit": "lab --transform node_modules/lab-transform-typescript test/unit",
+    "test:e2e": "lab --transform node_modules/lab-transform-typescript test/e2e",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   },

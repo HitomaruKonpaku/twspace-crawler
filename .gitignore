@@ -7,6 +7,7 @@ download/
 .cache/
 .media/
 .tmp/
+.tmp*/
 
 .env
 config.json
