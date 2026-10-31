@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.19.0
+
+- Download Space archives after the live CDN URL format changes (#104)
+- Fall back to the archive CDN paths when the live playlist returns 404
+- Support the `_b` chunk suffix in final playlists
+- Stop the master playlist check after `20` failed attempts
+
+## 1.18.5
+
+- Update Node.js requirement to >= 24
+- Update dependencies and fix audit findings
+
+## 1.18.4
+
+- Update `x-client-transaction-id` to version 0.3.2 (#103)
+
+## 1.18.3
+
+- Update `x-client-transaction-id` to version 0.3.1 (#102)
+
 ## 1.18.2
 
 - Update `x-client-transaction-id`
