@@ -3,25 +3,64 @@ import { AccessChat, ChatHistory } from '../interfaces/Periscope.interface'
 import { PeriscopeUtil } from '../utils/PeriscopeUtil'
 
 export class PeriscopeApi {
+  private static async tryCandidates<T>(
+    urls: string[],
+    fn: (url: string) => Promise<T>,
+  ): Promise<{ url: string, result: T }> {
+    let lastError: Error
+    // eslint-disable-next-line no-restricted-syntax
+    for (const url of urls) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        return { url, result: await fn(url) }
+      } catch (error) {
+        lastError = error
+      }
+    }
+    throw lastError
+  }
+
   public static async getMasterPlaylist(originUrl: string) {
-    const url = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
-    const { data } = await axios.get<string>(url)
-    return data
+    const masterUrl = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
+    const { result } = await this.tryCandidates(
+      PeriscopeUtil.getPlaylistUrlCandidates(masterUrl),
+      async (url) => {
+        const { data } = await axios.get<string>(url)
+        return data
+      },
+    )
+    return result
+  }
+
+  public static async resolveFinalPlaylist(originUrl: string) {
+    if (PeriscopeUtil.isFinalPlaylistUrl(originUrl)) {
+      const { data } = await axios.get<string>(originUrl)
+      return { url: originUrl, data }
+    }
+
+    const masterUrl = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
+    const { result } = await this.tryCandidates(
+      PeriscopeUtil.getPlaylistUrlCandidates(masterUrl),
+      async (url) => {
+        const { data: masterData } = await axios.get<string>(url)
+        const finalUrl = url.replace('master_playlist', PeriscopeUtil.getFinalPlaylistName(masterData))
+        const { data } = await axios.get<string>(finalUrl)
+        return { url: finalUrl, data }
+      },
+    )
+    return result
   }
 
   public static async getFinalPlaylistUrl(originUrl: string) {
     if (PeriscopeUtil.isFinalPlaylistUrl(originUrl)) {
       return originUrl
     }
-
-    const data = await this.getMasterPlaylist(originUrl)
-    const masterUrl = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
-    const url = masterUrl.replace('master_playlist', PeriscopeUtil.getFinalPlaylistName(data))
+    const { url } = await this.resolveFinalPlaylist(originUrl)
     return url
   }
 
   public static async getFinalPlaylist(originUrl: string) {
-    const { data } = await axios.get<string>(await this.getFinalPlaylistUrl(originUrl))
+    const { data } = await this.resolveFinalPlaylist(originUrl)
     return data
   }
 

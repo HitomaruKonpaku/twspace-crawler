@@ -8,7 +8,12 @@ import winston from 'winston'
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
 import { api } from '../api/twitter.api'
 import { PeriscopeApi } from '../apis/PeriscopeApi'
-import { APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY, APP_PLAYLIST_REFRESH_INTERVAL, APP_SPACE_ERROR_RETRY_INTERVAL } from '../constants/app.constant'
+import {
+  APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY,
+  APP_PLAYLIST_MASTER_RETRY_MAX,
+  APP_PLAYLIST_REFRESH_INTERVAL,
+  APP_SPACE_ERROR_RETRY_INTERVAL,
+} from '../constants/app.constant'
 import { SpaceState } from '../enums/Twitter.enum'
 import { AccessChat } from '../interfaces/Periscope.interface'
 import { LiveVideoStreamStatus } from '../interfaces/Twitter.interface'
@@ -39,6 +44,7 @@ export class SpaceWatcher extends EventEmitter {
 
   private lastChunkIndex: number
   private chunkVerifyCount = 0
+  private masterPlaylistRetryCount = 0
 
   private isNotificationNotified = false
 
@@ -133,7 +139,9 @@ export class SpaceWatcher extends EventEmitter {
   private async checkMasterPlaylist(): Promise<void> {
     this.logger.debug('--> checkMasterPlaylist')
     try {
-      const masterChunkSize = PeriscopeUtil.getChunks(await PeriscopeApi.getFinalPlaylist(this.dynamicPlaylistUrl)).length
+      const finalPlaylist = await PeriscopeApi.getFinalPlaylist(this.dynamicPlaylistUrl)
+      const masterChunkSize = PeriscopeUtil.getChunks(finalPlaylist).length
+      this.masterPlaylistRetryCount = 0
       this.logger.debug(`<-- checkMasterPlaylist: master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
       const canDownload = !this.lastChunkIndex
         || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
@@ -145,7 +153,13 @@ export class SpaceWatcher extends EventEmitter {
       this.logger.warn(`Master chunk size (${masterChunkSize}) lower than last chunk index (${this.lastChunkIndex})`)
       this.chunkVerifyCount += 1
     } catch (error) {
+      this.masterPlaylistRetryCount += 1
       this.logger.error(`checkMasterPlaylist: ${error.message}`)
+      if (this.masterPlaylistRetryCount >= APP_PLAYLIST_MASTER_RETRY_MAX) {
+        this.logger.error(`checkMasterPlaylist: max retry reached (${APP_PLAYLIST_MASTER_RETRY_MAX})`)
+        this.emit('failed')
+        return
+      }
     }
     this.checkMasterPlaylistWithTimer()
   }

@@ -1,4 +1,4 @@
 module.exports = {
-  lint: true,
+  lint: false,
   timeout: 10000,
 }

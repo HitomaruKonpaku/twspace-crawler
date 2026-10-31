@@ -83,19 +83,24 @@ export class SpaceDownloader {
     this.logger.debug('download', { playlistUrl: this.playlistUrl, originUrl: this.originUrl })
     const downloadStart = Date.now()
 
+    let data: string
     if (!this.playlistUrl) {
-      this.playlistUrl = await PeriscopeApi.getFinalPlaylistUrl(this.originUrl)
+      const resolved = await PeriscopeApi.resolveFinalPlaylist(this.originUrl)
+      this.playlistUrl = resolved.url
+      data = resolved.data
       this.logger.info(`Final playlist url: ${this.playlistUrl}`)
+    } else {
+      const response = await axios.get<string>(this.playlistUrl)
+      data = response.data
     }
-
-    let data = await axios.get<string>(this.playlistUrl).then((v) => v.data)
     const manifest = M3u8Util.parse(data)
     if (manifest.playlists?.length) {
       const item = manifest.playlists.sort((a, b) => b.attributes.RESOLUTION.height - a.attributes.RESOLUTION.height || b.attributes.RESOLUTION.width - a.attributes.RESOLUTION.width)[0]
       this.playlistUrl = new URL(item.uri, this.playlistUrl).href
       this.logger.info(`Final playlist url: ${this.playlistUrl}`)
 
-      data = await axios.get<string>(this.playlistUrl).then((v) => v.data)
+      const response = await axios.get<string>(this.playlistUrl)
+      data = response.data
       this.isVideo = true
       this.initResultFile()
     }

@@ -20,8 +20,30 @@ export class PeriscopeUtil {
       .replace(/master_dynamic_\d+/g, 'master_master_playlist')
   }
 
+  public static getPlaylistUrlCandidates(url: string): string[] {
+    const liveMatch = /\/x-media-live-stream-([^/]+)\//.exec(url)
+    if (liveMatch) {
+      const cluster = liveMatch[1]
+      return [...new Set([
+        url,
+        url.replace(liveMatch[0], '/periscope-replays-public/'),
+        url.replace(liveMatch[0], `/periscope-replay-direct-prod-${cluster}-public/`),
+      ])]
+    }
+
+    const replayMatch = /\/periscope-replay-direct-prod-[^/]+\//.exec(url)
+    if (replayMatch) {
+      return [...new Set([
+        url,
+        url.replace(replayMatch[0], '/periscope-replays-public/'),
+      ])]
+    }
+
+    return [url]
+  }
+
   public static getChunks(data: string): number[] {
-    const chunkIndexPattern = /(?<=chunk_\d+_)\d+(?=_a\.)/gm
+    const chunkIndexPattern = /(?<=chunk_\d+_)\d+(?=_[a-z]\.)/gm
     return data.match(chunkIndexPattern)?.map((v) => Number(v)) || []
   }
 

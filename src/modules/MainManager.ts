@@ -24,12 +24,21 @@ class MainManager {
     watcher.watch()
     watcher.once('complete', () => {
       this.logger.debug(`SpaceWatcher@${spaceId} complete`)
-      if (!watchers[spaceId]) {
-        return
-      }
-      delete watchers[spaceId]
-      this.logger.debug(`SpaceWatcher@${spaceId} delete`)
+      this.removeSpaceWatcher(spaceId)
     })
+    watcher.once('failed', () => {
+      this.logger.debug(`SpaceWatcher@${spaceId} failed`)
+      this.removeSpaceWatcher(spaceId)
+    })
+  }
+
+  private removeSpaceWatcher(spaceId: string) {
+    const watchers = this.spaceWatchers
+    if (!watchers[spaceId]) {
+      return
+    }
+    delete watchers[spaceId]
+    this.logger.debug(`SpaceWatcher@${spaceId} delete`)
   }
 
   public addUserWatcher(username: string) {
