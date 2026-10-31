@@ -35,6 +35,20 @@ export class Util {
     return interval
   }
 
+  // ponytail: number-by-number compare, enough because npm latest tag is always X.Y.Z
+  public static isNewerVersion(latest: string, current: string): boolean {
+    const a = latest.split('.').map((v) => parseInt(v, 10))
+    const b = current.split('.').map((v) => parseInt(v, 10))
+    for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+      const x = a[i] || 0
+      const y = b[i] || 0
+      if (x !== y) {
+        return x > y
+      }
+    }
+    return false
+  }
+
   public static getCacheDir(subDir = ''): string {
     return path.join(process.cwd(), APP_CACHE_DIR, subDir || '')
   }

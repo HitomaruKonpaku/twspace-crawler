@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { AccessChat, ChatHistory } from '../interfaces/periscope.interface'
-import { PeriscopeUtil } from '../utils/periscope-util'
+import { PeriscopeUtil } from '../utils/periscope.util'
 
 export class PeriscopeApi {
   private static async tryCandidates<T>(

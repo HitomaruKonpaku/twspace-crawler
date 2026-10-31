@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import axios from 'axios'
 import { Command, program } from 'commander'
 import dotenv from 'dotenv'
 import 'dotenv/config'
@@ -11,30 +10,14 @@ import { configManager } from './modules/config-manager'
 import { mainManager } from './modules/main-manager'
 import { SpaceDownloader } from './modules/space-downloader'
 import { userManager } from './modules/user-manager'
-import { CommandUtil } from './utils/command-util'
-import { TwitterUtil } from './utils/twitter-util'
+import { checkVersion } from './modules/version-checker'
+import { CommandUtil } from './utils/command.util'
+import { PackageUtil } from './utils/package.util'
+import { TwitterUtil } from './utils/twitter.util'
 import { Util } from './utils/util'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pkg = require('../package.json')
-
-const checkVersion = async () => {
-  const url = 'https://registry.npmjs.org/-/package/twspace-crawler/dist-tags'
-  try {
-    const { data } = await axios.get(url)
-    const latestVersion = data.latest
-    if (latestVersion === pkg.version) {
-      return
-    }
-    logger.info(`New version: ${latestVersion}`)
-    logger.info(`To update, run: npm i -g ${pkg.name}@latest`)
-  } catch {
-    // Ignore
-  }
-}
-
 program
-  .version(pkg.version)
+  .version(PackageUtil.getVersion())
   .description('CLI app to monitor & download Twitter Spaces.')
   .option('-d, --debug', 'Show debug logs')
   .option('--env <ENV_PATH>', 'Path to .env file, default to current working folder (See .env.example)')
@@ -54,7 +37,7 @@ program
 
 program.action(async (args, cmd: Command) => {
   logger.info(Array(80).fill('=').join(''))
-  logger.warn(`Version: ${pkg.version}`)
+  logger.warn(`Version: ${PackageUtil.getVersion()}`)
   CommandUtil.detectDebugOption(cmd)
 
   await checkVersion()

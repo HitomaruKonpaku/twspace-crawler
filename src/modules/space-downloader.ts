@@ -13,7 +13,7 @@ import winston from 'winston'
 import { PeriscopeApi } from '../apis/periscope-api'
 import { logger as baseLogger } from '../logger'
 import { M3u8Util } from '../utils/m3u8.util'
-import { PeriscopeUtil } from '../utils/periscope-util'
+import { PeriscopeUtil } from '../utils/periscope.util'
 import { Util } from '../utils/util'
 import { configManager } from './config-manager'
 

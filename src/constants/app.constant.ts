@@ -1,5 +1,6 @@
 export const APP_CACHE_DIR = './.cache'
 export const APP_DOWNLOAD_DIR = './download'
+export const APP_VERSION_CHECK_INTERVAL = 1 * 60 * 60 * 1000
 export const APP_USER_REFRESH_INTERVAL = 30000
 export const APP_SPACE_ERROR_RETRY_INTERVAL = 10000
 export const APP_PLAYLIST_REFRESH_INTERVAL = 10000
