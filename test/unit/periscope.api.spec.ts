@@ -14,9 +14,9 @@ const genericUrl = `${base}/periscope-replays-public/audio-space/master_playlist
 const genericFinalUrl = `${base}/periscope-replays-public/audio-space/playlist_1.m3u8`
 const regionalUrl = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
 const regionalFinalUrl = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/playlist_1.m3u8`
-const pBase = 'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
-const pRegionalUrl = `${pBase}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
-const pRegionalFinalUrl = `${pBase}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/playlist_1.m3u8`
+const fallbackBase = 'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
+const fallbackRegionalUrl = `${fallbackBase}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
+const fallbackRegionalFinalUrl = `${fallbackBase}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/playlist_1.m3u8`
 
 const masterData = '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=128000\nplaylist_1.m3u8\n'
 const finalData = '#EXTM3U\n#EXTINF:10,\nchunk_1_1_b.aac\n'
@@ -95,17 +95,17 @@ describe('PeriscopeApi', () => {
 
     it('uses the prod-fastly-p host when the original host fails', async () => {
       mockGet(async (url: string) => {
-        if (url === pRegionalUrl) {
+        if (url === fallbackRegionalUrl) {
           return { data: masterData }
         }
-        if (url === pRegionalFinalUrl) {
+        if (url === fallbackRegionalFinalUrl) {
           return { data: finalData }
         }
         throw notFound()
       })
 
       const result = await PeriscopeApi.resolveFinalPlaylist(liveUrl)
-      expect(result.url).equal(pRegionalFinalUrl)
+      expect(result.url).equal(fallbackRegionalFinalUrl)
       expect(result.data).equal(finalData)
     })
   })

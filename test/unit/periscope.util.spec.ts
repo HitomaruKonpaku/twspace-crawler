@@ -7,13 +7,13 @@ const { describe, it } = lab
 export { lab }
 
 const base = 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
-const pBase = 'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
+const fallbackBase = 'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
 const newLiveUrl = `${base}/x-media-live-stream-ap-northeast-1/audio-space/master_playlist.m3u8`
 const oldLiveUrl = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
 const genericArchiveUrl = `${base}/periscope-replays-public/audio-space/master_playlist.m3u8`
-const pNewLiveUrl = `${pBase}/x-media-live-stream-ap-northeast-1/audio-space/master_playlist.m3u8`
-const pOldLiveUrl = `${pBase}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
-const pGenericArchiveUrl = `${pBase}/periscope-replays-public/audio-space/master_playlist.m3u8`
+const fallbackNewLiveUrl = `${fallbackBase}/x-media-live-stream-ap-northeast-1/audio-space/master_playlist.m3u8`
+const fallbackOldLiveUrl = `${fallbackBase}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8`
+const fallbackGenericArchiveUrl = `${fallbackBase}/periscope-replays-public/audio-space/master_playlist.m3u8`
 
 describe('PeriscopeUtil', () => {
   describe('isFinalPlaylistUrl', () => {
@@ -67,37 +67,37 @@ describe('PeriscopeUtil', () => {
   })
 
   describe('getPlaylistUrlCandidates', () => {
-    it('returns the live, generic archive, and regional archive URLs for the new live path', () => {
+    it('returns the fallback host URLs first for the new live path', () => {
       expect(PeriscopeUtil.getPlaylistUrlCandidates(newLiveUrl)).equal([
+        fallbackNewLiveUrl,
+        fallbackGenericArchiveUrl,
+        fallbackOldLiveUrl,
         newLiveUrl,
         genericArchiveUrl,
         oldLiveUrl,
-        pNewLiveUrl,
-        pGenericArchiveUrl,
-        pOldLiveUrl,
       ])
     })
 
-    it('returns the input and generic archive URLs for the old live path', () => {
+    it('returns the fallback host URLs first for the old live path', () => {
       expect(PeriscopeUtil.getPlaylistUrlCandidates(oldLiveUrl)).equal([
+        fallbackOldLiveUrl,
+        fallbackGenericArchiveUrl,
         oldLiveUrl,
         genericArchiveUrl,
-        pOldLiveUrl,
-        pGenericArchiveUrl,
       ])
     })
 
     it('returns the input URL for an unrelated path', () => {
       const url = `${base}/audio-space/master_playlist.m3u8`
-      const pUrl = `${pBase}/audio-space/master_playlist.m3u8`
-      expect(PeriscopeUtil.getPlaylistUrlCandidates(url)).equal([url, pUrl])
+      const fallbackUrl = `${fallbackBase}/audio-space/master_playlist.m3u8`
+      expect(PeriscopeUtil.getPlaylistUrlCandidates(url)).equal([fallbackUrl, url])
     })
 
     it('returns the path candidates for a prod-fastly-p URL', () => {
-      expect(PeriscopeUtil.getPlaylistUrlCandidates(pNewLiveUrl)).equal([
-        pNewLiveUrl,
-        pGenericArchiveUrl,
-        pOldLiveUrl,
+      expect(PeriscopeUtil.getPlaylistUrlCandidates(fallbackNewLiveUrl)).equal([
+        fallbackNewLiveUrl,
+        fallbackGenericArchiveUrl,
+        fallbackOldLiveUrl,
       ])
     })
 

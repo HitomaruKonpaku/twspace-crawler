@@ -25,13 +25,15 @@
   "scripts": {
     "start": "node dist/index",
     "start:config": "node dist/index --config ./config.json",
-    "build": "tsc",
     "prepare": "npm run build",
+    "build": "tsc",
+    "build:script": "npm run build && tsc -p script/tsconfig.json",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "lab --transform node_modules/lab-transform-typescript test/unit",
     "test:e2e": "lab --transform node_modules/lab-transform-typescript test/e2e",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "build-e2e-dataset": "npm run build:script && node dist/script/build-e2e-dataset.js"
   },
   "dependencies": {
     "@discordjs/builders": "^1.15.0",

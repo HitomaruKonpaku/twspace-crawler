@@ -1,6 +1,6 @@
 {
   "id": "1nGnRBPAkzwGO",
-  "capturedAt": "2026-10-31T14:26:13.277Z",
+  "capturedAt": "2026-10-31T17:34:37.420Z",
   "graphql": {
     "AudioSpaceById": {
       "status": 200,
@@ -48,7 +48,7 @@
                     "favourites_count": 413,
                     "follow_request_sent": false,
                     "followed_by": false,
-                    "followers_count": 62048,
+                    "followers_count": 62052,
                     "following": true,
                     "friends_count": 5,
                     "has_custom_timelines": false,
@@ -59,7 +59,7 @@
                     "muting": false,
                     "name": "Midnight Grand Orchestra",
                     "needs_phone_verification": false,
-                    "normal_followers_count": 62048,
+                    "normal_followers_count": 62052,
                     "notifications": false,
                     "pinned_tweet_ids_str": [
                       "2113948629455028539"
@@ -245,7 +245,7 @@
                     "favourites_count": 413,
                     "follow_request_sent": false,
                     "followed_by": false,
-                    "followers_count": 62048,
+                    "followers_count": 62052,
                     "following": true,
                     "friends_count": 5,
                     "geo_enabled": false,
@@ -261,7 +261,7 @@
                     "muting": false,
                     "name": "Midnight Grand Orchestra",
                     "needs_phone_verification": false,
-                    "normal_followers_count": 62048,
+                    "normal_followers_count": 62052,
                     "notifications": false,
                     "nsfw_user": false,
                     "pinned_tweet_ids_str": [
@@ -384,7 +384,7 @@
                         "favourites_count": 413,
                         "follow_request_sent": false,
                         "followed_by": false,
-                        "followers_count": 62048,
+                        "followers_count": 62052,
                         "following": true,
                         "friends_count": 5,
                         "geo_enabled": false,
@@ -400,7 +400,7 @@
                         "muting": false,
                         "name": "Midnight Grand Orchestra",
                         "needs_phone_verification": false,
-                        "normal_followers_count": 62048,
+                        "normal_followers_count": 62052,
                         "notifications": false,
                         "nsfw_user": false,
                         "pinned_tweet_ids_str": [
@@ -529,7 +529,7 @@
                         "favourites_count": 10067,
                         "follow_request_sent": false,
                         "followed_by": false,
-                        "followers_count": 1892338,
+                        "followers_count": 1892332,
                         "following": true,
                         "friends_count": 628,
                         "geo_enabled": false,
@@ -545,7 +545,7 @@
                         "muting": false,
                         "name": "星街すいせい☄️Studio STELLAR",
                         "needs_phone_verification": false,
-                        "normal_followers_count": 1892338,
+                        "normal_followers_count": 1892332,
                         "notifications": false,
                         "nsfw_user": false,
                         "pinned_tweet_ids_str": [
@@ -613,10 +613,10 @@
                           }
                         },
                         "fast_followers_count": 0,
-                        "favourites_count": 36093,
+                        "favourites_count": 36097,
                         "follow_request_sent": false,
                         "followed_by": false,
-                        "followers_count": 87226,
+                        "followers_count": 87225,
                         "following": false,
                         "friends_count": 1312,
                         "geo_enabled": false,
@@ -632,7 +632,7 @@
                         "muting": false,
                         "name": "TAKU INOUE",
                         "needs_phone_verification": false,
-                        "normal_followers_count": 87226,
+                        "normal_followers_count": 87225,
                         "notifications": false,
                         "nsfw_user": false,
                         "pinned_tweet_ids_str": [
@@ -682,18 +682,6 @@
       "status": 404,
       "body": "",
       "error": "Request failed with status code 404"
-    },
-    {
-      "url": "https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/z8OYQtxWqmbwMJanM59y3ls2ydrIpdoAdZ5w3NqcwAeHntRZPVoLtYuDmQXoBH4FPnmfXbSkBwycDCxsRM4l4g/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8",
-      "status": 400,
-      "body": "Bad Request\n",
-      "error": "Request failed with status code 400"
-    },
-    {
-      "url": "https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/z8OYQtxWqmbwMJanM59y3ls2ydrIpdoAdZ5w3NqcwAeHntRZPVoLtYuDmQXoBH4FPnmfXbSkBwycDCxsRM4l4g/non_transcode/ap-northeast-1/periscope-replays-public/audio-space/master_playlist.m3u8",
-      "status": 403,
-      "body": "Forbidden\n",
-      "error": "Request failed with status code 403"
     },
     {
       "url": "https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/z8OYQtxWqmbwMJanM59y3ls2ydrIpdoAdZ5w3NqcwAeHntRZPVoLtYuDmQXoBH4FPnmfXbSkBwycDCxsRM4l4g/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8",

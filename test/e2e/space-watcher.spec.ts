@@ -28,7 +28,14 @@ interface Fixture {
 const fixturesDir = path.join(__dirname, '../data/e2e')
 const workDir = path.join(path.resolve(__dirname, '../..'), '.tmp.e2e')
 
-const masterUrl = 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/z8OYQtxWqmbwMJanM59y3ls2ydrIpdoAdZ5w3NqcwAeHntRZPVoLtYuDmQXoBH4FPnmfXbSkBwycDCxsRM4l4g/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8'
+const spaces: { id: string, expected: 'complete' | 'failed', url?: string }[] = [
+  { id: '1YqJDoNBbOaGV', expected: 'complete' },
+  { id: '1DxleVAbWZNKL', expected: 'complete' },
+  { id: '1nGnRBPAkzwGO', expected: 'failed' },
+  { id: '1nGnRBPAkzwGO', expected: 'complete', url: 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/z8OYQtxWqmbwMJanM59y3ls2ydrIpdoAdZ5w3NqcwAeHntRZPVoLtYuDmQXoBH4FPnmfXbSkBwycDCxsRM4l4g/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8' },
+  { id: '1kKzDPRrjpXJv', expected: 'failed' },
+  { id: '1kKzDPRrjpXJv', expected: 'complete', url: 'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/1SzYY4MFqJ1DfWVviciqfA87VDTn5C5wL4orgxjA9FROc0sAUbw64NgdK_mINNHP8KDNPYhHOkl_5ORtft8tRg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8' },
+]
 
 let axios: any
 let program: any
@@ -141,8 +148,8 @@ before(() => {
 
   originalDownloadChunks = SpaceDownloader.prototype.downloadChunks
   originalSpawnFfmpeg = SpaceDownloader.prototype.spawnFfmpeg
-  SpaceDownloader.prototype.downloadChunks = async () => {}
-  SpaceDownloader.prototype.spawnFfmpeg = async () => {}
+  SpaceDownloader.prototype.downloadChunks = async () => { }
+  SpaceDownloader.prototype.spawnFfmpeg = async () => { }
 })
 
 after(() => {
@@ -159,51 +166,25 @@ after(() => {
 })
 
 describe('SpaceWatcher', () => {
-  it('downloads an old archived Space by id', { timeout: 15000 }, async () => {
-    loadFixture('1YqJDoNBbOaGV')
-    const result = await watch('1YqJDoNBbOaGV')
+  spaces.forEach(({ id, expected, url }) => {
+    describe(`${id}${url ? ' with a master playlist url' : ''}`, () => {
+      it(`should ${expected}`, { timeout: 15000 }, async () => {
+        loadFixture(id)
+        const result = await watch(id, url)
 
-    expect(result.event).equal('complete')
-    expect(result.requests.some((url) => url.includes('/AudioSpaceById'))).true()
-    expect(result.requests.some((url) => url.includes('/AudiospaceByRestId'))).true()
+        expect(result.event).equal(expected)
+        expect(result.requests.some((request) => request.includes('/AudioSpaceById'))).true()
+        expect(result.requests.some((request) => request.includes('/AudiospaceByRestId'))).true()
 
-    const statusUrl = result.requests.find((url) => url.includes('/live_video_stream/status/'))
-    expect(statusUrl).exist()
-
-    const statusFixture = fixtures.http.find((item) => item.url === statusUrl)
-    const location = statusFixture.body.source.location
-    const playlistRequests = result.requests.filter((url) => url.includes('.m3u8'))
-    expect(playlistRequests).equal([location])
-
-    expect(result.requests.some((url) => url.includes('accessChatPublic'))).true()
-  })
-
-  it('fails by id when the Space archive is not available', { timeout: 15000 }, async () => {
-    loadFixture('1nGnRBPAkzwGO')
-    const result = await watch('1nGnRBPAkzwGO')
-
-    expect(result.event).equal('failed')
-    expect(result.requests.some((url) => url.includes('/AudioSpaceById'))).true()
-    expect(result.requests.some((url) => url.includes('/AudiospaceByRestId'))).true()
-    expect(result.requests.some((url) => url.includes('/live_video_stream/'))).false()
-    expect(result.requests.some((url) => url.includes('.m3u8'))).false()
-    expect(result.requests.some((url) => url.includes('accessChatPublic'))).false()
-  })
-
-  it('downloads with a master playlist url after the CDN host fallback', { timeout: 15000 }, async () => {
-    loadFixture('1nGnRBPAkzwGO')
-    const result = await watch('1nGnRBPAkzwGO', masterUrl)
-
-    expect(result.event).equal('complete')
-
-    const playlistRequests = result.requests.filter((url) => url.includes('.m3u8'))
-    expect(playlistRequests.length).equal(4)
-    expect(playlistRequests[0]).equal(masterUrl)
-    expect(playlistRequests[1]).contain('prod-fastly-ap-northeast-1.video.pscp.tv')
-    expect(playlistRequests[1]).contain('periscope-replays-public')
-    expect(playlistRequests[2]).contain('prod-fastly-p.video.pscp.tv')
-    expect(playlistRequests[2]).contain('master_playlist.m3u8')
-    expect(playlistRequests[3]).contain('prod-fastly-p.video.pscp.tv')
-    expect(playlistRequests[3]).contain('/audio-space/playlist_')
+        const httpRequests = result.requests.filter((request) => !request.includes('/graphql'))
+        // A url run goes straight to the downloader, so it only requests playlists.
+        const expectedHttp = expected === 'failed'
+          ? []
+          : fixtures.http
+            .filter((item) => !url || item.url.includes('.m3u8'))
+            .map((item) => item.url)
+        expect(httpRequests).equal(expectedHttp)
+      })
+    })
   })
 })

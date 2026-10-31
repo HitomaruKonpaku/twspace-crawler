@@ -21,9 +21,11 @@ export class PeriscopeUtil {
   }
 
   public static getPlaylistUrlCandidates(url: string): string[] {
+    // ponytail: prefer the fallback region host (prod-fastly-p), its replay
+    // paths returned 200 when the original region host returned 400/403.
     return [...new Set([
-      ...this.getPathCandidates(url),
       ...this.getPathCandidates(this.getFallbackHostUrl(url)),
+      ...this.getPathCandidates(url),
     ])]
   }
 

@@ -1,6 +1,6 @@
 {
   "id": "1YqJDoNBbOaGV",
-  "capturedAt": "2026-10-31T14:26:09.815Z",
+  "capturedAt": "2026-10-31T17:34:28.200Z",
   "graphql": {
     "AudioSpaceById": {
       "status": 200,
@@ -60,18 +60,18 @@
                     "favourites_count": 12458,
                     "follow_request_sent": false,
                     "followed_by": false,
-                    "followers_count": 1381208,
+                    "followers_count": 1381124,
                     "following": true,
                     "friends_count": 385,
                     "has_custom_timelines": true,
                     "is_translator": false,
-                    "listed_count": 9161,
+                    "listed_count": 9160,
                     "location": "",
                     "media_count": 1956,
                     "muting": false,
                     "name": "Ninomae Ina'nis🐙",
                     "needs_phone_verification": false,
-                    "normal_followers_count": 1381208,
+                    "normal_followers_count": 1381124,
                     "notifications": false,
                     "pinned_tweet_ids_str": [
                       "2101064234549268510"
@@ -257,7 +257,7 @@
                     "favourites_count": 12458,
                     "follow_request_sent": false,
                     "followed_by": false,
-                    "followers_count": 1381208,
+                    "followers_count": 1381124,
                     "following": true,
                     "friends_count": 385,
                     "geo_enabled": false,
@@ -273,7 +273,7 @@
                     "muting": false,
                     "name": "Ninomae Ina'nis🐙",
                     "needs_phone_verification": false,
-                    "normal_followers_count": 1381208,
+                    "normal_followers_count": 1381124,
                     "notifications": false,
                     "nsfw_user": false,
                     "pinned_tweet_ids_str": [
@@ -438,7 +438,7 @@
                         "favourites_count": 12458,
                         "follow_request_sent": false,
                         "followed_by": false,
-                        "followers_count": 1381208,
+                        "followers_count": 1381124,
                         "following": true,
                         "friends_count": 385,
                         "geo_enabled": false,
@@ -454,7 +454,7 @@
                         "muting": false,
                         "name": "Ninomae Ina'nis🐙",
                         "needs_phone_verification": false,
-                        "normal_followers_count": 1381208,
+                        "normal_followers_count": 1381124,
                         "notifications": false,
                         "nsfw_user": false,
                         "pinned_tweet_ids_str": [
@@ -504,9 +504,9 @@
           "status": "LIVE_PUBLIC",
           "streamType": "HLS"
         },
-        "sessionId": "2116537223852216320",
-        "chatToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbWJpZ3VvdXNfdXNlcl9pZCI6ImV5SlVkMmwwZEdWeVZYTmxja2xrSWpveU5Ua3hNalF6TnpnMWZRPT0iLCJicm9hZGNhc3RfaWQiOiIxWXFKRG9OQmJPYUdWIiwiZXhwIjoxNzkzNTQzMTcyLCJsb3dfbGF0ZW5jeSI6ZmFsc2UsInBhcnRpY2lwYW50X2luZGV4IjoxMTQxNDk5NjI0LCJyZWFkX29ubHkiOnRydWV9.bUt4mw4IHAPF80uU409AAzGCdbMDjb8yAT7KI9ysPJQ",
-        "lifecycleToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJicm9hZGNhc3RfaWQiOiIxWXFKRG9OQmJPYUdWIiwiY3JlYXRlZCI6MTc5MzQ1Njc3MiwiZXhwIjoxNzkzNTQzMTcyLCJpZ25vcmUiOmZhbHNlLCJpc19oaWdobGlnaHRzIjpmYWxzZSwiaXNfbGl2ZSI6ZmFsc2UsInBhcnRpY2lwYW50X2luZGV4IjoxMTQxNDk5NjI0LCJzaWQiOiI3NmYyNzY0ZGZmMDFhM2M5MDc2M2NkODgwY2MzZGI3ZiIsInRva2VuX3ZlcnNpb24iOjF9.dyQ-NSmmZ4m1Dfs0995X-V5qsLp96Ya2HJKS0l5lDfg",
+        "sessionId": "2116584610381651968",
+        "chatToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbWJpZ3VvdXNfdXNlcl9pZCI6ImV5SlVkMmwwZEdWeVZYTmxja2xrSWpveU5Ua3hNalF6TnpnMWZRPT0iLCJicm9hZGNhc3RfaWQiOiIxWXFKRG9OQmJPYUdWIiwiZXhwIjoxNzkzNTU0NDcwLCJsb3dfbGF0ZW5jeSI6ZmFsc2UsInBhcnRpY2lwYW50X2luZGV4IjoxMTQxNDk5NjI0LCJyZWFkX29ubHkiOnRydWV9.DN3pn3eE4QDUHiriLPr0h_s9hRFooYxPGtl0Bfh4jBI",
+        "lifecycleToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJicm9hZGNhc3RfaWQiOiIxWXFKRG9OQmJPYUdWIiwiY3JlYXRlZCI6MTc5MzQ2ODA3MCwiZXhwIjoxNzkzNTU0NDcwLCJpZ25vcmUiOmZhbHNlLCJpc19oaWdobGlnaHRzIjpmYWxzZSwiaXNfbGl2ZSI6ZmFsc2UsInBhcnRpY2lwYW50X2luZGV4IjoxMTQxNDk5NjI0LCJzaWQiOiI0OGI3ZGEyYjk2ZTcxNDA1NGY0OGY5MjJlZmVmOGFhZSIsInRva2VuX3ZlcnNpb24iOjF9.sBsikYR9FejjCS2rfOb89WAhgu_JwdvKi1jZulkIO_I",
         "shareUrl": "https://x.com/i/broadcasts/1YqJDoNBbOaGV",
         "liveChatReadOnly": true
       }
@@ -515,7 +515,7 @@
       "url": "https://proxsee.pscp.tv/api/v2/accessChatPublic",
       "status": 200,
       "body": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbWJpZ3VvdXNfdXNlcl9pZCI6ImV5SlVkMmwwZEdWeVZYTmxja2xrSWpveU5Ua3hNalF6TnpnMWZRPT0iLCJicm9hZGNhc3RfaWQiOiIxWXFKRG9OQmJPYUdWIiwiZXhwIjoxNzkzNTQzMTcyLCJsb3dfbGF0ZW5jeSI6ZmFsc2UsInBhcnRpY2lwYW50X2luZGV4IjoxMTQxNDk5NjI0LCJyZWFkX29ubHkiOnRydWV9.bUt4mw4IHAPF80uU409AAzGCdbMDjb8yAT7KI9ysPJQ",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbWJpZ3VvdXNfdXNlcl9pZCI6ImV5SlVkMmwwZEdWeVZYTmxja2xrSWpveU5Ua3hNalF6TnpnMWZRPT0iLCJicm9hZGNhc3RfaWQiOiIxWXFKRG9OQmJPYUdWIiwiZXhwIjoxNzkzNTU0NDcwLCJsb3dfbGF0ZW5jeSI6ZmFsc2UsInBhcnRpY2lwYW50X2luZGV4IjoxMTQxNDk5NjI0LCJyZWFkX29ubHkiOnRydWV9.DN3pn3eE4QDUHiriLPr0h_s9hRFooYxPGtl0Bfh4jBI",
         "endpoint": "",
         "room_id": "1YqJDoNBbOaGV",
         "participant_index": 1141499624,
