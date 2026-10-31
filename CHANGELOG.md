@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.19.2
+
+- Check for updates at most once per hour
+- Update dependencies and fix audit findings
+- Update README & package description to `X (Twitter)`
+
 ## 1.19.1
 
 - Fall back to the `prod-fastly-p` CDN host

@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/dt/twspace-crawler?logo=npm)](https://www.npmjs.com/package/twspace-crawler)
 [![pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2FHitomaruKonpaku%2Ftwspace-crawler%2Ftwspace-crawler&query=downloadCount&label=pulls&logo=github)](https://github.com/HitomaruKonpaku/twspace-crawler/pkgs/container/twspace-crawler)
 
-> **Node.js script & command-line app to automatically monitor & download [Twitter Spaces](https://help.twitter.com/en/using-twitter/spaces).**
+> **Node.js script & command-line app to automatically monitor & download [X (Twitter) Spaces](https://help.twitter.com/en/using-twitter/spaces).**
 
 > **UPDATE 2023-07-01: SINCE TWITTER CHANGED THEIR APIS, READ [INSTALLATION](INSTALLATION.md#unofficial-api) FIRST**
 
@@ -44,7 +44,7 @@
 
 - See [example](./example/)
 - Download [docker-compose.yaml](./example/docker-compose.yaml) & [config.yaml](./example/config.yaml)
-- Sign in Twitter
+- Sign in X (Twitter)
 - `Open DevTools (F12)` > `Application` > `Storage` > `Cookies`
 - Update docker compose environment
   - `TWITTER_AUTH_TOKEN`: Value of `auth_token`
