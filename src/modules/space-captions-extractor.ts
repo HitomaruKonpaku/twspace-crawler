@@ -4,6 +4,7 @@ import winston from 'winston'
 import { SpaceCaptionsChat, SpaceCaptionsDownloaderResult, SpaceCaptionsExtractorOptions } from '../interfaces/space-captions.interface'
 import { logger as baseLogger } from '../logger'
 import { TimeUtil } from '../utils/time.util'
+import { userManager } from './user-manager'
 
 /**
  * Extracts the captions of a Space from a downloaded chat JSON file.
@@ -68,7 +69,9 @@ export class SpaceCaptionsExtractor {
 
   private buildLine(chat: SpaceCaptionsChat, startedAt?: number) {
     const time = this.getTime(chat, startedAt)
-    const username = this.users.get(chat.userId) || `[${chat.userId}]`
+    const username = this.users.get(chat.userId)
+      || userManager.getUserById(chat.userId)?.username
+      || `[${chat.userId}]`
     const prefix = time
       ? `${time} | `
       : ''
