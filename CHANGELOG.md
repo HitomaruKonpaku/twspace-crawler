@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.19.3
+
+- Use the live-chat API for Space captions; `cc download` no longer needs an
+  endpoint or token
+- Save downloaded chat as `.json` instead of `.jsonl`
+- Ignore users that stay unavailable after an authenticated retry (#105)
+- Prefer the regional `prod-fastly-p` playlist fallback host
+
 ## 1.19.2
 
 - Check for updates at most once per hour
