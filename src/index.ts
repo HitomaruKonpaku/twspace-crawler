@@ -16,6 +16,97 @@ import { PackageUtil } from './utils/package.util'
 import { TwitterUtil } from './utils/twitter.util'
 import { Util } from './utils/util'
 
+//#region load
+
+function loadEnv(envPath?: string) {
+  if (envPath) {
+    dotenv.config({ path: envPath })
+  }
+
+  const charLimit = 4
+  const envKeys = [
+    // 'TWITTER_AUTHORIZATION',
+    'TWITTER_AUTH_TOKEN',
+    'TWITTER_CSRF_TOKEN',
+  ]
+  envKeys.forEach((key) => {
+    let value = (process.env[key] || '').substring(0, charLimit)
+    if (value) {
+      value += '****'
+    }
+    logger.debug(`env.${key}=${value}`)
+  })
+}
+
+function loadConfig(args: any) {
+  configManager.load()
+  configManager.update({
+    skipDownload: args.skipDownload ?? configManager.config.skipDownload,
+    skipDownloadAudio: args.skipDownloadAudio ?? configManager.config.skipDownloadAudio,
+    skipDownloadCaption: args.skipDownloadCaption ?? configManager.config.skipDownloadCaption,
+  })
+}
+
+//#endregion
+
+//#region mode
+
+function runPlaylistUrlMode(url: string) {
+  logger.info('Starting in playlist url mode', { url })
+  new SpaceDownloader(url, Util.getDateTimeString()).download()
+    .catch((error) => {
+      logger.error(`Download failed: ${error.message}`)
+      process.exitCode = 1
+    })
+}
+
+function runSpaceIdMode(id: string) {
+  logger.info('Starting in space id mode', { id })
+  mainManager.addSpaceWatcher(id)
+}
+
+function runSpaceUrlMode(spaceUrl: string) {
+  logger.info('Starting in space url mode', { spaceUrl })
+  const spaceId = TwitterUtil.getSpaceId(spaceUrl)
+  if (!spaceId) {
+    logger.error(`Space URL invalid: ${spaceUrl}`)
+    return
+  }
+  mainManager.addSpaceWatcher(spaceId)
+}
+
+async function runUserMode(user?: string) {
+  const usernames = [...new Set(
+    (user || '')
+      .split(',')
+      .concat((configManager.config.users || []).map((v) => (typeof v === 'string' ? v : v?.username)))
+      .filter((v) => v),
+  )] as string[]
+  if (!usernames.length) {
+    return
+  }
+
+  logger.info('Starting in user mode', { userCount: usernames.length, users: usernames })
+
+  userManager.once('list_ready', () => {
+    logger.warn('user_list_ready')
+    mainManager.runUserListWatcher()
+  })
+
+  await userManager.add(usernames)
+  logger.warn('user_list_init_completed')
+
+  if (Util.getTwitterAuthorization() || Util.getTwitterAuthToken()) {
+    mainManager.runUserListWatcher()
+  } else {
+    usernames.forEach((username) => mainManager.addUserWatcher(username))
+  }
+}
+
+//#endregion
+
+//#region program
+
 program
   .version(PackageUtil.getVersion())
   .description('CLI app to monitor & download Twitter Spaces.')
@@ -38,90 +129,36 @@ program
 program.action(async (args, cmd: Command) => {
   logger.info(Array(80).fill('=').join(''))
   logger.warn(`Version: ${PackageUtil.getVersion()}`)
+
   CommandUtil.detectDebugOption(cmd)
 
   await checkVersion()
 
   logger.debug('Args', args)
 
-  if (args.env) {
-    dotenv.config({ path: args.env })
-  }
+  loadEnv(args.env)
+  loadConfig(args)
 
-  const envKeys = [
-    // 'TWITTER_AUTHORIZATION',
-    'TWITTER_AUTH_TOKEN',
-    'TWITTER_CSRF_TOKEN',
-  ]
-  envKeys.forEach((key) => {
-    const limit = 4
-    let value = (process.env[key] || '').substring(0, limit)
-    if (value) { value += '****' }
-    logger.debug(`env.${key}=${value}`)
-  })
-
-  // config
-  configManager.load()
-  configManager.update({
-    skipDownload: args.skipDownload ?? configManager.config.skipDownload,
-    skipDownloadAudio: args.skipDownloadAudio ?? configManager.config.skipDownloadAudio,
-    skipDownloadCaption: args.skipDownloadCaption ?? configManager.config.skipDownloadCaption,
-  })
-
-  const {
-    url, id, spaceUrl, user,
-  } = args
+  const { url, id, spaceUrl, user } = args
 
   if (url && !id && !spaceUrl) {
-    logger.info('Starting in playlist url mode', { url })
-    new SpaceDownloader(url, Util.getDateTimeString()).download()
-      .catch((error) => {
-        logger.error(`Download failed: ${error.message}`)
-        process.exitCode = 1
-      })
+    runPlaylistUrlMode(url)
     return
   }
 
   if (id) {
-    logger.info('Starting in space id mode', { id })
-    mainManager.addSpaceWatcher(id)
+    runSpaceIdMode(id)
     return
   }
 
   if (spaceUrl) {
-    logger.info('Starting in space url mode', { spaceUrl })
-    const spaceId = TwitterUtil.getSpaceId(spaceUrl)
-    if (!spaceId) {
-      logger.error(`Space URL invalid: ${spaceUrl}`)
-      return
-    }
-    mainManager.addSpaceWatcher(spaceId)
+    runSpaceUrlMode(spaceUrl)
     return
   }
 
-  const usernames = [...new Set(
-    (user || '')
-      .split(',')
-      .concat((configManager.config.users || []).map((v) => (typeof v === 'string' ? v : v?.username)))
-      .filter((v) => v),
-  )] as string[]
-  if (usernames.length) {
-    logger.info('Starting in user mode', { userCount: usernames.length, users: usernames })
-
-    userManager.once('list_ready', () => {
-      logger.warn('user_list_ready')
-      mainManager.runUserListWatcher()
-    })
-
-    await userManager.add(usernames)
-    logger.warn('user_list_init_completed')
-
-    if (Util.getTwitterAuthorization() || Util.getTwitterAuthToken()) {
-      mainManager.runUserListWatcher()
-    } else {
-      usernames.forEach((username) => mainManager.addUserWatcher(username))
-    }
-  }
+  await runUserMode(user)
 })
 
 program.parse()
+
+//#endregion

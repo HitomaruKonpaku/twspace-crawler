@@ -21,9 +21,9 @@ import { logger as baseLogger, spaceLogger, spaceRawLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
 import { PeriscopeUtil } from '../utils/periscope.util'
 import { SpaceUtil } from '../utils/space.util'
+import { TwitterEntityUtil } from '../utils/twitter-entity.util'
 import { TwitterUtil } from '../utils/twitter.util'
 import { Util } from '../utils/util'
-import { TwitterEntityUtil } from '../utils/twitter-entity.util'
 import { configManager } from './config-manager'
 import { Notification } from './notification'
 import { SpaceCaptionsDownloader } from './space-captions-downloader'
@@ -178,12 +178,7 @@ export class SpaceWatcher extends EventEmitter {
   // #region space
 
   private async initData() {
-    if (!this.audioSpace?.metadata) {
-      await this.getSpaceData()
-      if (this.space?.state === SpaceState.LIVE) {
-        this.showNotification()
-      }
-    }
+    await this.initSpaceData()
 
     // Download space by url with available metadata
     this.dynamicPlaylistUrl = program.getOptionValue('url')
@@ -192,49 +187,17 @@ export class SpaceWatcher extends EventEmitter {
       return
     }
 
-    if (this.space?.state === SpaceState.CANCELED) {
-      this.logger.warn('Space canceled')
+    if (!this.canWatchSpace()) {
       return
     }
 
-    if (this.space?.state === SpaceState.ENDED && !this.space?.isAvailableForReplay) {
-      this.logger.warn('Space archive not available')
-      this.emit('failed')
+    await this.getLiveStreamStatus()
+
+    if (!this.loadPlaylist()) {
       return
     }
 
-    if (!this.liveStreamStatus) {
-      this.logger.debug('--> getLiveVideoStreamStatus')
-      const { data } = await api.liveVideoStream.status(this.audioSpace.metadata.media_key)
-      this.liveStreamStatus = data
-      this.logger.debug('<-- getLiveVideoStreamStatus')
-      this.logger.debug('liveStreamStatus', this.liveStreamStatus)
-    }
-
-    if (!this.dynamicPlaylistUrl) {
-      this.dynamicPlaylistUrl = this.liveStreamStatus.source?.location
-      if (!this.dynamicPlaylistUrl) {
-        this.logger.error('Playlist url not found')
-        this.emit('failed')
-        return
-      }
-      this.logger.info(`Master playlist url: ${PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)}`)
-      this.buildSpace()
-      this.logSpaceInfo()
-
-      if (this.space?.state === SpaceState.LIVE) {
-        this.sendWebhooks()
-      }
-    }
-
-    if (!this.accessChatData) {
-      this.logger.debug('--> getAccessChat')
-      this.accessChatData = await PeriscopeApi.getAccessChat(this.liveStreamStatus.chatToken)
-      this.logger.debug('<-- getAccessChat')
-      this.logger.debug('accessChat data', this.accessChatData)
-      this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
-      this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
-    }
+    await this.getAccessChatData()
 
     if (this.space?.state === SpaceState.ENDED) {
       this.processDownload()
@@ -250,13 +213,92 @@ export class SpaceWatcher extends EventEmitter {
     this.checkDynamicPlaylist()
   }
 
-  private buildSpace() {
-    const space = TwitterEntityUtil.buildSpaceByAudioSpace(this.audioSpace)
-    this.space = space
-    if (this.dynamicPlaylistUrl) {
-      this.space.playlistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
+  private async initSpaceData() {
+    if (this.audioSpace?.metadata) {
+      return
+    }
+
+    await this.getSpaceData()
+
+    const canShowNotification = this.space?.state === SpaceState.LIVE
+    if (canShowNotification) {
+      this.showNotification()
     }
   }
+
+  private canWatchSpace(): boolean {
+    if (this.space?.state === SpaceState.CANCELED) {
+      this.logger.warn('Space canceled')
+      return false
+    }
+
+    if (this.space?.state === SpaceState.ENDED && !this.space?.isAvailableForReplay) {
+      this.logger.warn('Space archive not available')
+      this.emit('failed')
+      return false
+    }
+
+    return true
+  }
+
+  private async getLiveStreamStatus() {
+    if (this.liveStreamStatus) {
+      return
+    }
+
+    this.logger.debug('--> getLiveStreamStatus')
+    const { data } = await api.liveVideoStream.status(this.audioSpace.metadata.media_key)
+    this.liveStreamStatus = data
+    this.logger.debug('<-- getLiveStreamStatus')
+    this.logger.debug('liveStreamStatus', this.liveStreamStatus)
+  }
+
+  private loadPlaylist(): boolean {
+    if (this.dynamicPlaylistUrl) {
+      return true
+    }
+
+    this.dynamicPlaylistUrl = this.liveStreamStatus.source?.location
+    if (!this.dynamicPlaylistUrl) {
+      this.logger.error('Playlist url not found')
+      this.emit('failed')
+      return false
+    }
+
+    const masterPlaylistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
+    this.logger.info(`Master playlist url: ${masterPlaylistUrl}`)
+    this.buildSpace()
+    this.logSpaceInfo()
+
+    const canSendWebhooks = this.space?.state === SpaceState.LIVE
+    if (canSendWebhooks) {
+      this.sendWebhooks()
+    }
+
+    return true
+  }
+
+  private async getAccessChatData() {
+    if (this.accessChatData) {
+      return
+    }
+
+    this.logger.debug('--> getAccessChat')
+    this.accessChatData = await PeriscopeApi.getAccessChat(this.liveStreamStatus.chatToken)
+    this.logger.debug('<-- getAccessChat')
+    this.logger.debug('accessChat data', this.accessChatData)
+    this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
+    this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
+  }
+
+  private buildSpace() {
+    const space = TwitterEntityUtil.buildSpaceByAudioSpace(this.audioSpace)
+    if (this.dynamicPlaylistUrl) {
+      space.playlistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
+    }
+    this.space = space
+  }
+
   // #endregion
 
   // #region audio space
@@ -333,7 +375,8 @@ export class SpaceWatcher extends EventEmitter {
         return
       }
 
-      if (this.space?.state === SpaceState.ENDED && prevState === SpaceState.LIVE) {
+      const canSendWebhooks = this.space?.state === SpaceState.ENDED && prevState === SpaceState.LIVE
+      if (canSendWebhooks) {
         this.sendWebhooks()
       }
     } catch (error) {

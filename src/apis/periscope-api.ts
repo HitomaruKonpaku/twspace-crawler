@@ -20,8 +20,9 @@ export class PeriscopeApi {
 
   public static async getMasterPlaylist(originUrl: string) {
     const masterUrl = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
+    const candidateUrls = PeriscopeUtil.getPlaylistUrlCandidates(masterUrl)
     const { result } = await this.tryCandidates(
-      PeriscopeUtil.getPlaylistUrlCandidates(masterUrl),
+      candidateUrls,
       async (url) => {
         const { data } = await axios.get<string>(url)
         return data
@@ -37,8 +38,9 @@ export class PeriscopeApi {
     }
 
     const masterUrl = PeriscopeUtil.getMasterPlaylistUrl(originUrl)
+    const candidateUrls = PeriscopeUtil.getPlaylistUrlCandidates(masterUrl)
     const { result } = await this.tryCandidates(
-      PeriscopeUtil.getPlaylistUrlCandidates(masterUrl),
+      candidateUrls,
       async (url) => {
         const { data: masterData } = await axios.get<string>(url)
         const finalUrl = url.replace('master_playlist', PeriscopeUtil.getFinalPlaylistName(masterData))

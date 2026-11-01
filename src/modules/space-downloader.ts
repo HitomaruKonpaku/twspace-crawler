@@ -59,11 +59,11 @@ export class SpaceDownloader {
       subDir,
       metadata,
     })
-    this.initPaylistFile()
+    this.initPlaylistFile()
     this.initResultFile()
   }
 
-  private initPaylistFile() {
+  private initPlaylistFile() {
     this.playlistFile = path.join(Util.getMediaDir(this.subDir), `${this.filename}.m3u8`)
     this.logger.verbose(`Playlist path: "${this.playlistFile}"`)
   }
@@ -93,6 +93,7 @@ export class SpaceDownloader {
       const response = await axios.get<string>(this.playlistUrl)
       data = response.data
     }
+
     const manifest = M3u8Util.parse(data)
     if (manifest.playlists?.length) {
       const item = manifest.playlists.sort((a, b) => b.attributes.RESOLUTION.height - a.attributes.RESOLUTION.height || b.attributes.RESOLUTION.width - a.attributes.RESOLUTION.width)[0]
