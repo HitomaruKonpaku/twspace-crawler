@@ -7,6 +7,7 @@ import { ccCommand } from './commands/cc.command'
 import { testCommand } from './commands/test.command'
 import { logger } from './logger'
 import { configManager } from './modules/config-manager'
+import { checkFfmpeg } from './modules/ffmpeg-checker'
 import { mainManager } from './modules/main-manager'
 import { SpaceDownloader } from './modules/space-downloader'
 import { userManager } from './modules/user-manager'
@@ -139,6 +140,10 @@ program.action(async (args, cmd: Command) => {
 
   loadEnv(args.env)
   loadConfig(args)
+
+  if (!(configManager.skipDownload || configManager.skipDownloadAudio)) {
+    await checkFfmpeg()
+  }
 
   const { url, id, spaceUrl, user } = args
 
