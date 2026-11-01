@@ -17,9 +17,9 @@ export class TwitterGraphqlApi extends TwitterBaseApi {
     return res
   }
 
-  public async UserByScreenName(username: string) {
+  public async UserByScreenName(username: string, useAuth = false) {
     const url = this.toUrl(twitterGraphqlEndpoints.UserByScreenName)
-    const headers = await this.getGuestV2Headers()
+    const headers = useAuth ? this.getAuthHeaders() : await this.getGuestV2Headers()
     const params = this.cloneParams(
       twitterGraphqlParams.UserByScreenName,
       { variables: { screen_name: username } },

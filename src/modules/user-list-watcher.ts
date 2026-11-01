@@ -6,7 +6,8 @@ import { TWITTER_API_LIST_SIZE, TWITTER_PUBLIC_AUTHORIZATION } from '../constant
 import { SpaceState } from '../enums/twitter.enum'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/util'
-import { User, userManager } from './user-manager'
+import { User } from '../interfaces/user.interface'
+import { userManager } from './user-manager'
 
 export class UserListWatcher extends EventEmitter {
   private logger: winston.Logger

@@ -1,4 +1,5 @@
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
+import { User } from './user.interface'
 
 export interface SpaceCaptionsChat {
   ts: string
@@ -10,11 +11,6 @@ export interface SpaceCaptionsChat {
   controlType?: number
   targetUserId?: string
   targetSessionUuid?: string
-}
-
-export interface SpaceCaptionsUser {
-  id: string
-  username: string
 }
 
 export interface SpaceCaptionsDownloaderOptions {
@@ -29,7 +25,7 @@ export interface SpaceCaptionsDownloaderResult {
   chats: SpaceCaptionsChat[]
   metadata: {
     audioSpace?: AudioSpace
-    extraUsers?: SpaceCaptionsUser[]
+    extraUsers?: User[]
   }
 }
 

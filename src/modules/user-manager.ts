@@ -1,18 +1,14 @@
 import Bottleneck from 'bottleneck'
 import { EventEmitter } from 'stream'
 import winston from 'winston'
-import { twitterApiLimiter } from '../limiter'
 import { api } from '../api/twitter.api'
 import { TwitterApi } from '../apis/twitter-api'
 import { TWITTER_API_LIST_SIZE, TWITTER_USER_FETCH_INTERVAL } from '../constants/twitter.constant'
+import { User } from '../interfaces/user.interface'
+import { twitterApiLimiter } from '../limiter'
 import { logger as baseLogger } from '../logger'
-import { Util } from '../utils/util'
 import { ArrayUtil } from '../utils/array.util'
-
-export interface User {
-  id: string
-  username: string
-}
+import { Util } from '../utils/util'
 
 class UserManager extends EventEmitter {
   private logger: winston.Logger
@@ -155,11 +151,18 @@ class UserManager extends EventEmitter {
 
   private async getUserByScreenName(username: string): Promise<User> {
     try {
-      const { data } = await api.graphql.UserByScreenName(username)
-      this.logger.debug('getUserByScreenName#data', { username, data })
+      let result = await this.fetchUserResult(username)
+      const unavailable = result?.__typename === 'UserUnavailable'
 
-      const result = data?.data?.user?.result
-      if (!result || !result.legacy) {
+      if (unavailable) {
+        this.logger.debug('getUserByScreenName#retryWithAuth', { username, reason: result.reason, msg: result.message })
+        result = await this.fetchUserResult(username, true)
+      }
+
+      if (!result?.legacy) {
+        if (unavailable) {
+          this.removeUser(username)
+        }
         return null
       }
 
@@ -173,6 +176,17 @@ class UserManager extends EventEmitter {
     }
 
     return null
+  }
+
+  private async fetchUserResult(username: string, useAuth = false) {
+    const { data } = await api.graphql.UserByScreenName(username, useAuth)
+    this.logger.debug('getUserByScreenName#data', { username, useAuth, data })
+    return data?.data?.user?.result
+  }
+
+  private removeUser(username: string) {
+    this.logger.warn(`removeUser: ${username}`)
+    this.users = this.users.filter((v) => v.username.toLowerCase() !== username.toLowerCase())
   }
 
   private emitListReady() {
