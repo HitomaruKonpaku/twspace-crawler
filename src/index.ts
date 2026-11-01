@@ -13,6 +13,7 @@ import { userManager } from './modules/user-manager'
 import { checkVersion } from './modules/version-checker'
 import { CommandUtil } from './utils/command.util'
 import { PackageUtil } from './utils/package.util'
+import { TimeUtil } from './utils/time.util'
 import { TwitterUtil } from './utils/twitter.util'
 import { Util } from './utils/util'
 
@@ -53,7 +54,7 @@ function loadConfig(args: any) {
 
 function runPlaylistUrlMode(url: string) {
   logger.info('Starting in playlist url mode', { url })
-  new SpaceDownloader(url, Util.getDateTimeString()).download()
+  new SpaceDownloader(url, TimeUtil.getDateTimeString()).download()
     .catch((error) => {
       logger.error(`Download failed: ${error.message}`)
       process.exitCode = 1

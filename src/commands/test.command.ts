@@ -2,7 +2,7 @@ import { Command } from 'commander'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { SpaceDownloader } from '../modules/space-downloader'
-import { Util } from '../utils/util'
+import { TimeUtil } from '../utils/time.util'
 
 const command = new Command('test')
   .description('Test!')
@@ -29,7 +29,7 @@ command
 
     filteredSpaces.forEach((space) => {
       const user = users.find((v) => v.username === space.username)
-      const time = Util.getDateTimeString(space.started_at)
+      const time = TimeUtil.getDateTimeString(space.started_at)
       const name = `[${space.username}][${time}] ${space.title || 'NA'} (${space.id})`
       const metadata = {
         title: space.title,

@@ -161,25 +161,19 @@ Use to manually process audio/captions
 - cc
 
 ```
-  download|d <SPACE_ID> <ENDPOINT> <TOKEN>  Download Space captions, with
-                                            - ENDPOINT: Chat endpoint
-                                            - TOKEN: Chat access token
+  download|d <SPACE_ID>                     Download Space captions
 
-  extract|e <FILE> [STARTED_AT]             Extract Space captions
+  extract|e <FILE>                          Extract Space captions
 ```
 
 ### Example
 
 ```
-twspace-crawler cc d 1yoJMWneoZwKQ https://prod-chatman-ancillary-ap-northeast-1.pscp.tv 2Ozpcu2xxqb5wxMdkyodUCygOrbYMLv8rq...
+twspace-crawler cc d 1yoJMWneoZwKQ
 ```
 
 ```
-twspace-crawler cc e /download/sample_cc.jsonl
-```
-
-```
-twspace-crawler cc e /download/sample_cc.jsonl 1633612289669
+twspace-crawler cc e sample_cc.json
 ```
 
 ## Webhooks

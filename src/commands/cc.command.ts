@@ -7,21 +7,21 @@ const command = new Command('cc')
   .description('Process captions')
 
 command
-  .command('download <SPACE_ID> <ENDPOINT> <TOKEN>')
+  .command('download <SPACE_ID>')
   .alias('d')
   .description('Download Space captions')
-  .action((spaceId, endpoint, token, opts, cmd: Command) => {
+  .action((spaceId, opts, cmd: Command) => {
     CommandUtil.detectDebugOption(cmd.parent.parent)
-    new SpaceCaptionsDownloader(spaceId, endpoint, token).download()
+    new SpaceCaptionsDownloader({ spaceId }).download()
   })
 
 command
-  .command('extract <FILE> [STARTED_AT]')
+  .command('extract <FILE>')
   .alias('e')
   .description('Extract Space captions')
-  .action((file, startedAt, opts, cmd: Command) => {
+  .action((file, opts, cmd: Command) => {
     CommandUtil.detectDebugOption(cmd.parent.parent)
-    new SpaceCaptionsExtractor(file, null, startedAt).extract()
+    new SpaceCaptionsExtractor({ inpFile: file }).extract()
   })
 
 export { command as ccCommand }

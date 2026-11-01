@@ -181,6 +181,7 @@ describe('SpaceWatcher', () => {
         const expectedHttp = expected === 'failed'
           ? []
           : fixtures.http
+            .filter((item) => !item.url.includes('accessChatPublic'))
             .filter((item) => !url || item.url.includes('.m3u8'))
             .map((item) => item.url)
         expect(httpRequests).equal(expectedHttp)

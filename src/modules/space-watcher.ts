@@ -15,12 +15,12 @@ import {
   APP_SPACE_ERROR_RETRY_INTERVAL,
 } from '../constants/app.constant'
 import { SpaceState } from '../enums/twitter.enum'
-import { AccessChat } from '../interfaces/periscope.interface'
 import { LiveVideoStreamStatus } from '../interfaces/twitter.interface'
 import { logger as baseLogger, spaceLogger, spaceRawLogger } from '../logger'
 import { TwitterSpace } from '../model/twitter-space'
 import { PeriscopeUtil } from '../utils/periscope.util'
 import { SpaceUtil } from '../utils/space.util'
+import { TimeUtil } from '../utils/time.util'
 import { TwitterEntityUtil } from '../utils/twitter-entity.util'
 import { TwitterUtil } from '../utils/twitter.util'
 import { Util } from '../utils/util'
@@ -37,7 +37,6 @@ export class SpaceWatcher extends EventEmitter {
 
   private audioSpace: AudioSpace
   private liveStreamStatus: LiveVideoStreamStatus
-  private accessChatData: AccessChat
   private dynamicPlaylistUrl: string
 
   private space: TwitterSpace
@@ -63,7 +62,7 @@ export class SpaceWatcher extends EventEmitter {
   }
 
   private get filename(): string {
-    const time = Util.getDateTimeString(this.space?.startedAt || this.space?.createdAt)
+    const time = TimeUtil.getDateTimeString(this.space?.startedAt || this.space?.createdAt)
     const name = `[${this.space?.creator?.username}][${time}] ${Util.getCleanFileName(this.space?.title) || 'NA'} (${this.spaceId})`
     return name
   }
@@ -105,7 +104,7 @@ export class SpaceWatcher extends EventEmitter {
       return
     }
     const ms = Number(this.space.endedAt) - this.space.startedAt
-    const duration = Util.getDisplayTime(ms)
+    const duration = TimeUtil.getDisplayTime(ms)
     this.logger.info(`Expected audio duration: ${duration}`)
   }
 
@@ -188,6 +187,7 @@ export class SpaceWatcher extends EventEmitter {
     }
 
     if (!this.canWatchSpace()) {
+      await this.downloadCaptions()
       return
     }
 
@@ -196,8 +196,6 @@ export class SpaceWatcher extends EventEmitter {
     if (!this.loadPlaylist()) {
       return
     }
-
-    await this.getAccessChatData()
 
     if (this.space?.state === SpaceState.ENDED) {
       this.processDownload()
@@ -276,19 +274,6 @@ export class SpaceWatcher extends EventEmitter {
     }
 
     return true
-  }
-
-  private async getAccessChatData() {
-    if (this.accessChatData) {
-      return
-    }
-
-    this.logger.debug('--> getAccessChat')
-    this.accessChatData = await PeriscopeApi.getAccessChat(this.liveStreamStatus.chatToken)
-    this.logger.debug('<-- getAccessChat')
-    this.logger.debug('accessChat data', this.accessChatData)
-    this.logger.info(`Chat endpoint: ${this.accessChatData.endpoint}`)
-    this.logger.info(`Chat access token: ${this.accessChatData.access_token}`)
   }
 
   private buildSpace() {
@@ -427,22 +412,20 @@ export class SpaceWatcher extends EventEmitter {
       return
     }
 
-    if (!this.accessChatData) {
-      return
-    }
-
     try {
       const username = this.space?.creator?.username
-      const tmpFile = path.join(Util.getMediaDir(username), `${this.filename} CC.jsonl`)
+      const inpFile = path.join(Util.getMediaDir(username), `${this.filename} CC.json`)
       const outFile = path.join(Util.getMediaDir(username), `${this.filename} CC.txt`)
       Util.createMediaDir(username)
-      await new SpaceCaptionsDownloader(
-        this.spaceId,
-        this.accessChatData.endpoint,
-        this.accessChatData.access_token,
-        tmpFile,
-      ).download()
-      await new SpaceCaptionsExtractor(tmpFile, outFile, this.space?.startedAt).extract()
+      await new SpaceCaptionsDownloader({
+        spaceId: this.spaceId,
+        audioSpace: this.audioSpace,
+        file: inpFile,
+      }).download()
+      new SpaceCaptionsExtractor({
+        inpFile,
+        outFile,
+      }).extract()
     } catch (error) {
       this.logger.error(`downloadCaptions: ${error.message}`)
     }

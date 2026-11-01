@@ -137,12 +137,12 @@ export class SpaceDownloader {
     }
 
     const chunkBaseUrl = PeriscopeUtil.getChunkPrefix(this.playlistUrl)
-    await Promise.all(chunks.map((v) => this.chunkLimiter.schedule(() => this.downloadChunk(chunkBaseUrl, v))))
+    await Promise.all(chunks.map((v, i) => this.chunkLimiter.schedule(() => this.downloadChunk(chunkBaseUrl, v, i + 1, chunks.length))))
   }
 
-  private async downloadChunk(chunkBaseUrl: string, chunkName: string) {
+  private async downloadChunk(chunkBaseUrl: string, chunkName: string, chunkIndex: number, total: number) {
     const url = chunkBaseUrl + chunkName
-    this.logger.debug(`downloadChunk: ${chunkName}`)
+    this.logger.debug(`downloadChunk: ${chunkName} (${chunkIndex}/${total})`)
 
     for (let retries = 0; retries <= this.MAX_RETRIES; retries++) {
       try {
