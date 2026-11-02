@@ -1,3 +1,4 @@
+import path from 'path'
 import { Util } from '../../src/utils/util'
 
 describe('Util', () => {
@@ -16,6 +17,17 @@ describe('Util', () => {
       expect(Util.isNewerVersion('2.0.0', '1.19.1')).toBe(true)
       expect(Util.isNewerVersion('1.19.2', '1.19.1')).toBe(true)
       expect(Util.isNewerVersion('1.19.1', '1.19.2')).toBe(false)
+    })
+  })
+
+  describe('getMediaDir', () => {
+    it('returns a sub directory under download', () => {
+      expect(Util.getMediaDir('nakiriayame')).toBe(path.resolve(process.cwd(), 'download', 'nakiriayame'))
+    })
+
+    it('uses an absolute sub directory as is', () => {
+      const dir = path.resolve('custom', 'nakiriayame')
+      expect(Util.getMediaDir(dir)).toBe(dir)
     })
   })
 })

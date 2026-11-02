@@ -16,6 +16,7 @@ import { CommandUtil } from './utils/command.util'
 import { PackageUtil } from './utils/package.util'
 import { TimeUtil } from './utils/time.util'
 import { TwitterUtil } from './utils/twitter.util'
+import { UserUtil } from './utils/user.util'
 import { Util } from './utils/util'
 
 //#region load
@@ -78,30 +79,38 @@ function runSpaceUrlMode(spaceUrl: string) {
 }
 
 async function runUserMode(user?: string) {
-  const usernames = [...new Set(
-    (user || '')
-      .split(',')
-      .concat((configManager.config.users || []).map((v) => (typeof v === 'string' ? v : v?.username)))
-      .filter((v) => v),
-  )] as string[]
-  if (!usernames.length) {
+  const users = UserUtil.normalize([
+    ...(user || '').split(','),
+    ...(configManager.config.users || []),
+  ])
+  if (!users.length) {
     return
   }
 
-  logger.info('Starting in user mode', { userCount: usernames.length, users: usernames })
+  logger.info('Starting in user mode', {
+    count: users.length,
+    usernames: users.filter((v) => v.username).map((v) => v.username),
+    userIds: users.filter((v) => !v.username).map((v) => v.id),
+  })
 
   userManager.once('list_ready', () => {
     logger.warn('user_list_ready')
     mainManager.runUserListWatcher()
   })
 
-  await userManager.add(usernames)
+  await userManager.add(users)
   logger.warn('user_list_init_completed')
 
   if (Util.getTwitterAuthorization() || Util.getTwitterAuthToken()) {
     mainManager.runUserListWatcher()
   } else {
-    usernames.forEach((username) => mainManager.addUserWatcher(username))
+    users.forEach((v) => {
+      if (!v.username) {
+        logger.warn(`Cannot watch user without username: [:${v.id}]`)
+        return
+      }
+      mainManager.addUserWatcher(v.username)
+    })
   }
 }
 

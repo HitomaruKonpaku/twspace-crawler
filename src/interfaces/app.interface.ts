@@ -1,3 +1,5 @@
+import { UserConfig } from './user.interface'
+
 export interface WebhookConfig {
   active?: boolean
 
@@ -33,10 +35,9 @@ export interface Config {
     }
   }
 
-  users?: (string | {
-    username: string
-    [key: string]: any
-  })[]
+  downloadDir?: string
+
+  users?: (string | number | UserConfig)[]
 
   webhooks?: {
     discord?: WebhookConfig[]

@@ -1,16 +1,19 @@
-node_modules/
-dist/
-logs/
-download/
-.vscode/
-.idea/
+# directories
 .cache/
+.idea/
 .media/
-.tmp/
 .tmp*/
+.vscode/
+dist/
+docs/
+download/
+logs/
+node_modules/
 
+# files
 .env
 config.json
 config.yaml
 
+# exceptions
 !example/**/config.yaml

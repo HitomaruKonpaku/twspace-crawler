@@ -14,8 +14,19 @@ interval: 30000
 #     extension: mp4
 #     args: []
 
+# Download folder for all users
+# downloadDir: 'D:\spaces'
+
 # List of user to check for live Spaces
+# A string or number is a username. Add a `:` prefix to use a user id.
+# An object can have `id`, `username`, and `dir`.
+# `dir` replaces `downloadDir` for that user.
 users:
+  # - nakiriayame
+  # - :1024532356554608640
+  # - { id: '1024532356554608640', username: nakiriayame, dir: 'D:\spaces' }
+  # - { username: nakiriayame, dir: '/mnt/spaces' }
+
   # hololive staff
   - achan_UGA
   # hololive jp

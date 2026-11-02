@@ -54,7 +54,7 @@ export class Util {
   }
 
   public static getMediaDir(subDir = ''): string {
-    return path.join(process.cwd(), APP_DOWNLOAD_DIR, subDir || '')
+    return path.resolve(process.cwd(), APP_DOWNLOAD_DIR, subDir || '')
   }
 
   public static createMediaDir(subDir = ''): string {

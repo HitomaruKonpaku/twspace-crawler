@@ -1,12 +1,12 @@
 import EventEmitter from 'events'
 import winston from 'winston'
-import { twitterSpaceApiLimiter } from '../limiter'
 import { TwitterApi } from '../apis/twitter-api'
 import { TWITTER_API_LIST_SIZE, TWITTER_PUBLIC_AUTHORIZATION } from '../constants/twitter.constant'
 import { SpaceState } from '../enums/twitter.enum'
+import { User } from '../interfaces/user.interface'
+import { twitterSpaceApiLimiter } from '../limiter'
 import { logger as baseLogger } from '../logger'
 import { Util } from '../utils/util'
-import { User } from '../interfaces/user.interface'
 import { userManager } from './user-manager'
 
 export class UserListWatcher extends EventEmitter {
@@ -33,9 +33,8 @@ export class UserListWatcher extends EventEmitter {
   }
 
   private async getSpaces(users: User[]) {
-    const usernames = users.map((v) => v.username)
     const userIds = users.map((v) => v.id)
-    this.logger.debug('--> getSpaces', { userCount: usernames.length, usernames })
+    this.logger.debug('--> getSpaces', { userCount: userIds.length })
     try {
       const liveSpaceIds: string[] = []
       if (Util.getTwitterAuthorization()) {

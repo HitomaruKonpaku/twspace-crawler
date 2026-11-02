@@ -1,14 +1,19 @@
 import Bottleneck from 'bottleneck'
+import path from 'path'
 import { EventEmitter } from 'stream'
 import winston from 'winston'
+import { AudioSpaceParticipants } from '../api/interface/twitter-graphql.interface'
 import { api } from '../api/twitter.api'
 import { TwitterApi } from '../apis/twitter-api'
 import { TWITTER_API_LIST_SIZE, TWITTER_USER_FETCH_INTERVAL } from '../constants/twitter.constant'
-import { User } from '../interfaces/user.interface'
+import { User, UserInput } from '../interfaces/user.interface'
 import { twitterApiLimiter } from '../limiter'
 import { logger as baseLogger } from '../logger'
 import { ArrayUtil } from '../utils/array.util'
+import { TwitterEntityUtil } from '../utils/twitter-entity.util'
+import { UserUtil } from '../utils/user.util'
 import { Util } from '../utils/util'
+import { configManager } from './config-manager'
 
 class UserManager extends EventEmitter {
   private logger: winston.Logger
@@ -28,7 +33,19 @@ class UserManager extends EventEmitter {
   }
 
   public getUserByUsername(username: string) {
-    return this.users.find((v) => v.username.toLowerCase() === username.toLowerCase())
+    if (!username) {
+      return undefined
+    }
+    return this.users.find((v) => v.username?.toLowerCase() === username.toLowerCase())
+  }
+
+  public getDownloadDir(creatorId: string, username: string): string {
+    const user = (creatorId && this.getUserById(creatorId)) || this.getUserByUsername(username)
+    const dir = user?.dir || configManager.config.downloadDir
+    if (!dir || !username) {
+      return undefined
+    }
+    return path.join(path.resolve(dir), username)
   }
 
   public getUsersWithId() {
@@ -39,14 +56,27 @@ class UserManager extends EventEmitter {
     return this.users.filter((v) => !v.id)
   }
 
-  public async add(usernames: string[]) {
-    this.logger.debug('add', { usernames })
-    usernames.forEach((username) => {
-      if (this.getUserByUsername(username)) {
+  public updateUserIds(participants: AudioSpaceParticipants) {
+    const users = [
+      ...(participants?.admins || []),
+      ...(participants?.speakers || []),
+      ...(participants?.listeners || []),
+    ]
+      .map((v) => TwitterEntityUtil.buildUserByParticipant(v))
+      .filter((v) => v)
+    users.forEach((user) => {
+      const tmpUser = this.getUserByUsername(user.username)
+      if (!tmpUser || tmpUser.id) {
         return
       }
-      this.users.push({ id: null, username })
+      tmpUser.id = user.id
     })
+    this.users = UserUtil.dedupe(this.users)
+  }
+
+  public async add(inputs: UserInput[]) {
+    this.logger.debug('add', { inputs })
+    this.users = UserUtil.dedupe([...this.users, ...UserUtil.normalize(inputs)])
     await this.fetchUsers()
   }
 
@@ -71,6 +101,8 @@ class UserManager extends EventEmitter {
     } catch (error) {
       this.logger.error(`fetchUsers: ${error.message}`)
     }
+
+    this.users = UserUtil.dedupe(this.users)
 
     const users = this.getUsersWithoutId()
     if (!users.length) {

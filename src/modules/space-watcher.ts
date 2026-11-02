@@ -29,6 +29,7 @@ import { Notification } from './notification'
 import { SpaceCaptionsDownloader } from './space-captions-downloader'
 import { SpaceCaptionsExtractor } from './space-captions-extractor'
 import { SpaceDownloader } from './space-downloader'
+import { userManager } from './user-manager'
 import { Webhook } from './webhook'
 
 export class SpaceWatcher extends EventEmitter {
@@ -65,6 +66,11 @@ export class SpaceWatcher extends EventEmitter {
     const time = TimeUtil.getDateTimeString(this.space?.startedAt || this.space?.createdAt)
     const name = `[${this.space?.creator?.username}][${time}] ${Util.getCleanFileName(this.space?.title) || 'NA'} (${this.spaceId})`
     return name
+  }
+
+  private get downloadDir(): string {
+    const username = this.space?.creator?.username
+    return userManager.getDownloadDir(this.space?.creatorId, username) || username
   }
 
   public async watch(): Promise<void> {
@@ -335,6 +341,7 @@ export class SpaceWatcher extends EventEmitter {
 
     this.audioSpace = audioSpaces.find((v) => v?.metadata)
     this.buildSpace()
+    userManager.updateUserIds(this.audioSpace?.participants)
     this.logger.debug('<-- getSpaceData')
   }
 
@@ -391,7 +398,7 @@ export class SpaceWatcher extends EventEmitter {
         this.downloader = new SpaceDownloader(
           this.dynamicPlaylistUrl,
           this.filename,
-          this.space?.creator?.username,
+          this.downloadDir,
           metadata,
           this.spaceId,
         )
@@ -413,10 +420,10 @@ export class SpaceWatcher extends EventEmitter {
     }
 
     try {
-      const username = this.space?.creator?.username
-      const inpFile = path.join(Util.getMediaDir(username), `${this.filename} CC.json`)
-      const outFile = path.join(Util.getMediaDir(username), `${this.filename} CC.txt`)
-      Util.createMediaDir(username)
+      const dir = this.downloadDir
+      const inpFile = path.join(Util.getMediaDir(dir), `${this.filename} CC.json`)
+      const outFile = path.join(Util.getMediaDir(dir), `${this.filename} CC.txt`)
+      Util.createMediaDir(dir)
       await new SpaceCaptionsDownloader({
         spaceId: this.spaceId,
         audioSpace: this.audioSpace,

@@ -141,6 +141,8 @@ twspace-crawler --id 1yoJMWvbybNKQ --url https://prod-fastly-ap-northeast-1.vide
                                     indefinitely, separate by comma (,)
 ```
 
+`--user` also accepts `:USER_ID`. In the config file, a `users` item can be a username, `:USER_ID`, or an object with `id`, `username`, and `dir`. `downloadDir` sets the download folder for all users. A user `dir` replaces `downloadDir`. The default folder is `download`. See [config.example.yaml](config.example.yaml).
+
 ### Additional options
 
 ```
