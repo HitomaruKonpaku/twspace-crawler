@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.20.0
+
+- Accept a username, `:USER_ID`, or an `{ id, username, dir }` object in
+  `users` and `--user` (#25, #101)
+- Add the `downloadDir` option and a per-user `dir`; the user `dir` wins,
+  then `downloadDir`, then the default `download` folder
+- Skip the user lookup when an id is known, and merge duplicate users by
+  id or username
+- Fill missing user ids from the Space participants
+- Detect ffmpeg at startup and warn when it is missing
+- Switch tests to Jest and update dependencies
+
 ## 1.19.3
 
 - Use the live-chat API for Space captions; `cc download` no longer needs an
