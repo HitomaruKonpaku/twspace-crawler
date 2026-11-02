@@ -24,6 +24,8 @@ RUN npm run build
 # TESTER
 FROM builder AS tester
 
+ENV NODE_OPTIONS=--experimental-vm-modules
+
 RUN npm test
 
 # RELEASE

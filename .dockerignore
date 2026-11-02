@@ -3,6 +3,6 @@
 !src/
 !test/
 !nest-cli.json
-!.labrc.js
+!jest.config.js
 !package*.json
 !tsconfig*.json
