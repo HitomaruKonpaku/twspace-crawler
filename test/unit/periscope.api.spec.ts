@@ -1,11 +1,5 @@
-import { expect } from '@hapi/code'
-import * as Lab from '@hapi/lab'
 import axios from 'axios'
 import { PeriscopeApi } from '../../src/apis/periscope-api'
-
-const lab = Lab.script()
-const { describe, it, afterEach } = lab
-export { lab }
 
 const base = 'https://prod-fastly-ap-northeast-1.video.pscp.tv/Transcoding/v1/hls/TOKEN/non_transcode/ap-northeast-1'
 const liveUrl = `${base}/x-media-live-stream-ap-northeast-1/audio-space/master_playlist.m3u8`
@@ -51,8 +45,8 @@ describe('PeriscopeApi', () => {
       })
 
       const result = await PeriscopeApi.resolveFinalPlaylist(liveUrl)
-      expect(result.url).equal(genericFinalUrl)
-      expect(result.data).equal(finalData)
+      expect(result.url).toEqual(genericFinalUrl)
+      expect(result.data).toEqual(finalData)
     })
 
     it('uses the generic archive when the live final playlist returns 404', async () => {
@@ -73,8 +67,8 @@ describe('PeriscopeApi', () => {
       })
 
       const result = await PeriscopeApi.resolveFinalPlaylist(liveUrl)
-      expect(result.url).equal(genericFinalUrl)
-      expect(result.data).equal(finalData)
+      expect(result.url).toEqual(genericFinalUrl)
+      expect(result.data).toEqual(finalData)
     })
 
     it('uses the regional archive when the generic archive fails', async () => {
@@ -89,8 +83,8 @@ describe('PeriscopeApi', () => {
       })
 
       const result = await PeriscopeApi.resolveFinalPlaylist(liveUrl)
-      expect(result.url).equal(regionalFinalUrl)
-      expect(result.data).equal(finalData)
+      expect(result.url).toEqual(regionalFinalUrl)
+      expect(result.data).toEqual(finalData)
     })
 
     it('uses the prod-fastly-p host when the original host fails', async () => {
@@ -105,8 +99,8 @@ describe('PeriscopeApi', () => {
       })
 
       const result = await PeriscopeApi.resolveFinalPlaylist(liveUrl)
-      expect(result.url).equal(fallbackRegionalFinalUrl)
-      expect(result.data).equal(finalData)
+      expect(result.url).toEqual(fallbackRegionalFinalUrl)
+      expect(result.data).toEqual(finalData)
     })
   })
 
@@ -122,7 +116,7 @@ describe('PeriscopeApi', () => {
         throw notFound()
       })
 
-      expect(await PeriscopeApi.getFinalPlaylistUrl(liveUrl)).equal(genericFinalUrl)
+      expect(await PeriscopeApi.getFinalPlaylistUrl(liveUrl)).toEqual(genericFinalUrl)
     })
   })
 
@@ -138,7 +132,7 @@ describe('PeriscopeApi', () => {
         throw notFound()
       })
 
-      expect(await PeriscopeApi.getFinalPlaylist(liveUrl)).equal(finalData)
+      expect(await PeriscopeApi.getFinalPlaylist(liveUrl)).toEqual(finalData)
     })
   })
 
@@ -151,7 +145,7 @@ describe('PeriscopeApi', () => {
         throw notFound()
       })
 
-      expect(await PeriscopeApi.getMasterPlaylist(liveUrl)).equal(masterData)
+      expect(await PeriscopeApi.getMasterPlaylist(liveUrl)).toEqual(masterData)
     })
   })
 })

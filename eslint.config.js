@@ -34,4 +34,11 @@ module.exports = [
       '@typescript-eslint/no-unused-vars': 'error',
     },
   },
+  {
+    files: ['test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 ]

@@ -1,11 +1,5 @@
-import { expect } from '@hapi/code'
-import * as Lab from '@hapi/lab'
 import { api } from '../../src/api/twitter.api'
 import { userManager } from '../../src/modules/user-manager'
-
-const lab = Lab.script()
-const { describe, it, beforeEach, afterEach } = lab
-export { lab }
 
 const userResult = (username: string, id: string) => ({
   __typename: 'User',
@@ -51,9 +45,9 @@ describe('UserManager', () => {
 
       const user = await getUserByScreenName('alice')
 
-      expect(user).equal({ id: '1', username: 'alice' })
-      expect(calls).equal([{ username: 'alice', useAuth: false }])
-      expect(userManager.getUserByUsername('alice')).exist()
+      expect(user).toEqual({ id: '1', username: 'alice' })
+      expect(calls).toEqual([{ username: 'alice', useAuth: false }])
+      expect(userManager.getUserByUsername('alice')).toBeDefined()
     })
 
     it('retries with auth when the user is unavailable and returns the user', async () => {
@@ -62,12 +56,12 @@ describe('UserManager', () => {
 
       const user = await getUserByScreenName('alice')
 
-      expect(user).equal({ id: '1', username: 'alice' })
-      expect(calls).equal([
+      expect(user).toEqual({ id: '1', username: 'alice' })
+      expect(calls).toEqual([
         { username: 'alice', useAuth: false },
         { username: 'alice', useAuth: true },
       ])
-      expect(userManager.getUserByUsername('alice')).exist()
+      expect(userManager.getUserByUsername('alice')).toBeDefined()
     })
 
     it('removes the user when the auth retry is still unavailable', async () => {
@@ -76,12 +70,12 @@ describe('UserManager', () => {
 
       const user = await getUserByScreenName('alice')
 
-      expect(user).null()
-      expect(calls).equal([
+      expect(user).toBeNull()
+      expect(calls).toEqual([
         { username: 'alice', useAuth: false },
         { username: 'alice', useAuth: true },
       ])
-      expect(userManager.getUserByUsername('alice')).not.exist()
+      expect(userManager.getUserByUsername('alice')).toBeUndefined()
     })
 
     it('removes the user when the public call is unavailable and the retry has no user', async () => {
@@ -90,8 +84,8 @@ describe('UserManager', () => {
 
       const user = await getUserByScreenName('alice')
 
-      expect(user).null()
-      expect(userManager.getUserByUsername('alice')).not.exist()
+      expect(user).toBeNull()
+      expect(userManager.getUserByUsername('alice')).toBeUndefined()
     })
 
     it('keeps the user when the public call has no user and is not unavailable', async () => {
@@ -100,9 +94,9 @@ describe('UserManager', () => {
 
       const user = await getUserByScreenName('alice')
 
-      expect(user).null()
-      expect(calls).equal([{ username: 'alice', useAuth: false }])
-      expect(userManager.getUserByUsername('alice')).exist()
+      expect(user).toBeNull()
+      expect(calls).toEqual([{ username: 'alice', useAuth: false }])
+      expect(userManager.getUserByUsername('alice')).toBeDefined()
     })
   })
 })

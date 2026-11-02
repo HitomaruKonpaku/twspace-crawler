@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import fs from 'fs'
-import nodeNotifier from 'node-notifier'
+import nodeNotifier, { AnyNotification } from 'node-notifier'
 import open from 'open'
 import path from 'path'
 import winston from 'winston'
@@ -12,7 +12,7 @@ export class Notification {
   private logger: winston.Logger
 
   constructor(
-    private readonly notification: nodeNotifier.Notification,
+    private readonly notification: AnyNotification,
     private readonly url: string,
   ) {
     this.logger = baseLogger.child({ label: '[Notification]' })
@@ -36,7 +36,7 @@ export class Notification {
 
   private async downloadIcon() {
     const url = this.notification.icon
-    if (!url) {
+    if (!url || typeof url !== 'string') {
       return
     }
     const requestId = randomUUID()

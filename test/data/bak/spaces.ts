@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-expressions
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 [
   // ================================================================================
   // ================================================================================

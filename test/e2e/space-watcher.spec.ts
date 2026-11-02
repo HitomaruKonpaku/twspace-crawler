@@ -1,13 +1,7 @@
-import { expect } from '@hapi/code'
-import * as Lab from '@hapi/lab'
 import fs from 'fs'
 import path from 'path'
 
 process.env.LOG_LEVEL = process.env.LOG_LEVEL || 'error'
-
-const lab = Lab.script()
-const { describe, it, before, after } = lab
-export { lab }
 
 interface FixtureResponse {
   status: number
@@ -123,7 +117,7 @@ const watch = async (id: string, url?: string) => {
   }
 }
 
-before(() => {
+beforeAll(() => {
   originalCwd = process.cwd()
   fs.mkdirSync(workDir, { recursive: true })
   process.chdir(workDir)
@@ -152,7 +146,7 @@ before(() => {
   SpaceDownloader.prototype.spawnFfmpeg = async () => { }
 })
 
-after(() => {
+afterAll(() => {
   axios.defaults.adapter = originalAdapters.axios
   api.graphql.client.defaults.adapter = originalAdapters.graphql
   api.liveVideoStream.client.defaults.adapter = originalAdapters.liveVideoStream
@@ -163,18 +157,19 @@ after(() => {
 
   delete process.env.SKIP_DOWNLOAD_CAPTION
   process.chdir(originalCwd)
+  fs.rmSync(workDir, { recursive: true, force: true })
 })
 
 describe('SpaceWatcher', () => {
   spaces.forEach(({ id, expected, url }) => {
     describe(`${id}${url ? ' with a master playlist url' : ''}`, () => {
-      it(`should ${expected}`, { timeout: 15000 }, async () => {
+      it(`should ${expected}`, async () => {
         loadFixture(id)
         const result = await watch(id, url)
 
-        expect(result.event).equal(expected)
-        expect(result.requests.some((request) => request.includes('/AudioSpaceById'))).true()
-        expect(result.requests.some((request) => request.includes('/AudiospaceByRestId'))).true()
+        expect(result.event).toEqual(expected)
+        expect(result.requests.some((request) => request.includes('/AudioSpaceById'))).toBe(true)
+        expect(result.requests.some((request) => request.includes('/AudiospaceByRestId'))).toBe(true)
 
         const httpRequests = result.requests.filter((request) => !request.includes('/graphql'))
         // A url run goes straight to the downloader, so it only requests playlists.
@@ -184,8 +179,8 @@ describe('SpaceWatcher', () => {
             .filter((item) => !item.url.includes('accessChatPublic'))
             .filter((item) => !url || item.url.includes('.m3u8'))
             .map((item) => item.url)
-        expect(httpRequests).equal(expectedHttp)
-      })
+        expect(httpRequests).toEqual(expectedHttp)
+      }, 15000)
     })
   })
 })
