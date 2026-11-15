@@ -26,18 +26,12 @@ function loadEnv(envPath?: string) {
     dotenv.config({ path: envPath })
   }
 
-  const charLimit = 4
   const envKeys = [
-    // 'TWITTER_AUTHORIZATION',
     'TWITTER_AUTH_TOKEN',
     'TWITTER_CSRF_TOKEN',
   ]
   envKeys.forEach((key) => {
-    let value = (process.env[key] || '').substring(0, charLimit)
-    if (value) {
-      value += '****'
-    }
-    logger.debug(`env.${key}=${value}`)
+    logger.debug(`env.${key} is ${process.env[key] ? 'set' : 'unset'}`)
   })
 }
 
@@ -55,7 +49,7 @@ function loadConfig(args: any) {
 //#region mode
 
 function runPlaylistUrlMode(url: string) {
-  logger.info('Starting in playlist url mode', { url })
+  logger.info('Starting in playlist URL mode')
   new SpaceDownloader(url, TimeUtil.getDateTimeString()).download()
     .catch((error) => {
       logger.error(`Download failed: ${error.message}`)
@@ -145,7 +139,8 @@ program.action(async (args, cmd: Command) => {
 
   await checkVersion()
 
-  logger.debug('Args', args)
+  const { url, id, spaceUrl, user, ...otherArgs } = args
+  logger.debug('Args', { id, spaceUrl, user, ...otherArgs, hasPlaylistUrl: Boolean(url) })
 
   loadEnv(args.env)
   loadConfig(args)
@@ -153,8 +148,6 @@ program.action(async (args, cmd: Command) => {
   if (!(configManager.skipDownload || configManager.skipDownloadAudio)) {
     await checkFfmpeg()
   }
-
-  const { url, id, spaceUrl, user } = args
 
   if (url && !id && !spaceUrl) {
     runPlaylistUrlMode(url)

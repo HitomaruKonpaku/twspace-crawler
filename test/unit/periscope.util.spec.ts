@@ -55,18 +55,33 @@ describe('PeriscopeUtil', () => {
     })
   })
 
-  describe('getFinalPlaylistName', () => {
-    it('returns the playlist name from a playlist body', () => {
-      const data = [
-        '#EXTM3U',
-        '#EXT-X-STREAM-INF:BANDWIDTH=64000',
-        'playlist_16752359708553501999.m3u8?type=replay',
-      ].join('\n')
-      expect(PeriscopeUtil.getFinalPlaylistName(data)).toEqual('playlist_16752359708553501999')
+  describe('getChunkUrlCandidates', () => {
+    const origin = 'https://example.test'
+    const jwt = 'header.' + 'payload'.repeat(20) + '.signature'
+    const archive = '/Transcoding/v1/hls/TOKEN/transcode/region/archive'
+    const directory = `/b${archive}/${jwt}/audio-space/nested/`
+    const playlist = `${origin}${directory}playlist_1.m3u8?sig=playlist`
+
+    it('uses the resolved playlist directory including its /b/ and token components', () => {
+      expect(PeriscopeUtil.getChunkPrefix(playlist)).toBe(origin + directory)
+      expect(PeriscopeUtil.getChunkUrlCandidates(playlist, 'chunk_123_0_b.aac?sig=chunk')).toEqual([
+        `${origin}${directory}chunk_123_0_b.aac?sig=chunk`,
+        `${origin}/b${archive.replace('/transcode/', '/non_transcode/')}/audio-space/chunk_123_0_b.aac?sig=chunk`,
+        `${origin}${archive.replace('/transcode/', '/non_transcode/')}/audio-space/chunk_123_0_b.aac?sig=chunk`,
+      ])
     })
 
-    it('throws when the playlist body has no playlist name', () => {
-      expect(() => PeriscopeUtil.getFinalPlaylistName('#EXTM3U')).toThrow()
+    it.each([
+      ['../chunks/chunk_123_0_b.aac?sig=a%2Fb', `${origin}/b${archive}/${jwt}/audio-space/chunks/chunk_123_0_b.aac?sig=a%2Fb`],
+      ['/chunks/chunk_123_0_b.aac?sig=abc', `${origin}/chunks/chunk_123_0_b.aac?sig=abc`],
+      ['https://cdn.example.test/chunks/chunk_123_0_b.aac?sig=abc', 'https://cdn.example.test/chunks/chunk_123_0_b.aac?sig=abc'],
+    ])('preserves the segment URI %s', (uri, expected) => {
+      expect(PeriscopeUtil.getChunkUrlCandidates(playlist, uri)).toEqual([expected])
+    })
+
+    it('keeps a conventional audio-space chunk next to its playlist', () => {
+      const chunk = 'chunk_123_0_a.aac'
+      expect(PeriscopeUtil.getChunkUrlCandidates(newLiveUrl, chunk)).toEqual([new URL(chunk, newLiveUrl).href])
     })
   })
 
@@ -91,6 +106,13 @@ describe('PeriscopeUtil', () => {
     it('keeps a master playlist URL unchanged', () => {
       const url = replayCases[0][1]
       expect(PeriscopeUtil.getMasterPlaylistUrl(url)).toEqual(url)
+    })
+
+    it('changes only the playlist filename and the type parameter', () => {
+      const origin = 'https://example.test/playlist_12/dynamic_playlist.m3u8?sig=a%2Fb&type=live&path=playlist_12'
+      expect(PeriscopeUtil.getMasterPlaylistUrl(origin)).toEqual(
+        'https://example.test/playlist_12/master_playlist.m3u8?sig=a%2Fb&path=playlist_12',
+      )
     })
   })
 
@@ -173,6 +195,11 @@ describe('PeriscopeUtil', () => {
     it('returns only the URL for an unrelated path', () => {
       const url = `${base}/audio-space/master_playlist.m3u8`
       expect((PeriscopeUtil as any).getPathCandidates(url)).toEqual([url])
+    })
+
+    it('does not rewrite archive-looking text in a query string', () => {
+      const url = 'https://example.test/master.m3u8?path=/x-media-live-stream-us-east-1/'
+      expect(PeriscopeUtil.getPlaylistUrlCandidates(url)).toEqual([url])
     })
   })
 

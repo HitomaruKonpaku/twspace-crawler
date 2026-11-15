@@ -4,7 +4,6 @@ import { spawn, SpawnOptions } from 'child_process'
 import { randomUUID } from 'crypto'
 import {
   mkdirSync,
-  readFileSync,
   rmSync,
   writeFileSync,
 } from 'fs'
@@ -27,7 +26,6 @@ import { configManager } from './config-manager'
 export class SpaceDownloader {
   private logger: winston.Logger
 
-  private playlistUrl: string
   private playlistFile: string
   private resultFile: string
   private isVideo = false
@@ -54,7 +52,6 @@ export class SpaceDownloader {
     this.id = this.id || randomUUID()
     this.logger = baseLogger.child({ label: `[SpaceDownloader@${this.id}]` })
     this.logger.debug('constructor', {
-      originUrl,
       filename,
       subDir,
       metadata,
@@ -80,29 +77,11 @@ export class SpaceDownloader {
   }
 
   public async download() {
-    this.logger.debug('download', { playlistUrl: this.playlistUrl, originUrl: this.originUrl })
     const downloadStart = Date.now()
-
-    let data: string
-    if (!this.playlistUrl) {
-      const resolved = await PeriscopeApi.resolveFinalPlaylist(this.originUrl)
-      this.playlistUrl = resolved.url
-      data = resolved.data
-      this.logger.info(`Final playlist url: ${this.playlistUrl}`)
-    } else {
-      const response = await axios.get<string>(this.playlistUrl)
-      data = response.data
-    }
-
+    const { url, data, isVideo } = await PeriscopeApi.resolveFinalPlaylist(this.originUrl)
     const manifest = M3u8Util.parse(data)
-    if (manifest.playlists?.length) {
-      const item = manifest.playlists.sort((a, b) => b.attributes.RESOLUTION.height - a.attributes.RESOLUTION.height || b.attributes.RESOLUTION.width - a.attributes.RESOLUTION.width)[0]
-      this.playlistUrl = new URL(item.uri, this.playlistUrl).href
-      this.logger.info(`Final playlist url: ${this.playlistUrl}`)
-
-      const response = await axios.get<string>(this.playlistUrl)
-      data = response.data
-      this.isVideo = true
+    this.isVideo = isVideo || PeriscopeUtil.isVideoPlaylistUrl(url)
+    if (this.isVideo) {
       this.initResultFile()
     }
 
@@ -110,10 +89,9 @@ export class SpaceDownloader {
     Util.createMediaDir(this.subDir)
 
     if (this.isVideo) {
-      await this.spawnFfmpeg(this.playlistUrl)
+      await this.spawnFfmpeg(url)
     } else {
-      writeFileSync(path.join(this.tmpDir, this.tmpPlaylistFile), data)
-      await this.downloadChunks()
+      await this.downloadChunks(url, data, manifest.segments.map((segment) => segment.uri))
       await this.spawnFfmpeg(this.tmpPlaylistFile)
     }
 
@@ -129,24 +107,25 @@ export class SpaceDownloader {
 
   // #region audio
 
-  private async downloadChunks() {
-    const m3u8 = readFileSync(path.join(this.tmpDir, this.tmpPlaylistFile), 'utf8')
-    const chunks = m3u8.match(/chunk_[\w.]*/g)
-    if (!chunks.length) {
+  private async downloadChunks(playlistUrl: string, data: string, segmentUris: string[]) {
+    if (!segmentUris.length) {
       throw new Error('CHUNK_NOT_FOUND')
     }
 
-    const chunkBaseUrl = PeriscopeUtil.getChunkPrefix(this.playlistUrl)
-    await Promise.all(chunks.map((v, i) => this.chunkLimiter.schedule(() => this.downloadChunk(chunkBaseUrl, v, i + 1, chunks.length))))
+    const localNames = new Map([...new Set(segmentUris)].map((uri, i) => [uri, `chunk_${i}.aac`]))
+    const playlist = data.replace(/^[^#\r\n][^\r\n]*/gm, (line) => localNames.get(line.trim()) ?? line)
+    writeFileSync(path.join(this.tmpDir, this.tmpPlaylistFile), playlist)
+    await Promise.all([...localNames].map(([uri, name]) => this.chunkLimiter.schedule(() => {
+      const urls = PeriscopeUtil.getChunkUrlCandidates(playlistUrl, uri)
+      return this.downloadChunk(urls, name)
+    })))
   }
 
-  private async downloadChunk(chunkBaseUrl: string, chunkName: string, chunkIndex: number, total: number) {
-    const url = chunkBaseUrl + chunkName
-    this.logger.debug(`downloadChunk: ${chunkName} (${chunkIndex}/${total})`)
-
+  private async downloadChunk(urls: string[], chunkName: string) {
+    let candidate = 0
     for (let retries = 0; retries <= this.MAX_RETRIES; retries++) {
       try {
-        const { data } = await axios.get(url, { responseType: 'arraybuffer' })
+        const { data } = await axios.get(urls[candidate], { responseType: 'arraybuffer' })
         let buffer = Buffer.from(data)
         const index = buffer.indexOf(this.ignoreBuffer)
         if (index !== -1) {
@@ -155,11 +134,17 @@ export class SpaceDownloader {
         writeFileSync(path.join(this.tmpDir, chunkName), buffer)
         return
       } catch (error) {
-        if (retries >= this.MAX_RETRIES) {
-          this.logger.error(`downloadChunk: ${error.message}`, { chunkName, url, retries })
-          throw error
+        const status = error.response?.status
+        if ((status === 404 || status === 410) && candidate + 1 < urls.length) {
+          candidate++
         }
-        this.logger.warn(`downloadChunk: ${error.message}`, { chunkName, url, retries })
+        const message = `Chunk ${chunkName} download failed (${status ? `HTTP ${status}` : 'no HTTP response'})`
+        if (retries >= this.MAX_RETRIES) {
+          // Axios errors retain request headers and URLs.
+          // eslint-disable-next-line preserve-caught-error
+          throw new Error(message)
+        }
+        this.logger.warn(message, { retries })
       }
     }
   }
@@ -204,7 +189,6 @@ export class SpaceDownloader {
     args.push(this.resultFile)
 
     this.logger.verbose(`File is saving to "${this.resultFile}"`)
-    this.logger.verbose(`${cmd} ${args.join(' ')}`)
 
     const cwd = path.join(process.cwd(), this.tmpDir)
     // https://github.com/nodejs/node/issues/21825
