@@ -294,4 +294,54 @@ describe('SpaceDownloader', () => {
       ffmpeg.mockRestore()
     }
   })
+
+  it('reuses the backing archive for legacy audio chunks after HTTP 400', async () => {
+    const master = 'https://example.test/Transcoding/v1/hls/TOKEN/non_transcode/region/archive/audio-space/master_playlist.m3u8'
+    const jwt = 'header.' + 'payload'.repeat(20) + '.signature'
+    const mediaPath = `/b/Transcoding/v1/hls/TOKEN/transcode/region/archive/${jwt}/audio-space/playlist_1.m3u8`
+    const media = new URL(mediaPath, master).href
+    const chunks = Array.from({ length: 7 }, (_, index) => `chunk_123_${index}_a.aac`)
+    const signedChunk = 'chunk_123_7_a.aac?sig=bound-to-original-path'
+    const movedChunk = 'chunk_123_8_a.aac'
+    const declared = (uri: string) => new URL(uri, media).href
+    const backing = (uri: string) => `https://example.test/b/Transcoding/v1/hls/TOKEN/non_transcode/region/archive/audio-space/${uri}`
+    const bytes = Buffer.from('test legacy audio')
+    const mediaBody = '#EXTM3U\n' + [...chunks, signedChunk, movedChunk].map((uri) => `#EXTINF:10,\n${uri}\n`).join('')
+    loadFixture('1YqJDoNBbOaGV')
+    fixtures.http = [
+      { url: master, status: 200, body: `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=350000,RESOLUTION=176x312,CODECS="avc1.640015,mp4a.40.2"\n${mediaPath}\n` },
+      { url: media, status: 200, body: mediaBody },
+      ...chunks.flatMap((uri) => [
+        { url: declared(uri), status: 400, body: '' },
+        { url: backing(uri), status: 200, body: bytes },
+      ]),
+      { url: declared(signedChunk), status: 200, body: bytes },
+      { url: backing(signedChunk), status: 200, body: bytes },
+      { url: backing(movedChunk), status: 404, body: '' },
+      { url: declared(movedChunk), status: 200, body: bytes },
+    ]
+
+    SpaceDownloader.prototype.downloadChunks = originalDownloadChunks
+    const ffmpeg = jest.spyOn(SpaceDownloader.prototype, 'spawnFfmpeg').mockImplementation(async function (input: string) {
+      expect(input).toBe('playlist.m3u8')
+      expect(this.resultFile).toMatch(/\.m4a$/)
+      expect(fs.readdirSync(this.tmpDir)).toHaveLength(chunks.length + 3)
+      expect(fs.readFileSync(path.join(this.tmpDir, 'chunk_8.aac'))).toEqual(bytes)
+    })
+    try {
+      await new SpaceDownloader(master, 'legacy-audio-fixture').download()
+      expect(requests.slice(0, 2)).toEqual([master, media])
+      const declaredAttempts = requests.filter((url) => chunks.some((uri) => declared(uri) === url))
+      expect(declaredAttempts.length).toBeGreaterThan(0)
+      expect(declaredAttempts.length).toBeLessThan(chunks.length)
+      expect(requests).toEqual(expect.arrayContaining(chunks.map(backing)))
+      expect(requests).toContain(declared(signedChunk))
+      expect(requests).not.toContain(backing(signedChunk))
+      expect(requests.filter((url) => url.endsWith(movedChunk))).toEqual([backing(movedChunk), declared(movedChunk)])
+      expect(ffmpeg).toHaveBeenCalledTimes(1)
+    } finally {
+      ffmpeg.mockRestore()
+      SpaceDownloader.prototype.downloadChunks = async () => { }
+    }
+  })
 })

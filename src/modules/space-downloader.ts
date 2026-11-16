@@ -121,9 +121,19 @@ export class SpaceDownloader {
     const localNames = new Map([...new Set(segmentUris)].map((uri, i) => [uri, `chunk_${i}.aac`]))
     const playlist = data.replace(/^[^#\r\n][^\r\n]*/gm, (line) => localNames.get(line.trim()) ?? line)
     writeFileSync(path.join(this.tmpDir, this.tmpPlaylistFile), playlist)
-    await Promise.all([...localNames].map(([uri, name]) => this.chunkLimiter.schedule(() => {
+    let preferredArchiveCandidate = 0
+    await Promise.all([...localNames].map(([uri, name]) => this.chunkLimiter.schedule(async () => {
       const urls = PeriscopeUtil.getChunkUrlCandidates(playlistUrl, uri)
-      return this.downloadChunk(urls, name)
+      // Only unsigned bare chunks share the same archive candidates for this playlist.
+      const canReuseArchive = urls.length > 1 && !uri.includes('?')
+      const preferred = canReuseArchive ? preferredArchiveCandidate : 0
+      const candidates = preferred
+        ? [urls[preferred], ...urls.filter((_, index) => index !== preferred)]
+        : urls
+      const downloadedUrl = await this.downloadChunk(candidates, name)
+      if (canReuseArchive) {
+        preferredArchiveCandidate = urls.indexOf(downloadedUrl)
+      }
     })))
   }
 
@@ -139,10 +149,12 @@ export class SpaceDownloader {
           buffer = buffer.slice(index)
         }
         writeFileSync(path.join(this.tmpDir, chunkName), buffer)
-        return
+        return urls[candidate]
       } catch (error) {
         const status = error.response?.status
-        if ((status === 404 || status === 410) && candidate + 1 < urls.length) {
+        // Legacy audio replays can reject the transcode chunk URL with HTTP 400.
+        // Alternate URLs here are backing archive paths for bare audio chunks.
+        if ((status === 400 || status === 404 || status === 410) && candidate + 1 < urls.length) {
           candidate++
         }
         const message = `Chunk ${chunkName} download failed (${status ? `HTTP ${status}` : 'no HTTP response'})`
