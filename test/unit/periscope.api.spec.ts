@@ -93,7 +93,7 @@ describe('PeriscopeApi', () => {
       mockGet(async (url) => ({
         data: url === masterUrl ? [
           '#EXTM3U',
-          '#EXT-X-STREAM-INF:BANDWIDTH=1000000,CODECS="avc1.640015"',
+          '#EXT-X-STREAM-INF:BANDWIDTH=1000000,RESOLUTION=640x480,CODECS="avc1.640015"',
           'video.m3u8',
           '#EXT-X-STREAM-INF:BANDWIDTH=64000,CODECS="mp4a.40.2"',
           'audio.m3u8',
@@ -102,7 +102,7 @@ describe('PeriscopeApi', () => {
         ].join('\n') : finalData,
       }))
 
-      await expect(PeriscopeApi.resolveFinalPlaylist(masterUrl)).resolves.toMatchObject({ url: mediaUrl, data: finalData })
+      await expect(PeriscopeApi.resolveFinalPlaylist(masterUrl)).resolves.toMatchObject({ url: mediaUrl, data: finalData, isVideo: false })
     })
 
     it.each([`${liveFinalUrl}?sig=a%2Fb`, 'https://example.test/media.m3u8?type=replay&sig=abc'])(

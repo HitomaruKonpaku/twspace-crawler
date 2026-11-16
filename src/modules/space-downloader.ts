@@ -80,8 +80,8 @@ export class SpaceDownloader {
     const downloadStart = Date.now()
     const { url, data, isVideo } = await PeriscopeApi.resolveFinalPlaylist(this.originUrl)
     const manifest = M3u8Util.parse(data)
-    this.isVideo = isVideo || PeriscopeUtil.isVideoPlaylistUrl(url)
-    if (this.isVideo) {
+    if (this.isVideo !== isVideo) {
+      this.isVideo = isVideo
       this.initResultFile()
     }
 

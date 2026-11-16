@@ -9,6 +9,10 @@ export class PeriscopeUtil {
     return /\/video-space\/|\/(?:master_dynamic_\d+|master_master_playlist)\.m3u8$/.test(new URL(url).pathname)
   }
 
+  public static isAudioPlaylistUrl(url: URL) {
+    return url.pathname.split('/').includes('audio-space')
+  }
+
   public static getAudioPlaylistUri(manifest: Manifest) {
     const playlists = manifest.playlists ?? []
     const audioGroups = manifest.mediaGroups?.AUDIO ?? {}

@@ -98,8 +98,7 @@ const loadFixture = (id: string) => {
   // body at the URI advertised by the master so the expected request follows HLS.
   const master = fixtures.http.find((item) => item.url.endsWith('/master_playlist.m3u8'))
   if (master) {
-    const uris = master.body.split('\n').filter((line: string) => line.startsWith('/b/'))
-    const uri = uris[uris.length - 1]
+    const uri = master.body.split('\n').find((line: string) => line.startsWith('/b/'))
     const media = fixtures.http.find((item) => /\/playlist_\d+\.m3u8$/.test(item.url))
     if (uri && media) {
       media.url = new URL(uri, master.url).href
@@ -245,7 +244,7 @@ describe('SpaceDownloader', () => {
     const segmentUri = '../chunks/chunk_123_0_b.aac?sig=a%2Fb'
     const segment = new URL(segmentUri, media).href
     const bytes = Buffer.from('test audio')
-    const masterBody = `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=128000\n${new URL(media).pathname}?sig=media\n`
+    const masterBody = `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=350000,RESOLUTION=176x312,CODECS="avc1.640015,mp4a.40.2"\n${new URL(media).pathname}?sig=media\n`
     const mediaBody = `#EXTM3U\n#EXTINF:10,\n${segmentUri}\n`
     loadFixture('1YqJDoNBbOaGV')
     fixtures.http = [
@@ -257,6 +256,7 @@ describe('SpaceDownloader', () => {
     SpaceDownloader.prototype.downloadChunks = originalDownloadChunks
     const ffmpeg = jest.spyOn(SpaceDownloader.prototype, 'spawnFfmpeg').mockImplementation(async function (input: string) {
       const playlist = fs.readFileSync(path.join(this.tmpDir, input), 'utf8')
+      expect(this.resultFile).toMatch(/\.m4a$/)
       expect(playlist).toBe(mediaBody.replace(segmentUri, 'chunk_0.aac'))
       expect(fs.readFileSync(path.join(this.tmpDir, 'chunk_0.aac'))).toEqual(bytes)
     })

@@ -68,21 +68,20 @@ export class PeriscopeApi {
 
     return this.tryCandidates(urls, async (url) => {
       let video = PeriscopeUtil.isVideoPlaylistUrl(originUrl)
+      let audio = PeriscopeUtil.isAudioPlaylistUrl(new URL(originUrl))
       let stage: PlaylistStage = direct && !video ? 'media' : 'master'
       const visited = new Set<string>()
       while (!visited.has(url) && visited.size < 4) {
         visited.add(url)
         const data = await this.fetchPlaylist(url, stage)
+        audio ||= PeriscopeUtil.isAudioPlaylistUrl(new URL(url))
+        video = !audio && (video || PeriscopeUtil.isVideoPlaylistUrl(url))
         if (typeof data === 'string' && /^#EXTINF:/m.test(data)) {
           return { url, data, isVideo: video }
         }
 
-        const manifest = M3u8Util.parse(data)
-        const variants = manifest.playlists ?? []
-        video ||= variants.some((item) => item.attributes.RESOLUTION)
-          || (variants.length > 0 && variants.every((item) =>
-            /(?:^|,\s*)(?:avc[13]|hvc1|hev1|vp0?[89]|av01)(?:\.|,|$)/i.test(item.attributes.CODECS ?? '')))
-        const nextUrl = this.getNextPlaylistUrl(data, url, stage, video)
+        const { nextUrl, isVideo } = this.resolveVariant(data, url, stage, video, audio)
+        video = isVideo
         if (!nextUrl) {
           return { url, data, isVideo: video }
         }
@@ -93,18 +92,26 @@ export class PeriscopeApi {
     })
   }
 
-  private static getNextPlaylistUrl(data: string, url: string, stage: PlaylistStage, video: boolean) {
+  private static resolveVariant(data: string, url: string, stage: PlaylistStage, video: boolean, audio: boolean) {
     try {
       const manifest = M3u8Util.parse(data)
+      const variants = manifest.playlists ?? []
+      // Audio Space masters can advertise X's video transcodes alongside their AAC replay.
+      const isVideo = !audio && (video || (
+        variants.length > 0
+        && variants.every(({ attributes }) => attributes.RESOLUTION
+          || /(?:^|,\s*)(?:avc[13]|hvc1|hev1|vp0?[89]|av01)(?:\.|,|$)/i.test(attributes.CODECS ?? ''))
+        && !variants.every(({ uri }) => PeriscopeUtil.isAudioPlaylistUrl(new URL(uri, url)))
+      ))
       let uri: string
-      if (video && manifest.playlists?.length) {
-        const variant = [...manifest.playlists].sort((a, b) =>
+      if (isVideo && variants.length) {
+        const variant = [...variants].sort((a, b) =>
           (b.attributes.RESOLUTION?.height ?? 0) - (a.attributes.RESOLUTION?.height ?? 0)
           || (b.attributes.RESOLUTION?.width ?? 0) - (a.attributes.RESOLUTION?.width ?? 0))[0]
         const audioGroup = manifest.mediaGroups?.AUDIO?.[variant.attributes.AUDIO]
         if (Object.values(audioGroup ?? {}).some((item) => item.uri)) {
           // FFmpeg needs the master to download and mux separate audio and video.
-          return undefined
+          return { nextUrl: undefined, isVideo }
         }
         uri = variant.uri
       } else {
@@ -113,7 +120,7 @@ export class PeriscopeApi {
       if (uri) {
         const resolved = new URL(uri, url)
         if (resolved.protocol === 'http:' || resolved.protocol === 'https:') {
-          return resolved.href
+          return { nextUrl: resolved.href, isVideo }
         }
       }
     } catch {
