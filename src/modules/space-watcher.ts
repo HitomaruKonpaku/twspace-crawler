@@ -253,7 +253,12 @@ export class SpaceWatcher extends EventEmitter {
     this.logger.debug('--> getLiveStreamStatus')
     const { data } = await api.liveVideoStream.status(this.audioSpace.metadata.media_key)
     this.liveStreamStatus = data
-    this.logger.debug('<-- getLiveStreamStatus')
+    this.logger.debug('<-- getLiveStreamStatus', {
+      status: data?.source?.status,
+      streamType: data?.source?.streamType,
+      playlist: PeriscopeUtil.getPlaylistLogDetails(data?.source?.location),
+      hasChatToken: Boolean(data?.chatToken),
+    })
   }
 
   private loadPlaylist(): boolean {
@@ -268,6 +273,9 @@ export class SpaceWatcher extends EventEmitter {
       return false
     }
 
+    this.logger.info('Master playlist', {
+      playlist: PeriscopeUtil.getPlaylistLogDetails(PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)),
+    })
     this.buildSpace()
     this.logSpaceInfo()
 

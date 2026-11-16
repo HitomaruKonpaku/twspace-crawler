@@ -52,6 +52,7 @@ export class SpaceDownloader {
     this.id = this.id || randomUUID()
     this.logger = baseLogger.child({ label: `[SpaceDownloader@${this.id}]` })
     this.logger.debug('constructor', {
+      originPlaylist: PeriscopeUtil.getPlaylistLogDetails(originUrl),
       filename,
       subDir,
       metadata,
@@ -77,9 +78,14 @@ export class SpaceDownloader {
   }
 
   public async download() {
+    this.logger.debug('download', { originPlaylist: PeriscopeUtil.getPlaylistLogDetails(this.originUrl) })
     const downloadStart = Date.now()
     const { url, data, isVideo } = await PeriscopeApi.resolveFinalPlaylist(this.originUrl)
     const manifest = M3u8Util.parse(data)
+    this.logger.info('Resolved final playlist', {
+      playlist: PeriscopeUtil.getPlaylistLogDetails(url),
+      mediaType: isVideo ? 'video' : 'audio',
+    })
     if (this.isVideo !== isVideo) {
       this.isVideo = isVideo
       this.initResultFile()
@@ -122,6 +128,7 @@ export class SpaceDownloader {
   }
 
   private async downloadChunk(urls: string[], chunkName: string) {
+    this.logger.debug('downloadChunk', { chunkName, candidates: urls.length })
     let candidate = 0
     for (let retries = 0; retries <= this.MAX_RETRIES; retries++) {
       try {
@@ -189,6 +196,11 @@ export class SpaceDownloader {
     args.push(this.resultFile)
 
     this.logger.verbose(`File is saving to "${this.resultFile}"`)
+    this.logger.verbose('Starting FFmpeg', {
+      mediaType,
+      input: this.isVideo ? PeriscopeUtil.getPlaylistLogDetails(inp) : inp,
+      customArgs: Boolean(mediaArgs?.length || config?.ffmpegArgs?.length),
+    })
 
     const cwd = path.join(process.cwd(), this.tmpDir)
     // https://github.com/nodejs/node/issues/21825

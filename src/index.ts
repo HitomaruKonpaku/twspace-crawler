@@ -14,6 +14,7 @@ import { userManager } from './modules/user-manager'
 import { checkVersion } from './modules/version-checker'
 import { CommandUtil } from './utils/command.util'
 import { PackageUtil } from './utils/package.util'
+import { PeriscopeUtil } from './utils/periscope.util'
 import { TimeUtil } from './utils/time.util'
 import { TwitterUtil } from './utils/twitter.util'
 import { UserUtil } from './utils/user.util'
@@ -49,7 +50,7 @@ function loadConfig(args: any) {
 //#region mode
 
 function runPlaylistUrlMode(url: string) {
-  logger.info('Starting in playlist URL mode')
+  logger.info('Starting in playlist URL mode', { playlist: PeriscopeUtil.getPlaylistLogDetails(url) })
   new SpaceDownloader(url, TimeUtil.getDateTimeString()).download()
     .catch((error) => {
       logger.error(`Download failed: ${error.message}`)
@@ -140,7 +141,7 @@ program.action(async (args, cmd: Command) => {
   await checkVersion()
 
   const { url, id, spaceUrl, user, ...otherArgs } = args
-  logger.debug('Args', { id, spaceUrl, user, ...otherArgs, hasPlaylistUrl: Boolean(url) })
+  logger.debug('Args', { id, spaceUrl, user, ...otherArgs, playlist: PeriscopeUtil.getPlaylistLogDetails(url) })
 
   loadEnv(args.env)
   loadConfig(args)

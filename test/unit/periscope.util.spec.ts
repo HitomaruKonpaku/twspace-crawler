@@ -39,6 +39,24 @@ const fallbackOldLiveUrl = `${fallbackBase}/periscope-replay-direct-prod-ap-nort
 const fallbackGenericArchiveUrl = `${fallbackBase}/periscope-replays-public/audio-space/master_playlist.m3u8`
 
 describe('PeriscopeUtil', () => {
+  describe('getPlaylistLogDetails', () => {
+    it('logs the host and known playlist name without credentials, path tokens or query parameters', () => {
+      const url = 'https://user:password@cdn.example.test/b/TOKEN/JWT/audio-space/playlist_42.m3u8?sig=secret#fragment'
+      expect(PeriscopeUtil.getPlaylistLogDetails(url)).toEqual({
+        host: 'cdn.example.test',
+        playlist: 'playlist_42.m3u8',
+      })
+    })
+
+    it('omits unrecognized filenames and does not echo invalid URLs', () => {
+      expect(PeriscopeUtil.getPlaylistLogDetails('https://cdn.example.test/SECRET.m3u8')).toEqual({
+        host: 'cdn.example.test',
+        playlist: undefined,
+      })
+      expect(PeriscopeUtil.getPlaylistLogDetails('SECRET')).toEqual({ invalidUrl: true })
+    })
+  })
+
   describe('isFinalPlaylistUrl', () => {
     it('returns true for a final replay playlist', () => {
       const url = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/playlist_16752359708553501999.m3u8`

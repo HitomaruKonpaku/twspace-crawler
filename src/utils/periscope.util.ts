@@ -13,6 +13,19 @@ export class PeriscopeUtil {
     return url.pathname.split('/').includes('audio-space')
   }
 
+  public static getPlaylistLogDetails(url?: string) {
+    if (!url) {
+      return undefined
+    }
+    try {
+      const { hostname, pathname } = new URL(url)
+      const playlist = /\/((?:dynamic_playlist|master_playlist|master_master_playlist|playlist_\d+|master_dynamic_\d+)\.m3u8)$/.exec(pathname)?.[1]
+      return { host: hostname, playlist }
+    } catch {
+      return { invalidUrl: true }
+    }
+  }
+
   public static getAudioPlaylistUri(manifest: Manifest) {
     const playlists = manifest.playlists ?? []
     const audioGroups = manifest.mediaGroups?.AUDIO ?? {}
