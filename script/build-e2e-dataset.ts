@@ -1,5 +1,5 @@
 /**
- * Builds an offline e2e fixture in test/data/e2e from a Space.
+ * Builds an offline e2e fixture in test/data/e2e/watcher from a Space.
  *
  * Usage (`--` is required so npm passes the args to the script):
  *   npm run build-e2e-dataset -- <space-id>
@@ -40,7 +40,7 @@ interface Fixture {
 }
 
 const rootDir = path.resolve(__dirname, '../..')
-const fixturesDir = path.join(rootDir, 'test/data/e2e')
+const fixturesDir = path.join(rootDir, 'test/data/e2e/watcher')
 const workDir = path.join(rootDir, '.tmp.e2e')
 const timeout = 60000
 

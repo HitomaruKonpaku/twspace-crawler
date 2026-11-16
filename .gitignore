@@ -17,3 +17,4 @@ config.yaml
 
 # exceptions
 !example/**/config.yaml
+!test/data/e2e/download/

@@ -19,7 +19,7 @@ interface Fixture {
   http: HttpFixture[]
 }
 
-const fixturesDir = path.join(__dirname, '../data/e2e')
+const fixturesDir = path.join(__dirname, '../data/e2e/watcher')
 const workDir = path.join(path.resolve(__dirname, '../..'), '.tmp.e2e')
 
 const spaces: { id: string, expected: 'complete' | 'failed', url?: string }[] = [

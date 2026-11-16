@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { SpaceUtil } from '../../src/utils/space.util'
 
-const fixtureFile = path.join(__dirname, '../data/e2e/1YqJDoNBbOaGV.json')
+const fixtureFile = path.join(__dirname, '../data/e2e/watcher/1YqJDoNBbOaGV.json')
 const fixture = JSON.parse(fs.readFileSync(fixtureFile, 'utf8'))
 
 const byIdSpace = fixture.graphql.AudioSpaceById.body.data.audioSpace
