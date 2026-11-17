@@ -1,4 +1,5 @@
 import { Manifest } from 'm3u8-parser'
+import { APP_HLS_KEY_MAX_LENGTH } from '../constants/app.constant'
 import { CodecUtil } from './codec.util'
 
 export class PeriscopeUtil {
@@ -122,7 +123,8 @@ export class PeriscopeUtil {
     }
 
     const archivePath = chunks.slice(0, audioSpaceIndex + 1)
-    if (archivePath[audioSpaceIndex - 1].length > 86) {
+    // Check for the audio JWT and ignore it; 86 is the HLS key length.
+    if (archivePath[audioSpaceIndex - 1].length > APP_HLS_KEY_MAX_LENGTH) {
       archivePath.splice(audioSpaceIndex - 1, 1)
     }
     url.pathname = archivePath.join('/').replace('/transcode/', '/non_transcode/') + '/'

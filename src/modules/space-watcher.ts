@@ -9,6 +9,7 @@ import { AudioSpace } from '../api/interface/twitter-graphql.interface'
 import { api } from '../api/twitter.api'
 import { PeriscopeApi } from '../apis/periscope-api'
 import {
+  APP_DOWNLOAD_RETRY_INTERVAL,
   APP_DOWNLOAD_UNAVAILABLE_RETRY_MAX,
   APP_PLAYLIST_CHUNK_VERIFY_RETRY_MAX,
   APP_PLAYLIST_MASTER_RETRY_MAX,
@@ -423,7 +424,7 @@ export class SpaceWatcher extends EventEmitter {
         return
       }
 
-      const ms = 10000
+      const ms = APP_DOWNLOAD_RETRY_INTERVAL
       this.logger.info(`Retry download audio in ${ms}ms`)
       setTimeout(() => this.downloadAudio(), ms)
     }

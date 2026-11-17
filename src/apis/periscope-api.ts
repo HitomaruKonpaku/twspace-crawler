@@ -1,5 +1,7 @@
 import axios from 'axios'
+import { Manifest, PlaylistItem } from 'm3u8-parser'
 import { setTimeout as delay } from 'timers/promises'
+import { APP_PLAYLIST_RESOLVE_MAX_DEPTH, APP_PLAYLIST_RETRY_DELAYS } from '../constants/app.constant'
 import { AccessChat, ChatHistory } from '../interfaces/periscope.interface'
 import { PlaylistCandidatesError, PlaylistUnavailableError } from '../model/error'
 import { CodecUtil } from '../utils/codec.util'
@@ -9,6 +11,8 @@ import { PeriscopeUtil } from '../utils/periscope.util'
 type PlaylistStage = 'master' | 'media'
 
 export class PeriscopeApi {
+  // #region playlist
+
   private static async tryCandidates<T>(urls: string[], fetch: (url: string) => Promise<T>): Promise<T> {
     const failures: Error[] = []
     for (const url of urls) {
@@ -23,7 +27,6 @@ export class PeriscopeApi {
   }
 
   private static async fetchPlaylist(url: string, stage: PlaylistStage) {
-    const retryDelays = [250, 500]
     for (let attempt = 0; ; attempt++) {
       try {
         const { data } = await axios.get<string>(url)
@@ -31,8 +34,8 @@ export class PeriscopeApi {
       } catch (error) {
         const status = error.response?.status
         const unavailable = status === 404 || status === 410
-        if (unavailable && attempt < retryDelays.length) {
-          await delay(retryDelays[attempt])
+        if (unavailable && attempt < APP_PLAYLIST_RETRY_DELAYS.length) {
+          await delay(APP_PLAYLIST_RETRY_DELAYS[attempt])
           continue
         }
         // Axios errors retain request headers and URLs.
@@ -72,7 +75,7 @@ export class PeriscopeApi {
         ? 'media'
         : 'master'
       const visited = new Set<string>()
-      while (!visited.has(url) && visited.size < 4) {
+      while (!visited.has(url) && visited.size < APP_PLAYLIST_RESOLVE_MAX_DEPTH) {
         visited.add(url)
         const data = await this.fetchPlaylist(url, stage)
         audio ||= PeriscopeUtil.isAudioPlaylistUrl(url)
@@ -100,27 +103,11 @@ export class PeriscopeApi {
     try {
       const manifest = M3u8Util.parse(data)
       const variants = manifest.playlists ?? []
-      // Audio Space masters can advertise X's video transcodes alongside their AAC replay.
-      const isVideo = !audio
-        && (
-          video
-          || (
-            variants.length > 0
-            && variants.every(({ attributes }) => attributes.RESOLUTION || CodecUtil.hasVideoCodec(attributes.CODECS))
-            && !variants.every(({ uri }) => PeriscopeUtil.isAudioPlaylistUrl(new URL(uri, url).href))
-          )
-        )
+      const isVideo = this.isVideoManifest(variants, url, video, audio)
       let uri: string
       if (isVideo && variants.length) {
-        const variant = [...variants]
-          .sort(
-            (a, b) =>
-              (b.attributes.RESOLUTION?.height ?? 0) - (a.attributes.RESOLUTION?.height ?? 0)
-              || (b.attributes.RESOLUTION?.width ?? 0) - (a.attributes.RESOLUTION?.width ?? 0),
-          )[0]
-        const audioGroup = manifest.mediaGroups?.AUDIO?.[variant.attributes.AUDIO]
-        const hasAudio = Object.values(audioGroup ?? {}).some((item) => item.uri)
-        if (hasAudio) {
+        const variant = this.getHighestVariant(variants)
+        if (this.hasSeparateAudio(manifest, variant)) {
           // FFmpeg needs the master to download and mux separate audio and video.
           return { nextUrl: undefined, isVideo }
         }
@@ -128,6 +115,7 @@ export class PeriscopeApi {
       } else {
         uri = PeriscopeUtil.getAudioPlaylistUri(manifest)
       }
+
       if (uri) {
         const resolved = new URL(uri, url)
         if (resolved.protocol === 'http:' || resolved.protocol === 'https:') {
@@ -137,10 +125,36 @@ export class PeriscopeApi {
     } catch {
       // Parser and URL errors can contain the original response and signed URIs.
     }
+
     const mediaType = video
       ? 'media'
       : 'audio'
     throw new Error(`${stage} playlist has no usable ${mediaType} URI`)
+  }
+
+  private static isVideoManifest(variants: PlaylistItem[], url: string, video: boolean, audio: boolean) {
+    // Audio Space masters can advertise X's video transcodes alongside their AAC replay.
+    const hasVideoVariants = variants.length > 0
+      && variants.every(({ attributes }) => attributes.RESOLUTION || CodecUtil.hasVideoCodec(attributes.CODECS))
+      && !variants.every(({ uri }) => PeriscopeUtil.isAudioPlaylistUrl(new URL(uri, url).href))
+    const result = !audio && (video || hasVideoVariants)
+    return result
+  }
+
+  private static getHighestVariant(variants: PlaylistItem[]) {
+    const result = [...variants]
+      .sort(
+        (a, b) =>
+          (b.attributes.RESOLUTION?.height ?? 0) - (a.attributes.RESOLUTION?.height ?? 0)
+          || (b.attributes.RESOLUTION?.width ?? 0) - (a.attributes.RESOLUTION?.width ?? 0),
+      )[0]
+    return result
+  }
+
+  private static hasSeparateAudio(manifest: Manifest, variant: PlaylistItem) {
+    const audioGroup = manifest.mediaGroups?.AUDIO?.[variant.attributes.AUDIO]
+    const result = Object.values(audioGroup ?? {}).some((item) => item.uri)
+    return result
   }
 
   public static async getFinalPlaylistUrl(originUrl: string) {
@@ -155,6 +169,10 @@ export class PeriscopeApi {
     const { data } = await this.resolveFinalPlaylist(originUrl)
     return data
   }
+
+  // #endregion
+
+  // #region chat
 
   public static async getAccessChat(chatToken: string) {
     const { data } = await axios.post<AccessChat>(
@@ -172,4 +190,6 @@ export class PeriscopeApi {
     )
     return data
   }
+
+  // #endregion
 }
