@@ -26,6 +26,7 @@ FROM builder AS tester
 
 ENV NODE_OPTIONS=--experimental-vm-modules
 
+RUN apk add --no-cache ffmpeg
 RUN npm test
 
 # RELEASE
