@@ -217,13 +217,13 @@ export class SpaceDownloader {
 
     args.push(this.resultFile)
 
-    this.logger.debug(`${cmd} ${args.join(' ')}`)
-    this.logger.verbose('Starting FFmpeg', {
+    this.logger.debug('Starting FFmpeg', {
       mediaType,
       input: inp,
       customArgs: Boolean(mediaArgs?.length || config?.ffmpegArgs?.length),
     })
-    this.logger.verbose(`File is saving to "${this.resultFile}"`)
+    this.logger.debug(`${cmd} ${args.join(' ')}`)
+    this.logger.info(`File is saving to "${this.resultFile}"`)
 
     const cwd = path.join(process.cwd(), this.tmpDir)
     // https://github.com/nodejs/node/issues/21825
