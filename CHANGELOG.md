@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.20.1
+
+- Fix the final playlist URL resolution for Space replays
+- Keep audio Space replays on the audio download path
+- Try the non-legacy archive chunk URL first, and reuse the working archive
+  path for legacy replays
+- Log full playlist URLs and chunk download progress again
+
 ## 1.20.0
 
 - Accept a username, `:USER_ID`, or an `{ id, username, dir }` object in
