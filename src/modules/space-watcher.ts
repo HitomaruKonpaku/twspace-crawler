@@ -7,9 +7,10 @@ import winston from 'winston'
 
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
 import { api } from '../api/twitter.api'
-import { PeriscopeApi, PlaylistCandidatesError } from '../apis/periscope-api'
+import { PeriscopeApi } from '../apis/periscope-api'
 import {
-  APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY,
+  APP_DOWNLOAD_UNAVAILABLE_RETRY_MAX,
+  APP_PLAYLIST_CHUNK_VERIFY_RETRY_MAX,
   APP_PLAYLIST_MASTER_RETRY_MAX,
   APP_PLAYLIST_REFRESH_INTERVAL,
   APP_SPACE_ERROR_RETRY_INTERVAL,
@@ -17,6 +18,7 @@ import {
 import { SpaceState } from '../enums/twitter.enum'
 import { LiveVideoStreamStatus } from '../interfaces/twitter.interface'
 import { logger as baseLogger, spaceLogger, spaceRawLogger } from '../logger'
+import { PlaylistCandidatesError } from '../model/error'
 import { TwitterSpace } from '../model/twitter-space'
 import { PeriscopeUtil } from '../utils/periscope.util'
 import { SpaceUtil } from '../utils/space.util'
@@ -136,7 +138,7 @@ export class SpaceWatcher extends EventEmitter {
         this.checkMasterPlaylist()
         return
       }
-      this.logger.error(`Dynamic playlist request failed (${status ? `HTTP ${status}` : 'no HTTP response'})`)
+      this.logger.error(`checkDynamicPlaylist: ${error.response?.message ?? error.message} (${status})`)
     }
     this.checkDynamicPlaylistWithTimer()
   }
@@ -149,7 +151,7 @@ export class SpaceWatcher extends EventEmitter {
       this.masterPlaylistRetryCount = 0
       this.logger.debug(`<-- checkMasterPlaylist: master chunk size ${masterChunkSize}, last chunk index ${this.lastChunkIndex}`)
       const canDownload = !this.lastChunkIndex
-        || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY
+        || this.chunkVerifyCount > APP_PLAYLIST_CHUNK_VERIFY_RETRY_MAX
         || masterChunkSize >= this.lastChunkIndex
       if (canDownload) {
         await this.processDownload()
@@ -253,12 +255,8 @@ export class SpaceWatcher extends EventEmitter {
     this.logger.debug('--> getLiveStreamStatus')
     const { data } = await api.liveVideoStream.status(this.audioSpace.metadata.media_key)
     this.liveStreamStatus = data
-    this.logger.debug('<-- getLiveStreamStatus', {
-      status: data?.source?.status,
-      streamType: data?.source?.streamType,
-      playlist: PeriscopeUtil.getPlaylistLogDetails(data?.source?.location),
-      hasChatToken: Boolean(data?.chatToken),
-    })
+    this.logger.debug('liveStreamStatus', this.liveStreamStatus)
+    this.logger.debug('<-- getLiveStreamStatus')
   }
 
   private loadPlaylist(): boolean {
@@ -273,9 +271,9 @@ export class SpaceWatcher extends EventEmitter {
       return false
     }
 
-    this.logger.info('Master playlist', {
-      playlist: PeriscopeUtil.getPlaylistLogDetails(PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)),
-    })
+    const masterPlaylistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
+    this.logger.info(`Master playlist url: ${masterPlaylistUrl}`)
+
     this.buildSpace()
     this.logSpaceInfo()
 
@@ -412,14 +410,19 @@ export class SpaceWatcher extends EventEmitter {
       this.unavailableDownloadRetryCount = 0
       this.emit('complete')
     } catch (error) {
-      this.logger.error(`downloadAudio: ${error.message}`)
-      if (error instanceof PlaylistCandidatesError && error.unavailable && ++this.unavailableDownloadRetryCount > 6) {
+      this.logger.error(`downloadAudio: ${error.response?.message ?? error.message}`, { retries: this.unavailableDownloadRetryCount })
+      const unavailable = error instanceof PlaylistCandidatesError && error.unavailable
+      if (unavailable) {
+        this.unavailableDownloadRetryCount++
+      } else {
+        this.unavailableDownloadRetryCount = 0
+      }
+      const retryExhausted = this.unavailableDownloadRetryCount > APP_DOWNLOAD_UNAVAILABLE_RETRY_MAX
+      if (retryExhausted) {
         this.emit('failed')
         return
       }
-      if (!(error instanceof PlaylistCandidatesError && error.unavailable)) {
-        this.unavailableDownloadRetryCount = 0
-      }
+
       const ms = 10000
       this.logger.info(`Retry download audio in ${ms}ms`)
       setTimeout(() => this.downloadAudio(), ms)

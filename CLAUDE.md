@@ -95,8 +95,10 @@ Additional CLI pieces: `--force` bypasses the ended-space check for `--id`; the 
 - `APP_USER_REFRESH_INTERVAL` = 30s (default user polling)
 - `APP_SPACE_ERROR_RETRY_INTERVAL` = 10s
 - `APP_PLAYLIST_REFRESH_INTERVAL` = 10s
-- `APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY` = 20
+- `APP_PLAYLIST_CHUNK_VERIFY_RETRY_MAX` = 20
 - `APP_PLAYLIST_MASTER_RETRY_MAX` = 20
+- `APP_DOWNLOAD_UNAVAILABLE_RETRY_MAX` = 6
+- `APP_DOWNLOAD_CHUNK_RETRY_MAX` = 3
 
 `src/constants/twitter.constant.ts`:
 

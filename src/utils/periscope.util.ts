@@ -1,4 +1,5 @@
 import { Manifest } from 'm3u8-parser'
+import { CodecUtil } from './codec.util'
 
 export class PeriscopeUtil {
   public static isFinalPlaylistUrl(url: string) {
@@ -9,21 +10,8 @@ export class PeriscopeUtil {
     return /\/video-space\/|\/(?:master_dynamic_\d+|master_master_playlist)\.m3u8$/.test(new URL(url).pathname)
   }
 
-  public static isAudioPlaylistUrl(url: URL) {
-    return url.pathname.split('/').includes('audio-space')
-  }
-
-  public static getPlaylistLogDetails(url?: string) {
-    if (!url) {
-      return undefined
-    }
-    try {
-      const { hostname, pathname } = new URL(url)
-      const playlist = /\/((?:dynamic_playlist|master_playlist|master_master_playlist|playlist_\d+|master_dynamic_\d+)\.m3u8)$/.exec(pathname)?.[1]
-      return { host: hostname, playlist }
-    } catch {
-      return { invalidUrl: true }
-    }
+  public static isAudioPlaylistUrl(url: string) {
+    return new URL(url).pathname.split('/').includes('audio-space')
   }
 
   public static getAudioPlaylistUri(manifest: Manifest) {
@@ -38,10 +26,14 @@ export class PeriscopeUtil {
       return rendition.uri
     }
 
-    return playlists.find(({ attributes }) => {
-      const codecs = attributes.CODECS?.split(',').map((codec) => codec.trim())
-      return !codecs || codecs.some((codec) => /^(mp4a|aac|ac-3|ec-3|ac-4|opus|flac|mp3|alac)(\.|$)/i.test(codec))
-    })?.uri
+    const result = playlists
+      .find(({ attributes }) => {
+        const codecs = attributes.CODECS?.split(',').map((codec) => codec.trim())
+        const isAudio = !codecs || codecs.some((codec) => CodecUtil.isAudioCodec(codec))
+        return isAudio
+      })
+      ?.uri
+    return result
   }
 
   public static getMasterPlaylistUrl(url: string) {
@@ -61,10 +53,11 @@ export class PeriscopeUtil {
   public static getPlaylistUrlCandidates(url: string): string[] {
     // ponytail: prefer the fallback region host (prod-fastly-p), its replay
     // paths returned 200 when the original region host returned 400/403.
-    return [...new Set([
+    const result = [...new Set([
       ...this.getPathCandidates(this.getFallbackHostUrl(url)),
       ...this.getPathCandidates(url),
     ])]
+    return result
   }
 
   private static getFallbackHostUrl(url: string) {
@@ -81,22 +74,25 @@ export class PeriscopeUtil {
       candidate.pathname = pathname.replace(pattern, replacement)
       return candidate.href
     }
+
     const liveMatch = /\/x-media-live-stream-([^/]+)\//.exec(pathname)
     if (liveMatch) {
       const cluster = liveMatch[1]
-      return [
+      const result = [
         url,
         withArchivePath(liveMatch[0], '/periscope-replays-public/'),
         withArchivePath(liveMatch[0], `/periscope-replay-direct-prod-${cluster}-public/`),
       ]
+      return result
     }
 
     const replayMatch = /\/periscope-replay-direct-prod-[^/]+\//.exec(pathname)
     if (replayMatch) {
-      return [
+      const result = [
         url,
         withArchivePath(replayMatch[0], '/periscope-replays-public/'),
       ]
+      return result
     }
 
     return [url]
@@ -118,6 +114,7 @@ export class PeriscopeUtil {
     if (!/^chunk_[\w.]+(?:\?|$)/.test(uri)) {
       return [chunkUrl]
     }
+
     const chunks = url.pathname.split('/')
     const audioSpaceIndex = chunks.indexOf('audio-space')
     if (audioSpaceIndex < 0) {
@@ -133,6 +130,10 @@ export class PeriscopeUtil {
     const unprefixedUrl = url.pathname.startsWith('/b/Transcoding/')
       ? new URL(uri, new URL(url.pathname.slice(2), url)).href
       : archiveUrl
-    return [...new Set([chunkUrl, archiveUrl, unprefixedUrl])]
+    const urls = uri.includes('?')
+      ? [chunkUrl, archiveUrl, unprefixedUrl]
+      : [unprefixedUrl, archiveUrl, chunkUrl]
+    const result = [...new Set(urls)]
+    return result
   }
 }

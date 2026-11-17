@@ -36,6 +36,19 @@ afterEach(() => {
 })
 
 describe('PeriscopeApi', () => {
+  describe('getMasterPlaylist', () => {
+    it('returns the generic archive master playlist data', async () => {
+      mockGet(async (url: string) => {
+        if (url === genericUrl) {
+          return { data: masterData }
+        }
+        throw notFound()
+      })
+
+      expect(await PeriscopeApi.getMasterPlaylist(liveUrl)).toEqual(masterData)
+    })
+  })
+
   describe('resolveFinalPlaylist', () => {
     it.each([
       ['nested relative', '../nested/audio/stream.m3u8?sig=a%2Fb&x=2', 'https://example.test/top/nested/audio/stream.m3u8?sig=a%2Fb&x=2'],
@@ -270,7 +283,7 @@ describe('PeriscopeApi', () => {
       mockGet(get)
 
       await expect(PeriscopeApi.resolveFinalPlaylist(masterUrl)).rejects.toThrow(
-        /^All playlist candidates exhausted \(2\): media playlist unavailable \(HTTP 410\); master playlist unavailable \(HTTP 404\)$/,
+        /^All playlist candidates exhausted \(2\): media playlist unavailable \(410\); master playlist unavailable \(404\)$/,
       )
       expect(get.mock.calls.flat()).toEqual([
         masterUrl, mediaUrl, mediaUrl, mediaUrl, fallbackUrl, fallbackUrl, fallbackUrl,
@@ -279,10 +292,11 @@ describe('PeriscopeApi', () => {
     })
 
     it.each([429, 503])('preserves candidate fallback without per-request retries on HTTP %s', async (status) => {
-      const get = jest.fn().mockRejectedValue(httpError(status))
+      const error = httpError(status)
+      const get = jest.fn().mockRejectedValue(error)
       mockGet(get)
       await expect(PeriscopeApi.getMasterPlaylist(fallbackRegionalUrl)).rejects.toThrow(
-        `All playlist candidates exhausted (2): master playlist request failed (HTTP ${status})`,
+        `All playlist candidates exhausted (2): master playlist request failed: ${error.message} (${status})`,
       )
       expect(get).toHaveBeenCalledTimes(2)
       expect(delay).not.toHaveBeenCalled()
@@ -318,19 +332,6 @@ describe('PeriscopeApi', () => {
       })
 
       expect(await PeriscopeApi.getFinalPlaylist(liveUrl)).toEqual(finalData)
-    })
-  })
-
-  describe('getMasterPlaylist', () => {
-    it('returns the generic archive master playlist data', async () => {
-      mockGet(async (url: string) => {
-        if (url === genericUrl) {
-          return { data: masterData }
-        }
-        throw notFound()
-      })
-
-      expect(await PeriscopeApi.getMasterPlaylist(liveUrl)).toEqual(masterData)
     })
   })
 })

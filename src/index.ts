@@ -14,7 +14,6 @@ import { userManager } from './modules/user-manager'
 import { checkVersion } from './modules/version-checker'
 import { CommandUtil } from './utils/command.util'
 import { PackageUtil } from './utils/package.util'
-import { PeriscopeUtil } from './utils/periscope.util'
 import { TimeUtil } from './utils/time.util'
 import { TwitterUtil } from './utils/twitter.util'
 import { UserUtil } from './utils/user.util'
@@ -27,12 +26,17 @@ function loadEnv(envPath?: string) {
     dotenv.config({ path: envPath })
   }
 
+  const charLimit = 4
   const envKeys = [
     'TWITTER_AUTH_TOKEN',
     'TWITTER_CSRF_TOKEN',
   ]
   envKeys.forEach((key) => {
-    logger.debug(`env.${key} is ${process.env[key] ? 'set' : 'unset'}`)
+    let value = (process.env[key] || '').substring(0, charLimit)
+    if (value) {
+      value += '****'
+    }
+    logger.debug(`env.${key}=${value}`)
   })
 }
 
@@ -50,7 +54,7 @@ function loadConfig(args: any) {
 //#region mode
 
 function runPlaylistUrlMode(url: string) {
-  logger.info('Starting in playlist URL mode', { playlist: PeriscopeUtil.getPlaylistLogDetails(url) })
+  logger.info('Starting in playlist URL mode', { url })
   new SpaceDownloader(url, TimeUtil.getDateTimeString()).download()
     .catch((error) => {
       logger.error(`Download failed: ${error.message}`)
@@ -140,8 +144,8 @@ program.action(async (args, cmd: Command) => {
 
   await checkVersion()
 
-  const { url, id, spaceUrl, user, ...otherArgs } = args
-  logger.debug('Args', { id, spaceUrl, user, ...otherArgs, playlist: PeriscopeUtil.getPlaylistLogDetails(url) })
+  const { debug, url, id, spaceUrl, user, ...otherArgs } = args
+  logger.debug('Args', { debug, id, url, spaceUrl, user, ...otherArgs })
 
   loadEnv(args.env)
   loadConfig(args)

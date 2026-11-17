@@ -10,7 +10,9 @@ import {
 import path from 'path'
 import winston from 'winston'
 import { PeriscopeApi } from '../apis/periscope-api'
+import { APP_DOWNLOAD_CHUNK_RETRY_MAX } from '../constants/app.constant'
 import { logger as baseLogger } from '../logger'
+import { BufferUtil } from '../utils/buffer.util'
 import { M3u8Util } from '../utils/m3u8.util'
 import { PeriscopeUtil } from '../utils/periscope.util'
 import { Util } from '../utils/util'
@@ -30,17 +32,10 @@ export class SpaceDownloader {
   private resultFile: string
   private isVideo = false
 
-  private readonly MAX_RETRIES = 3
-
   private readonly tmpDir = path.join('.tmp', [this.id, randomUUID()].filter((v) => v).join('_'))
   private readonly tmpPlaylistFile = 'playlist.m3u8'
 
-  private readonly chunkLimiter = new Bottleneck({ maxConcurrent: 5 })
-
-  /**
-   * @see https://github.com/HoloArchivists/tslazer/commit/56ba5e11cc4c1a6bab1845e835f7fc4de4babb99
-   */
-  private readonly ignoreBuffer = Buffer.from([0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0x50, 0x52, 0x49, 0x56])
+  private readonly chunkLimiter = new Bottleneck({ maxConcurrent: 1 })
 
   constructor(
     private readonly originUrl: string,
@@ -52,7 +47,7 @@ export class SpaceDownloader {
     this.id = this.id || randomUUID()
     this.logger = baseLogger.child({ label: `[SpaceDownloader@${this.id}]` })
     this.logger.debug('constructor', {
-      originPlaylist: PeriscopeUtil.getPlaylistLogDetails(originUrl),
+      originUrl,
       filename,
       subDir,
       metadata,
@@ -78,14 +73,16 @@ export class SpaceDownloader {
   }
 
   public async download() {
-    this.logger.debug('download', { originPlaylist: PeriscopeUtil.getPlaylistLogDetails(this.originUrl) })
-    const downloadStart = Date.now()
-    const { url, data, isVideo } = await PeriscopeApi.resolveFinalPlaylist(this.originUrl)
-    const manifest = M3u8Util.parse(data)
-    this.logger.info('Resolved final playlist', {
-      playlist: PeriscopeUtil.getPlaylistLogDetails(url),
-      mediaType: isVideo ? 'video' : 'audio',
+    this.logger.debug('download', {
+      originUrl: this.originUrl,
     })
+    const downloadStart = Date.now()
+    const { url: playlistUrl, data, isVideo } = await PeriscopeApi.resolveFinalPlaylist(this.originUrl)
+    this.logger.debug('download', {
+      mediaType: isVideo ? 'video' : 'audio',
+      playlistUrl,
+    })
+    this.logger.info(`Final playlist url: ${playlistUrl}`)
     if (this.isVideo !== isVideo) {
       this.isVideo = isVideo
       this.initResultFile()
@@ -95,12 +92,14 @@ export class SpaceDownloader {
     Util.createMediaDir(this.subDir)
 
     if (this.isVideo) {
-      await this.spawnFfmpeg(url)
+      await this.spawnFfmpeg(playlistUrl)
     } else {
-      await this.downloadChunks(url, data, manifest.segments.map((segment) => segment.uri))
+      const manifest = M3u8Util.parse(data)
+      await this.downloadChunks(playlistUrl, data, manifest.segments.map((segment) => segment.uri))
       await this.spawnFfmpeg(this.tmpPlaylistFile)
     }
 
+    // Clean up tmp dir
     rmSync(this.tmpDir, { recursive: true, force: true })
 
     const downloadEnd = Date.now()
@@ -122,32 +121,34 @@ export class SpaceDownloader {
     const playlist = data.replace(/^[^#\r\n][^\r\n]*/gm, (line) => localNames.get(line.trim()) ?? line)
     writeFileSync(path.join(this.tmpDir, this.tmpPlaylistFile), playlist)
     let preferredArchiveCandidate = 0
-    await Promise.all([...localNames].map(([uri, name]) => this.chunkLimiter.schedule(async () => {
-      const urls = PeriscopeUtil.getChunkUrlCandidates(playlistUrl, uri)
-      // Only unsigned bare chunks share the same archive candidates for this playlist.
-      const canReuseArchive = urls.length > 1 && !uri.includes('?')
-      const preferred = canReuseArchive ? preferredArchiveCandidate : 0
-      const candidates = preferred
-        ? [urls[preferred], ...urls.filter((_, index) => index !== preferred)]
-        : urls
-      const downloadedUrl = await this.downloadChunk(candidates, name)
-      if (canReuseArchive) {
-        preferredArchiveCandidate = urls.indexOf(downloadedUrl)
-      }
-    })))
+
+    await Promise.all([...localNames].map(([uri, name], index) =>
+      this.chunkLimiter.schedule(async () => {
+        const urls = PeriscopeUtil.getChunkUrlCandidates(playlistUrl, uri)
+        // Only unsigned bare chunks share the same archive candidates for this playlist.
+        const canReuseArchive = urls.length > 1 && !uri.includes('?')
+        const preferred = canReuseArchive
+          ? preferredArchiveCandidate
+          : 0
+        const candidates = preferred
+          ? [urls[preferred], ...urls.filter((_, i) => i !== preferred)]
+          : urls
+        const downloadedUrl = await this.downloadChunk(candidates, name, index + 1, localNames.size)
+        if (canReuseArchive) {
+          preferredArchiveCandidate = urls.indexOf(downloadedUrl)
+        }
+      }),
+    ))
   }
 
-  private async downloadChunk(urls: string[], chunkName: string) {
-    this.logger.debug('downloadChunk', { chunkName, candidates: urls.length })
+  private async downloadChunk(urls: string[], chunkName: string, chunkIndex: number, total: number) {
+    this.logger.debug(`downloadChunk: ${chunkName} (${chunkIndex}/${total})`, { candidates: urls.length })
     let candidate = 0
-    for (let retries = 0; retries <= this.MAX_RETRIES; retries++) {
+    for (let retries = 0; retries <= APP_DOWNLOAD_CHUNK_RETRY_MAX; retries++) {
+      const url = urls[candidate]
       try {
-        const { data } = await axios.get(urls[candidate], { responseType: 'arraybuffer' })
-        let buffer = Buffer.from(data)
-        const index = buffer.indexOf(this.ignoreBuffer)
-        if (index !== -1) {
-          buffer = buffer.slice(index)
-        }
+        const { data } = await axios.get(url, { responseType: 'arraybuffer' })
+        const buffer = BufferUtil.stripIgnoreBuffer(data)
         writeFileSync(path.join(this.tmpDir, chunkName), buffer)
         return urls[candidate]
       } catch (error) {
@@ -157,13 +158,20 @@ export class SpaceDownloader {
         if ((status === 400 || status === 404 || status === 410) && candidate + 1 < urls.length) {
           candidate++
         }
-        const message = `Chunk ${chunkName} download failed (${status ? `HTTP ${status}` : 'no HTTP response'})`
-        if (retries >= this.MAX_RETRIES) {
-          // Axios errors retain request headers and URLs.
-          // eslint-disable-next-line preserve-caught-error
-          throw new Error(message)
+        const errMsg = `downloadChunk: "${chunkName}" download failed`
+        const errParams = {
+          chunkName,
+          url,
+          retries,
+          status,
+          message: error.response?.message ?? error.message,
         }
-        this.logger.warn(message, { retries })
+        if (retries >= APP_DOWNLOAD_CHUNK_RETRY_MAX) {
+          this.logger.error(errMsg, errParams)
+          // Axios errors retain request headers and URLs.
+          throw error
+        }
+        this.logger.warn(errMsg, errParams)
       }
     }
   }
@@ -195,7 +203,9 @@ export class SpaceDownloader {
     }
 
     const { config } = configManager
-    const mediaType = this.isVideo ? 'video' : 'audio'
+    const mediaType = this.isVideo
+      ? 'video'
+      : 'audio'
     const mediaArgs = config?.ffmpeg?.[mediaType]?.args
     if (mediaArgs?.length > 0) {
       args.push(...mediaArgs)
@@ -207,12 +217,13 @@ export class SpaceDownloader {
 
     args.push(this.resultFile)
 
-    this.logger.verbose(`File is saving to "${this.resultFile}"`)
+    this.logger.debug(`${cmd} ${args.join(' ')}`)
     this.logger.verbose('Starting FFmpeg', {
       mediaType,
-      input: this.isVideo ? PeriscopeUtil.getPlaylistLogDetails(inp) : inp,
+      input: inp,
       customArgs: Boolean(mediaArgs?.length || config?.ffmpegArgs?.length),
     })
+    this.logger.verbose(`File is saving to "${this.resultFile}"`)
 
     const cwd = path.join(process.cwd(), this.tmpDir)
     // https://github.com/nodejs/node/issues/21825

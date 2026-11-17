@@ -39,24 +39,6 @@ const fallbackOldLiveUrl = `${fallbackBase}/periscope-replay-direct-prod-ap-nort
 const fallbackGenericArchiveUrl = `${fallbackBase}/periscope-replays-public/audio-space/master_playlist.m3u8`
 
 describe('PeriscopeUtil', () => {
-  describe('getPlaylistLogDetails', () => {
-    it('logs the host and known playlist name without credentials, path tokens or query parameters', () => {
-      const url = 'https://user:password@cdn.example.test/b/TOKEN/JWT/audio-space/playlist_42.m3u8?sig=secret#fragment'
-      expect(PeriscopeUtil.getPlaylistLogDetails(url)).toEqual({
-        host: 'cdn.example.test',
-        playlist: 'playlist_42.m3u8',
-      })
-    })
-
-    it('omits unrecognized filenames and does not echo invalid URLs', () => {
-      expect(PeriscopeUtil.getPlaylistLogDetails('https://cdn.example.test/SECRET.m3u8')).toEqual({
-        host: 'cdn.example.test',
-        playlist: undefined,
-      })
-      expect(PeriscopeUtil.getPlaylistLogDetails('SECRET')).toEqual({ invalidUrl: true })
-    })
-  })
-
   describe('isFinalPlaylistUrl', () => {
     it('returns true for a final replay playlist', () => {
       const url = `${base}/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/playlist_16752359708553501999.m3u8`
@@ -70,36 +52,6 @@ describe('PeriscopeUtil', () => {
 
     it('returns false for a master playlist', () => {
       expect(PeriscopeUtil.isFinalPlaylistUrl(newLiveUrl)).toBe(false)
-    })
-  })
-
-  describe('getChunkUrlCandidates', () => {
-    const origin = 'https://example.test'
-    const jwt = 'header.' + 'payload'.repeat(20) + '.signature'
-    const archive = '/Transcoding/v1/hls/TOKEN/transcode/region/archive'
-    const directory = `/b${archive}/${jwt}/audio-space/nested/`
-    const playlist = `${origin}${directory}playlist_1.m3u8?sig=playlist`
-
-    it('uses the resolved playlist directory including its /b/ and token components', () => {
-      expect(PeriscopeUtil.getChunkPrefix(playlist)).toBe(origin + directory)
-      expect(PeriscopeUtil.getChunkUrlCandidates(playlist, 'chunk_123_0_b.aac?sig=chunk')).toEqual([
-        `${origin}${directory}chunk_123_0_b.aac?sig=chunk`,
-        `${origin}/b${archive.replace('/transcode/', '/non_transcode/')}/audio-space/chunk_123_0_b.aac?sig=chunk`,
-        `${origin}${archive.replace('/transcode/', '/non_transcode/')}/audio-space/chunk_123_0_b.aac?sig=chunk`,
-      ])
-    })
-
-    it.each([
-      ['../chunks/chunk_123_0_b.aac?sig=a%2Fb', `${origin}/b${archive}/${jwt}/audio-space/chunks/chunk_123_0_b.aac?sig=a%2Fb`],
-      ['/chunks/chunk_123_0_b.aac?sig=abc', `${origin}/chunks/chunk_123_0_b.aac?sig=abc`],
-      ['https://cdn.example.test/chunks/chunk_123_0_b.aac?sig=abc', 'https://cdn.example.test/chunks/chunk_123_0_b.aac?sig=abc'],
-    ])('preserves the segment URI %s', (uri, expected) => {
-      expect(PeriscopeUtil.getChunkUrlCandidates(playlist, uri)).toEqual([expected])
-    })
-
-    it('keeps a conventional audio-space chunk next to its playlist', () => {
-      const chunk = 'chunk_123_0_a.aac'
-      expect(PeriscopeUtil.getChunkUrlCandidates(newLiveUrl, chunk)).toEqual([new URL(chunk, newLiveUrl).href])
     })
   })
 
@@ -229,6 +181,52 @@ describe('PeriscopeUtil', () => {
         'chunk_456_1_b.aac',
       ].join('\n')
       expect(PeriscopeUtil.getChunks(data)).toEqual([0, 1])
+    })
+  })
+
+  describe('getChunkUrlCandidates', () => {
+    const origin = 'https://example.test'
+    const jwt = 'header.' + 'payload'.repeat(20) + '.signature'
+    const archive = '/Transcoding/v1/hls/TOKEN/transcode/region/archive'
+    const directory = `/b${archive}/${jwt}/audio-space/nested/`
+    const playlist = `${origin}${directory}playlist_1.m3u8?sig=playlist`
+
+    it('uses the resolved playlist directory including its /b/ and token components', () => {
+      expect(PeriscopeUtil.getChunkPrefix(playlist)).toBe(origin + directory)
+      expect(PeriscopeUtil.getChunkUrlCandidates(playlist, 'chunk_123_0_b.aac?sig=chunk')).toEqual([
+        `${origin}${directory}chunk_123_0_b.aac?sig=chunk`,
+        `${origin}/b${archive.replace('/transcode/', '/non_transcode/')}/audio-space/chunk_123_0_b.aac?sig=chunk`,
+        `${origin}${archive.replace('/transcode/', '/non_transcode/')}/audio-space/chunk_123_0_b.aac?sig=chunk`,
+      ])
+    })
+
+    it('returns only the non-legacy URL for a resolved legacy master playlist', () => {
+      const master = 'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/dEsQa71h5MUFTxIyTl4I8Z7Kv1Mm-lTTld5mYQ4pnQSh3cCa0UAQ-dp3xpmWltBCUIl7CyzsIEdTUqeesWZlCg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/master_playlist.m3u8'
+      expect(PeriscopeUtil.getChunkUrlCandidates(master, 'chunk_1694124487285794259_0_a.aac')).toEqual([
+        'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/dEsQa71h5MUFTxIyTl4I8Z7Kv1Mm-lTTld5mYQ4pnQSh3cCa0UAQ-dp3xpmWltBCUIl7CyzsIEdTUqeesWZlCg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/chunk_1694124487285794259_0_a.aac',
+      ])
+    })
+
+    it('tries the non-legacy archive paths first for an unsigned legacy replay chunk', () => {
+      const media = 'https://prod-fastly-p.video.pscp.tv/b/Transcoding/v1/hls/dEsQa71h5MUFTxIyTl4I8Z7Kv1Mm-lTTld5mYQ4pnQSh3cCa0UAQ-dp3xpmWltBCUIl7CyzsIEdTUqeesWZlCg/transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsInZlcnNpb24iOiIyIn0.eyJIZWlnaHQiOjgsIkticHMiOjM1MCwiVHJhbnNjb2RlQXVkaW8iOnRydWUsIldpZHRoIjo4fQ.j9A1sJbguxIY34C17U6iN7yTx8JM_ZNYJhfxaSmwGKQ/audio-space/playlist_1.m3u8'
+      expect(PeriscopeUtil.getChunkUrlCandidates(media, 'chunk_1694124487285794259_0_a.aac')).toEqual([
+        'https://prod-fastly-p.video.pscp.tv/Transcoding/v1/hls/dEsQa71h5MUFTxIyTl4I8Z7Kv1Mm-lTTld5mYQ4pnQSh3cCa0UAQ-dp3xpmWltBCUIl7CyzsIEdTUqeesWZlCg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/chunk_1694124487285794259_0_a.aac',
+        'https://prod-fastly-p.video.pscp.tv/b/Transcoding/v1/hls/dEsQa71h5MUFTxIyTl4I8Z7Kv1Mm-lTTld5mYQ4pnQSh3cCa0UAQ-dp3xpmWltBCUIl7CyzsIEdTUqeesWZlCg/non_transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/audio-space/chunk_1694124487285794259_0_a.aac',
+        'https://prod-fastly-p.video.pscp.tv/b/Transcoding/v1/hls/dEsQa71h5MUFTxIyTl4I8Z7Kv1Mm-lTTld5mYQ4pnQSh3cCa0UAQ-dp3xpmWltBCUIl7CyzsIEdTUqeesWZlCg/transcode/ap-northeast-1/periscope-replay-direct-prod-ap-northeast-1-public/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsInZlcnNpb24iOiIyIn0.eyJIZWlnaHQiOjgsIkticHMiOjM1MCwiVHJhbnNjb2RlQXVkaW8iOnRydWUsIldpZHRoIjo4fQ.j9A1sJbguxIY34C17U6iN7yTx8JM_ZNYJhfxaSmwGKQ/audio-space/chunk_1694124487285794259_0_a.aac',
+      ])
+    })
+
+    it.each([
+      ['../chunks/chunk_123_0_b.aac?sig=a%2Fb', `${origin}/b${archive}/${jwt}/audio-space/chunks/chunk_123_0_b.aac?sig=a%2Fb`],
+      ['/chunks/chunk_123_0_b.aac?sig=abc', `${origin}/chunks/chunk_123_0_b.aac?sig=abc`],
+      ['https://cdn.example.test/chunks/chunk_123_0_b.aac?sig=abc', 'https://cdn.example.test/chunks/chunk_123_0_b.aac?sig=abc'],
+    ])('preserves the segment URI %s', (uri, expected) => {
+      expect(PeriscopeUtil.getChunkUrlCandidates(playlist, uri)).toEqual([expected])
+    })
+
+    it('keeps a conventional audio-space chunk next to its playlist', () => {
+      const chunk = 'chunk_123_0_a.aac'
+      expect(PeriscopeUtil.getChunkUrlCandidates(newLiveUrl, chunk)).toEqual([new URL(chunk, newLiveUrl).href])
     })
   })
 })
