@@ -7,7 +7,7 @@ import winston from 'winston'
 
 import { AudioSpace } from '../api/interface/twitter-graphql.interface'
 import { api } from '../api/twitter.api'
-import { PeriscopeApi } from '../apis/periscope-api'
+import { PeriscopeApi, PlaylistCandidatesError } from '../apis/periscope-api'
 import {
   APP_PLAYLIST_CHUNK_VERIFY_MAX_RETRY,
   APP_PLAYLIST_MASTER_RETRY_MAX,
@@ -45,6 +45,7 @@ export class SpaceWatcher extends EventEmitter {
   private lastChunkIndex: number
   private chunkVerifyCount = 0
   private masterPlaylistRetryCount = 0
+  private unavailableDownloadRetryCount = 0
 
   private isNotificationNotified = false
 
@@ -99,7 +100,6 @@ export class SpaceWatcher extends EventEmitter {
       started_at: this.space?.startedAt,
       ended_at: this.space?.endedAt,
       title: this.space?.title || null,
-      playlist_url: PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl),
     }
     spaceLogger.info(payload)
     this.logger.info('Space info', payload)
@@ -136,7 +136,7 @@ export class SpaceWatcher extends EventEmitter {
         this.checkMasterPlaylist()
         return
       }
-      this.logger.error(`checkDynamicPlaylist: ${error.message}`)
+      this.logger.error(`Dynamic playlist request failed (${status ? `HTTP ${status}` : 'no HTTP response'})`)
     }
     this.checkDynamicPlaylistWithTimer()
   }
@@ -253,8 +253,12 @@ export class SpaceWatcher extends EventEmitter {
     this.logger.debug('--> getLiveStreamStatus')
     const { data } = await api.liveVideoStream.status(this.audioSpace.metadata.media_key)
     this.liveStreamStatus = data
-    this.logger.debug('<-- getLiveStreamStatus')
-    this.logger.debug('liveStreamStatus', this.liveStreamStatus)
+    this.logger.debug('<-- getLiveStreamStatus', {
+      status: data?.source?.status,
+      streamType: data?.source?.streamType,
+      playlist: PeriscopeUtil.getPlaylistLogDetails(data?.source?.location),
+      hasChatToken: Boolean(data?.chatToken),
+    })
   }
 
   private loadPlaylist(): boolean {
@@ -269,8 +273,9 @@ export class SpaceWatcher extends EventEmitter {
       return false
     }
 
-    const masterPlaylistUrl = PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)
-    this.logger.info(`Master playlist url: ${masterPlaylistUrl}`)
+    this.logger.info('Master playlist', {
+      playlist: PeriscopeUtil.getPlaylistLogDetails(PeriscopeUtil.getMasterPlaylistUrl(this.dynamicPlaylistUrl)),
+    })
     this.buildSpace()
     this.logSpaceInfo()
 
@@ -404,11 +409,18 @@ export class SpaceWatcher extends EventEmitter {
         )
       }
       await this.downloader.download()
+      this.unavailableDownloadRetryCount = 0
       this.emit('complete')
     } catch (error) {
-      const ms = 10000
-      // Attemp to download transcode playlist right after space end could return 404
       this.logger.error(`downloadAudio: ${error.message}`)
+      if (error instanceof PlaylistCandidatesError && error.unavailable && ++this.unavailableDownloadRetryCount > 6) {
+        this.emit('failed')
+        return
+      }
+      if (!(error instanceof PlaylistCandidatesError && error.unavailable)) {
+        this.unavailableDownloadRetryCount = 0
+      }
+      const ms = 10000
       this.logger.info(`Retry download audio in ${ms}ms`)
       setTimeout(() => this.downloadAudio(), ms)
     }
